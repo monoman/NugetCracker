@@ -1,0 +1,80 @@
+Well lately I've been a heavy user of NuGet packaging, trying to tame versioning issues in some proprietary projects I work on that evolve, and partly reuse, near to a hundred libraries (many of them in vertically-dependent sets aligned to 'plugins' in the applications).
+
+Let's put it bluntly: IT'S A NIGHTMARE. 
+
+First of all, we have many solutions as it is unfeasible to load and work with a single one containing hundreds of projects.
+
+Also we needed to organize source in a hierarchy of folders, for subsystems, for specific plugin trees, for product, separating test projects, etc... So it means we have tree of folders with projects in leafs, nested 3,4, or more levels down from the solution that uses them.
+
+Finally, we have solutions that share some projects (one of the purposes of adopting NuGet is to avoid this pattern, but we aren't there yet).
+
+Summing up the above points, we are very very far from the NuGet assumption of a single-solution, with all projects nested just one level, and mainly using external NuGets from the standard source feed.
+
+<digression>
+The standard NuGet feed is rarely used by us, because most packages there just don't support .NET 2.0, which our projects are still bound to, the sole package we could use from there was log4net, which is stable for some years, The rest we needed to cook our own versions of nugets for  Npgsql, nHibernate 1.2, Castle.ActiveRecord 1.0RC3, and so on. 
+All of this is published on a server shared folder, as we doesn't have time allowance to setup a NuGet server
+</digression>
+
+Let's just exemplify what all that means...
+
+A contrived and simplified scenario:
+
+Library NugetCracker.Core 1.0.0.0  depends only on framework assemblies.
+Library NugetCracker.CLI 1.0.0.0 depends on NugetCracker.Core 1.0.0.0 and framework assemblies
+Library NugetCracker.Web 1.0.0.0 depends on NugetCracker.Core 1.0.0.0 and NancyFX and framework assemblies
+Program NugetCracker 1.0.0.0 depends on NugetCracker.CLI 1.0.0.0 and NugetCracker.Web 1.0.0.0
+
+Now if we allow the Package Manager to get away with forcing bindingRedirects in the app.config (or web.config), we could publish a new nuget for NugetCracker.Core 1.0.1.0 and update just the NugetCracker program:
+
+  <runtime>
+    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+      <dependentAssembly>
+        <assemblyIdentity name="NugetCracker.Core" publicKeyToken="4d2b94b6b4a6df75" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-1.0.1.0" newVersion="1.0.1.0" />
+      </dependentAssembly>
+    </assemblyBinding>
+  </runtime>
+
+Now this may work if the changes were non-breaking, but if, for example, add a new method to some interface in core that the other libraries implement and the program uses, we will have to 
+update the intermediary nugets, build and publish new nugets, and them update the program. 
+
+I think that now you can easily extrapolate that for my real scenario that means many iterations of building/publishing/updating across many solutions.
+
+Well time to fast-forward to what I expect to be able to do when NugetCracker 1.0 is done:
+
+In the command line:
+
+> NugetCracker
+Scanning for solutions in .
+Found NugetCracker.sln
+-- Project NugetCracker.Core generates nuget for version 1.0.0.0
+-- Project NugetCracker.CLI generates nuget for version 1.0.0.0 depends on NugetCracker.Core
+-- Project NugetCracker.Web generates nuget for version 1.0.0.0 depends on NugetCracker.Core, NancyFx
+-- Project NugetCracker generates program for version 1.0.0.0 depends on NugetCracker.CLI, NugetCracker.Web
+No nugets sources specified using default feed
+No publishing feed/share specified, publishing to folder .\NugetPackages
+Command > BumpVersion --minor --cascade NugetCracker.Core
+Bumping version of package NugetCracker.Core to 1.1.0.0
+Building NugetCracker.Core
+Packaging NugetCracker.Core.1.1
+Publishing NugetCracker.Core.1.1 to .\NugetPackages
+Updating Package Dependency on NugetCracker.Core to 1.1 in NugetCracker.CLI, NugetCracker.Web
+Bumping version of package NugetCracker.CLI to 1.1.0.0
+Building NugetCracker.CLI
+Packaging NugetCracker.CLI.1.1
+Publishing NugetCracker.CLI.1.1 to .\NugetPackages
+Bumping version of package NugetCracker.Web to 1.1.0.0
+Building NugetCracker.Web
+Packaging NugetCracker.Web.1.1
+Publishing NugetCracker.Web.1.1 to .\NugetPackages
+Updating Package Dependency on NugetCracker.CLI to 1.1 in NugetCracker
+Updating Package Dependency on NugetCracker.Web to 1.1 in NugetCracker
+Bumping version of program NugetCracker.Core to 1.1.0.0
+Building NugetCracker
+Packaging .\NugetCracker.1.1.zip for zip installation
+Command > PublishTo -Apikey xxxxxxx -Source http://nuget.mycompany.com/
+Publishing NugetCracker.Core.1.1 to http://nuget.mycompany.com/
+Publishing NugetCracker.CLI.1.1 to http://nuget.mycompany.com/
+Publishing NugetCracker.Web.1.1 to http://nuget.mycompany.com/
+
+Becoming reality soon...
