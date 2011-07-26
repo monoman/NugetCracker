@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NugetCracker", "NugetCracker\NugetCracker.csproj", "{05FCAE79-AF85-4E20-95A2-372CAF30E94E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Commons.Prevalence", "Commons.Prevalence\Commons.Prevalence.csproj", "{A5BEC694-1421-438E-B444-08246BCB7161}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,6 +19,12 @@ Global
 		{05FCAE79-AF85-4E20-95A2-372CAF30E94E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{05FCAE79-AF85-4E20-95A2-372CAF30E94E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{05FCAE79-AF85-4E20-95A2-372CAF30E94E}.Release|x86.ActiveCfg = Release|Any CPU
+		{A5BEC694-1421-438E-B444-08246BCB7161}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5BEC694-1421-438E-B444-08246BCB7161}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5BEC694-1421-438E-B444-08246BCB7161}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A5BEC694-1421-438E-B444-08246BCB7161}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5BEC694-1421-438E-B444-08246BCB7161}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5BEC694-1421-438E-B444-08246BCB7161}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

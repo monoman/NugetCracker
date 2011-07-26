@@ -1,14 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using NugetCracker.Persistence;
 
 namespace NugetCracker
 {
 	class Program
 	{
+		private static MetaProjectPersistence _metaProjectPersistence;
+
 		static void Main(string[] args)
 		{
-			Console.WriteLine("NugetCracker 0.1\n\nJust started see https://github.com/monoman/NugetCracker");
+			Console.WriteLine("NugetCracker 0.1\nSee https://github.com/monoman/NugetCracker\n");
+
+			_metaProjectPersistence = new MetaProjectPersistence(args.GetMetaProjectFilePath());
+
+			Console.WriteLine("Using {0}", _metaProjectPersistence.FilePath);
+			Console.WriteLine("Will be scanning directories:");
+			foreach (string dir in _metaProjectPersistence.ListOfDirectories)
+				Console.WriteLine("-- '{0}' > '{1}'", dir, _metaProjectPersistence.ToAbsolutePath(dir));
 		}
+
+
 	}
 }
