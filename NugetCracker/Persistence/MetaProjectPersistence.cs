@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Commons.Prevalence;
 using NugetCracker.Data;
-using System.IO;
 using NugetCracker.Transactions;
 
 namespace NugetCracker.Persistence
@@ -22,7 +22,7 @@ namespace NugetCracker.Persistence
 
 		public void AddDirectory(string dirPath)
 		{
-			ExecuteTransaction(new AddDirectoryTransactioo(ToRelativePath(dirPath)));
+			ExecuteTransaction(new AddDirectoryTransaction(ToRelativePath(dirPath)));
 		}
 
 		public string ToRelativePath(string dirPath)

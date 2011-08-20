@@ -14,11 +14,11 @@ namespace Commons.Prevalence
 
 		private readonly TSystemRoot _system;
 		private readonly FileStream _journal;
-		private readonly BinaryFormatter _formatter;
+		private readonly IFormatter _formatter;
 
-		public PrevaylerJrSharp(string storageFilePath)
+		public PrevaylerJrSharp(string storageFilePath, IFormatter formatter = null)
 		{
-			_formatter = new BinaryFormatter();
+			_formatter = formatter ?? new BinaryFormatter();
 			_system = RestoreState(storageFilePath);
 			var backup = new MoveToBackup(storageFilePath);
 			_journal = new FileStream(storageFilePath, FileMode.Create);
