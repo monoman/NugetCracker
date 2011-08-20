@@ -8,11 +8,11 @@ using NugetCracker.Data;
 namespace NugetCracker.Transactions
 {
 	[Serializable]
-	public class AddDirectoryTransactioo: PrevaylerJrSharp<MetaProject>.Command
+	public class AddDirectoryTransaction: PrevaylerJrSharp<MetaProject>.Command
 	{
 		public readonly string _directoryPath;
 
-		public AddDirectoryTransactioo(string directoryPath)
+		public AddDirectoryTransaction(string directoryPath)
 		{
 			_directoryPath = directoryPath;
 		}
