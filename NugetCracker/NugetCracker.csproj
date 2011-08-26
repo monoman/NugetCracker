@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -48,6 +48,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net">
+      <HintPath>..\packages\log4net.1.2.10\lib\2.0\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -56,6 +59,12 @@
   <ItemGroup>
     <Compile Include="Data\MetaProject.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Interfaces\INugetSpec.cs" />
+    <Compile Include="Interfaces\IComponent.cs" />
+    <Compile Include="Interfaces\INugetPackage.cs" />
+    <Compile Include="Interfaces\INugetSource.cs" />
+    <Compile Include="Interfaces\IProject.cs" />
+    <Compile Include="Interfaces\IVersionable.cs" />
     <Compile Include="Persistence\MetaProjectPersistence.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -63,6 +72,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
