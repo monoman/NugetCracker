@@ -5,13 +5,13 @@ using System.Text;
 
 namespace NugetCracker.Interfaces
 {
-	public interface IComponent
+	public interface IComponent : IEquatable<IComponent>
 	{
 		string Name { get; }
 		string Description { get; }
 		Version CurrentVersion { get; }
 
-		string Path { get; }
+		string FullPath { get; }
 
 		IQueryable<IComponent> Dependencies { get; }
 	}

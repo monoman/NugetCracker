@@ -57,6 +57,10 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\CSharp\CSharpNugetProject.cs" />
+    <Compile Include="Components\CSharp\CSharpProject.cs" />
+    <Compile Include="Components\CSharp\CSharpComponentsFactory.cs" />
+    <Compile Include="Interfaces\IComponentsFactory.cs" />
     <Compile Include="Data\MetaProject.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Interfaces\INugetSpec.cs" />
