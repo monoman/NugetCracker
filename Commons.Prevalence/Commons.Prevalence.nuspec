@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://github.com/monoman/NugetCracker/wiki/License:--BSD-simplified</licenseUrl>
+    <projectUrl>https://github.com/monoman/NugetCracker/wiki/NugetCracker-Project</projectUrl>
+    <description>$description$</description>
+    <copyright>Copyright © Klaus Wuestfeld, Rafael 'Monoman' Teixeira 2011</copyright>
+    <tags>Prevalence</tags>
+  </metadata>
+</package>
