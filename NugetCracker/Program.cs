@@ -1,11 +1,11 @@
 ﻿using System;
-using NugetCracker.Persistence;
 using System.Collections.Generic;
-using NugetCracker.Interfaces;
 using System.IO;
 using System.Linq;
-using NugetCracker.Components.CSharp;
 using log4net;
+using NugetCracker.Components.CSharp;
+using NugetCracker.Interfaces;
+using NugetCracker.Persistence;
 
 namespace NugetCracker
 {
@@ -14,9 +14,10 @@ namespace NugetCracker
 		static MetaProjectPersistence _metaProjectPersistence;
 		static List<IComponent> _components;
 
-		static Version Version 
+		static Version Version
 		{
-			get {
+			get
+			{
 				return new System.Reflection.AssemblyName(System.Reflection.Assembly.GetCallingAssembly().FullName).Version;
 			}
 		}
@@ -32,14 +33,17 @@ namespace NugetCracker
 			foreach (string dir in _metaProjectPersistence.ListOfDirectories) {
 				string path = _metaProjectPersistence.ToAbsolutePath(dir);
 				Console.WriteLine("Scanning '{0}' > '{1}'", dir, path);
+				scannedDirsCount = 0;
 				Scan(path);
+				Console.WriteLine("\nScanned {0} directories", scannedDirsCount);
+				Console.WriteLine("Found {0} components", _components.Count);
+				Console.WriteLine("Sorting...");
+				_components.Sort((c1, c2) => c1.Name.CompareTo(c2.Name));
 			}
 
-			Console.WriteLine("Found {0} components:", _components.Count);
-			foreach (var component in _components)
-				Console.WriteLine("-- " + component);
+			ListComponents();
 
-			var inlineCommand = args.SkipWhile(s => Directory.Exists(s) || File.Exists(s));
+			var inlineCommand = args.SkipWhile(s => s.ToLowerInvariant() != "-c").Skip(1);
 			if (inlineCommand.Count() > 0) {
 				ProcessCommand(inlineCommand);
 				Console.Write("Done!");
@@ -49,6 +53,19 @@ namespace NugetCracker
 					Console.Write("Ready > ");
 				while (ProcessCommand(BreakLine(Console.ReadLine())));
 			}
+		}
+
+		private static void ListComponents(string pattern = null)
+		{
+			if (string.IsNullOrWhiteSpace(pattern)) {
+				Console.WriteLine("\nListing all components...");
+			} else {
+				Console.WriteLine("\nListing components filtered by '{0}' ...", pattern);
+				pattern = pattern.ToLowerInvariant();
+			}
+			var i = 0;
+			foreach (var component in _components.FindAll(c => c.MatchName(pattern)))
+				Console.WriteLine("[{0:0000}] {1}", ++i, component);
 		}
 
 		private static string[] BreakLine(string command)
@@ -65,9 +82,14 @@ namespace NugetCracker
 			var command = args.First().ToLowerInvariant();
 			args = args.Skip(1);
 			switch (command) {
-				case "bumpversion": case "bv":
-					var componentName = args.FirstOrDefault(s => !s.StartsWith("--"));
-					if (componentName == null) {
+				case "list":
+				case "l":
+					ListComponents(args.FirstOrDefault());
+					return true;
+				case "bumpversion":
+				case "bv":
+					var componentNamePattern = args.FirstOrDefault(s => !s.StartsWith("--"));
+					if (componentNamePattern == null) {
 						Console.WriteLine("ERROR: No component name specified");
 						return true;
 					}
@@ -79,26 +101,27 @@ namespace NugetCracker
 						partToBump = VersionPart.Minor;
 					else if (args.Contains("--revision"))
 						partToBump = VersionPart.Revision;
-					return BumpVersionCommand(logger, componentName, cascade, partToBump);
-				case "quit": case "q": case "exit":
+					return BumpVersionCommand(logger, componentNamePattern, cascade, partToBump);
+				case "quit":
+				case "q":
+				case "exit":
 					return false;
 			}
 			Console.WriteLine("ERROR: Unknown command '{0}'", command);
 			return true;
 		}
 
-		private static bool BumpVersionCommand(ILog logger, string componentName, bool cascade, VersionPart partToBump)
+		private static bool BumpVersionCommand(ILog logger, string componentNamePattern, bool cascade, VersionPart partToBump)
 		{
-			var component = FindComponent<IVersionable>(componentName);
-			if (component == null) {
-				Console.WriteLine("ERROR: Could not find a versionable component with the name {0}", componentName);
+			var component = FindComponent<IVersionable>(componentNamePattern);
+			if (component == null)
 				return true;
-			}
-			componentName = component.Name;
+
+			var componentName = component.Name;
 			Version newVersion = component.CurrentVersion.Bump(partToBump);
 			Console.WriteLine("== Bumping component '{0}' version from {1} to {2}", componentName, component.CurrentVersion.ToShort(), newVersion.ToShort());
 			if (!component.SetNewVersion(logger, newVersion)) {
-				Console.WriteLine("ERROR: Could not bump component '{0}' version to {1}", componentName, newVersion);
+				Console.WriteLine("ERROR: Could not bump component '{0}' version to {1}", componentName, newVersion.ToShort());
 				return true;
 			}
 			if (component is IProject) {
@@ -123,18 +146,43 @@ namespace NugetCracker
 			return true;
 		}
 
-		public static T FindComponent<T>(string componentName) where T : class
+		public static T FindComponent<T>(string componentNamePattern) where T : class
 		{
-			componentName = componentName.ToLowerInvariant();
 			try {
-				return (T)_components.SingleOrDefault(c => c is T && c.Name.ToLowerInvariant().StartsWith(componentName));
+				var list = _components.FindAll(c => c is T && c.MatchName(componentNamePattern));
+				if (list.Count == 1)
+					return (T)list[0];
+				if (list.Count > 20)
+					Console.WriteLine("Too many components match the pattern '{0}': {1}. Try another pattern!", componentNamePattern, list.Count);
+				else if (list.Count == 0)
+					Console.WriteLine("No components match the pattern '{0}'. Try another pattern!", componentNamePattern);
+				else {
+					do {
+						var i = 0;
+						Console.WriteLine("Select from this list:");
+						foreach (var component in list)
+							Console.WriteLine("[{0:0000}] {1}", ++i, component);
+						Console.Write("Type 1-{0}, 0 to abandon: ", list.Count);
+						var input = Console.ReadLine();
+						if (int.TryParse(input, out i)) {
+							if (i == 0)
+								break;
+							if (i > 0 && i <= list.Count)
+								return (T)list[i - 1];
+						}
+					} while (true);
+				}
 			} catch {
-				return (T)null;
 			}
+			return (T)null;
 		}
+		private static int scannedDirsCount = 0;
 
 		private static void Scan(string path)
 		{
+			if ((scannedDirsCount & 255) == 0)
+				Console.Write('.');
+			scannedDirsCount++;
 			_components.AddRange(FindComponentIn(path));
 			foreach (var dir in Directory.EnumerateDirectories(path))
 				Scan(dir);

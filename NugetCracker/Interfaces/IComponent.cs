@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace NugetCracker.Interfaces
 {
@@ -14,5 +12,9 @@ namespace NugetCracker.Interfaces
 		string FullPath { get; }
 
 		IQueryable<IComponent> Dependencies { get; }
+
+		bool MatchName(string pattern);
+
+		string ToLongString();
 	}
 }

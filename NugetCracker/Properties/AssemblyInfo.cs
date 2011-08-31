@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("NugetCracker")]
@@ -15,5 +14,5 @@ using System.Runtime.InteropServices;
 
 [assembly: Guid("1654cc24-907b-48c5-9297-e6f1e7ed14c2")]
 
-[assembly: AssemblyVersion("0.1.0.1")]
-[assembly: AssemblyFileVersion("0.1.0.1")]
+[assembly: AssemblyVersion("0.2.0.0")]
+[assembly: AssemblyFileVersion("0.2.0.0")]

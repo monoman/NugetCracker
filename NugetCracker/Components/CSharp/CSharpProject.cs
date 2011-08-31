@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NugetCracker.Interfaces;
-using log4net;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using log4net;
+using NugetCracker.Interfaces;
 
 namespace NugetCracker.Components.CSharp
 {
@@ -36,7 +36,7 @@ namespace NugetCracker.Components.CSharp
 			return false;
 		}
 
-		public string Name { get; private set; }
+		public string Name { get; protected set; }
 
 		public string Description { get; private set; }
 
@@ -69,9 +69,21 @@ namespace NugetCracker.Components.CSharp
 			return FullPath.GetHashCode();
 		}
 
-		public override string ToString()
+		public virtual string ToLongString()
 		{
 			return string.Format("C# Project: {0}.{1} from '{2}'", Name, CurrentVersion.ToShort(), FullPath);
+		}
+
+		public override string ToString()
+		{
+			return string.Format("C# Project: {0}.{1}", Name, CurrentVersion.ToShort());
+		}
+
+
+		public bool MatchName(string pattern)
+		{
+			return string.IsNullOrWhiteSpace(pattern) || Regex.IsMatch(Name, pattern,
+				RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
 		}
 	}
 }

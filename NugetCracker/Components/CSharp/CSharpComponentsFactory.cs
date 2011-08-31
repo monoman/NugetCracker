@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using NugetCracker.Interfaces;
+using System.Text.RegularExpressions;
 
 namespace NugetCracker.Components.CSharp
 {
@@ -12,11 +13,21 @@ namespace NugetCracker.Components.CSharp
 		public IEnumerable<IComponent> FindComponentsIn(string folderPath)
 		{
 			foreach (var project in Directory.EnumerateFiles(folderPath, "*.csproj")) {
-				if (File.Exists(Path.GetFileNameWithoutExtension(project) + ".nuspec"))
+				var nuspec = Path.Combine(folderPath, Path.GetFileNameWithoutExtension(project) + ".nuspec");
+				if (File.Exists(nuspec))
 					yield return new CSharpNugetProject(project);
-				yield return new CSharpProject(project);
+				else
+					yield return new CSharpProject(project);
+			}
+			foreach (var solution in Directory.EnumerateFiles(folderPath, "*.sln")) {
+				string solutionContents = File.ReadAllText(solution);
+				string webApplicationPattern = "Project\\(\"\\{E24C65DC-7377-472B-9ABA-BC803B73C61A\\}\"\\)\\s*\\=\\s*\"([^\"]+)\"\\s*\\,\\s*\"([^\"]+)\"";
+				var match = Regex.Match(solutionContents, webApplicationPattern, RegexOptions.Multiline);
+				while (match.Success) {
+					yield return new CSharpWebsite(solution, match.Groups[1].Value, match.Groups[2].Value);
+					match = match.NextMatch();
+				}
 			}
 		}
-
 	}
 }
