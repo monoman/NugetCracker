@@ -31,11 +31,11 @@ namespace NugetCracker
 		{
 			switch (partToBump) {
 				case VersionPart.Major:
-					return new Version(oldVersion.Major + 1, oldVersion.Minor, oldVersion.Build, oldVersion.Revision);
+					return new Version(oldVersion.Major + 1, 0, 0, 0);
 				case VersionPart.Minor:
-					return new Version(oldVersion.Major, oldVersion.Minor + 1, oldVersion.Build, oldVersion.Revision);
+					return new Version(oldVersion.Major, oldVersion.Minor + 1, 0, 0);
 				case VersionPart.Build:
-					return new Version(oldVersion.Major, oldVersion.Minor, oldVersion.Build + 1, oldVersion.Revision);
+					return new Version(oldVersion.Major, oldVersion.Minor, oldVersion.Build + 1, 0);
 			}
 			return new Version(oldVersion.Major, oldVersion.Minor, oldVersion.Build, oldVersion.Revision + 1);
 		}
