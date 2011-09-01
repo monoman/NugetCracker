@@ -2,7 +2,7 @@
 
 namespace NugetCracker.Interfaces
 {
-	interface IComponentsFactory
+	public interface IComponentsFactory
 	{
 		IEnumerable<IComponent> FindComponentsIn(string folderPath);
 	}

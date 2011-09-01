@@ -57,10 +57,14 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\BumpVersionCommand.cs" />
+    <Compile Include="Data\ComponentsList.cs" />
+    <Compile Include="Interfaces\ICommand.cs" />
     <Compile Include="Components\CSharp\CSharpNugetProject.cs" />
     <Compile Include="Components\CSharp\CSharpProject.cs" />
     <Compile Include="Components\CSharp\CSharpComponentsFactory.cs" />
     <Compile Include="Components\CSharp\CSharpWebsite.cs" />
+    <Compile Include="Interfaces\IComponentFinder.cs" />
     <Compile Include="Interfaces\IComponentsFactory.cs" />
     <Compile Include="Data\MetaProject.cs" />
     <Compile Include="Extensions.cs" />
