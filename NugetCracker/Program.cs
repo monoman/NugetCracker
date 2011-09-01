@@ -20,7 +20,8 @@ namespace NugetCracker
 				  new CSharpComponentsFactory()
 		};
 		static ICommand[] _commands = new ICommand[] {
-			new BumpVersionCommand()
+			new BumpVersionCommand(),
+			new ListCommand()
 		};
 
 
@@ -51,8 +52,6 @@ namespace NugetCracker
 			Console.WriteLine("Sorting...");
 			_components.SortByName();
 
-			ListComponents();
-
 			var inlineCommand = args.SkipWhile(s => s.ToLowerInvariant() != "-c").Skip(1);
 			if (inlineCommand.Count() > 0) {
 				ProcessCommand(inlineCommand);
@@ -63,19 +62,6 @@ namespace NugetCracker
 					Console.Write("Ready > ");
 				while (ProcessCommand(BreakLine(Console.ReadLine())));
 			}
-		}
-
-		private static void ListComponents(string pattern = null)
-		{
-			if (string.IsNullOrWhiteSpace(pattern)) {
-				Console.WriteLine("\nListing all components...");
-			} else {
-				Console.WriteLine("\nListing components filtered by '{0}' ...", pattern);
-				pattern = pattern.ToLowerInvariant();
-			}
-			var i = 0;
-			foreach (var component in _components.FilterBy(pattern))
-				Console.WriteLine("[{0:0000}] {1}", ++i, component);
 		}
 
 		private static string[] BreakLine(string command)
@@ -92,10 +78,6 @@ namespace NugetCracker
 			var commandName = args.First().ToLowerInvariant();
 			args = args.Skip(1);
 			switch (commandName) {
-				case "list":
-				case "l":
-					ListComponents(args.FirstOrDefault());
-					return true;
 				case "quit":
 				case "q":
 				case "exit":
@@ -105,8 +87,7 @@ namespace NugetCracker
 						Console.WriteLine("Available Commands:");
 						List<string> helpLines = new List<string> {
 							"Help            Show this list of commands or an specific command help",
-							"Quit, Exit      Stops interactive mode",
-							"List            List components, optionally filtered by regular expression"
+							"Quit, Exit      Stops interactive mode"
 						};
 						foreach (ICommand command in _commands)
 							helpLines.Add(command.HelpLine);

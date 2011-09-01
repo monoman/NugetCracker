@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Collections.Generic;
 
 namespace NugetCracker.Components.CSharp
 {
@@ -11,16 +12,17 @@ namespace NugetCracker.Components.CSharp
 		{
 			SolutionPath = solutionPath;
 			Name = webApplicationName;
+			_isWeb = true;
 		}
 
-		public override string ToLongString()
+		protected override void ParseAvailableData()
 		{
-			return string.Format("C# Web Site: {0} ({1}) from '{2}'", Name, CurrentVersion.ToShort(), FullPath);
+			var app_code = Path.Combine(_projectDir, "App_Code");
+			ParseAssemblyInfo(Directory.EnumerateFiles(app_code, "*.cs", SearchOption.AllDirectories));
+			ParsePackagesFile();
 		}
 
-		public override string ToString()
-		{
-			return string.Format("C# Web Site: {0} ({1})", Name, CurrentVersion.ToShort());
-		}
+
+		public override string Type { get { return "C# Web Site"; } }
 	}
 }
