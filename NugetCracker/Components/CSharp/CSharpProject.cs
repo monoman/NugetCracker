@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using log4net;
 using NugetCracker.Interfaces;
 using System.Text;
+using System.Diagnostics;
 
 namespace NugetCracker.Components.CSharp
 {
@@ -93,7 +93,7 @@ namespace NugetCracker.Components.CSharp
 					Description = match.Groups[1].Value;
 				}
 			} else {
-				Console.WriteLine("Missing file: {0}", sourcePath);
+				Console.WriteLine("\nMissing file: {0}", sourcePath);
 			}
 			return found;
 		}
@@ -103,19 +103,63 @@ namespace NugetCracker.Components.CSharp
 			return Path.GetFileNameWithoutExtension(projectFileFullPath);
 		}
 
-		public bool Build(ILog logger)
+		public bool Build(ILogger logger)
+		{
+			using (logger.QuietBlock)
+				return ExecuteTool(logger, "msbuild.exe", FullPath);
+		}
+
+		protected bool ExecuteTool(ILogger logger, string toolName, string arguments)
+		{
+			try {
+				Process p = new Process();
+				p.StartInfo.UseShellExecute = false;
+				p.StartInfo.RedirectStandardError = true;
+				p.StartInfo.RedirectStandardOutput = true;
+				p.StartInfo.FileName = toolName.FindInPathEnvironmentVariable();
+				p.StartInfo.Arguments = arguments;
+				p.StartInfo.WorkingDirectory = _projectDir;
+				p.StartInfo.CreateNoWindow = true;
+				if (logger != null) {
+					p.OutputDataReceived += (object sender, DataReceivedEventArgs e) => logger.Info(e.Data);
+					p.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => logger.Error(e.Data);
+				}
+				p.Start();
+				p.BeginOutputReadLine();
+				p.BeginErrorReadLine();
+				p.WaitForExit();
+				return p.ExitCode == 0;
+			} catch (Exception e) {
+				logger.Error(e);
+			}
+			return false;
+		}
+
+		public bool DeployTo(ILogger logger, string path)
 		{
 			return false;
 		}
 
-		public bool DeployTo(ILog logger, string path)
+		public bool SetNewVersion(ILogger logger, Version version)
 		{
-			return false;
-		}
-
-		public bool SetNewVersion(ILog logger, Version version)
-		{
-			return false;
+			logger.Info("Setting new version to {0}", version.ToShort());
+			if (!File.Exists(_assemblyInfoPath)) {
+				logger.Error("There's no file to keep the version information in this component.");
+				return false;
+			}
+			try {
+				string info = File.ReadAllText(_assemblyInfoPath);
+				string pattern = "AssemblyVersion\\(\"([^\"]*)\"\\)";
+				info = Regex.Replace(info, pattern, "AssemblyVersion(\"" + version + "\")", RegexOptions.Multiline);
+				pattern = "AssemblyFileVersion\\(\"([^\"]*)\"\\)";
+				info = Regex.Replace(info, pattern, "AssemblyFileVersion(\"" + version + "\")", RegexOptions.Multiline);
+				File.WriteAllText(_assemblyInfoPath, info);
+				CurrentVersion = version;
+				return true;
+			} catch (Exception e) {
+				logger.Error(e);
+				return false;
+			}
 		}
 
 		public string Name { get; protected set; }

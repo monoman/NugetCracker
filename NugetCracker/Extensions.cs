@@ -49,5 +49,18 @@ namespace NugetCracker
 					return version.ToString(3);
 			return version.ToString();
 		}
+
+		public static string FindInPathEnvironmentVariable(this string executable)
+		{
+			var paths = new List<string>(Environment.GetEnvironmentVariable("path").Split(';'));
+			paths.Insert(0, Environment.CurrentDirectory);
+			paths.Insert(1, "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319");
+			foreach (var path in paths) {
+				var candidate = Path.Combine(path, executable);
+				if (File.Exists(candidate))
+					return candidate;
+			}
+			throw new ArgumentException("Could not find '" + executable + "' in the %PATH%");
+		}
 	}
 }

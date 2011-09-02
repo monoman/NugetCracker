@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using log4net;
 using NugetCracker.Commands;
 using NugetCracker.Components.CSharp;
 using NugetCracker.Data;
 using NugetCracker.Interfaces;
 using NugetCracker.Persistence;
+using NugetCracker.Utilities;
 
 namespace NugetCracker
 {
@@ -23,7 +23,7 @@ namespace NugetCracker
 			new BumpVersionCommand(),
 			new ListCommand()
 		};
-
+		static List<string> _helpLines = null;
 
 		static Version Version
 		{
@@ -74,48 +74,66 @@ namespace NugetCracker
 		{
 			if (args.Count() == 0)
 				return true;
-			ILog logger = null;
+			ILogger logger = new ConsoleLogger(false);
 			var commandName = args.First().ToLowerInvariant();
 			args = args.Skip(1);
 			switch (commandName) {
 				case "quit":
 				case "q":
 				case "exit":
+				case "e":
 					return false;
 				case "help":
-					if (args.Count() == 0) {
-						Console.WriteLine("Available Commands:");
-						List<string> helpLines = new List<string> {
-							"Help            Show this list of commands or an specific command help",
-							"Quit, Exit      Stops interactive mode"
-						};
-						foreach (ICommand command in _commands)
-							helpLines.Add(command.HelpLine);
-						helpLines.Sort();
-						foreach (var s in helpLines)
-							Console.WriteLine("    " + s);
-					} else {
-						foreach (ICommand command in _commands)
-							if (command.Matches(args.First())) {
-								Console.WriteLine(command.Help);
-								break;
-							}
-					}
-					return true;
+				case "?":
+					return HelpCommand(logger, args);
 				default:
 					foreach (ICommand command in _commands)
 						if (command.Matches(commandName))
-							return command.Process(logger, args, _components);
+							using (logger.Block)
+								return command.Process(logger, args, _components);
 					break;
 			}
-			Console.WriteLine("ERROR: Unknown command '{0}'", commandName);
+			logger.Error("Unknown command '{0}'", commandName);
 			return true;
 		}
 
+		private static bool HelpCommand(ILogger logger, IEnumerable<string> args)
+		{
+			using (logger.Block) {
+				if (args.Count() > 0) {
+					foreach (ICommand command in _commands)
+						if (command.Matches(args.First())) {
+							logger.Info("Usage:\n");
+							logger.Info(command.Help);
+							return true;
+						}
+				}
+				logger.Info("Available Commands:");
+				using (logger.Block)
+					foreach (var s in HelpLines)
+						logger.Info(s);
+				return true;
+			}
+		}
 
+		private static IEnumerable<string> HelpLines
+		{
+			get
+			{
+				if (_helpLines == null) {
+					_helpLines = new List<string> {
+							"Help, ?         Show this list of commands or an specific command help",
+							"Quit, Exit      Stops interactive mode"
+						};
+					foreach (ICommand command in _commands)
+						_helpLines.Add(command.HelpLine);
+					_helpLines.Sort(); ;
+				}
+				return _helpLines;
+			}
+		}
 
 		private static int scannedDirsCount = 0;
-
 
 		private static void OnScanned(string path)
 		{

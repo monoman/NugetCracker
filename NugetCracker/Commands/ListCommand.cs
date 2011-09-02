@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using log4net;
-using NugetCracker.Interfaces;
 using NugetCracker.Data;
+using NugetCracker.Interfaces;
 
 namespace NugetCracker.Commands
 {
@@ -21,8 +20,7 @@ namespace NugetCracker.Commands
 		{
 			get
 			{
-				return @"
-List [options] [pattern]
+				return @"List [options] [pattern]
 
 	Lists components, filtered by regular expression pattern if supplied.
 
@@ -33,19 +31,19 @@ List [options] [pattern]
 			}
 		}
 
-		public bool Process(ILog logger, IEnumerable<string> args, ComponentsList components)
+		public bool Process(ILogger logger, IEnumerable<string> args, ComponentsList components)
 		{
 			var pattern = args.FirstOrDefault(s => !s.StartsWith("-"));
 			bool full = args.Contains("-full");
 			if (string.IsNullOrWhiteSpace(pattern)) {
-				Console.WriteLine("\nListing all components...");
+				logger.Info("Listing all components...");
 			} else {
-				Console.WriteLine("\nListing components filtered by '{0}' ...", pattern);
+				logger.Info("Listing components filtered by '{0}' ...", pattern);
 				pattern = pattern.ToLowerInvariant();
 			}
 			var i = 0;
 			foreach (var component in components.FilterBy(pattern))
-				Console.WriteLine("[{0:0000}] {1}", ++i, (full ? component.ToLongString() : component.ToString()));
+				logger.Info("[{0:0000}] {1}", ++i, (full ? component.ToLongString() : component.ToString()));
 			return true;
 		}
 	}

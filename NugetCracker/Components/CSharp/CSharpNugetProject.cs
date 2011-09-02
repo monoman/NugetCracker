@@ -1,5 +1,4 @@
 ﻿using System;
-using log4net;
 using NugetCracker.Interfaces;
 
 namespace NugetCracker.Components.CSharp
@@ -11,9 +10,10 @@ namespace NugetCracker.Components.CSharp
 		{
 		}
 
-		public bool Pack(ILog logger)
+		public bool Pack(ILogger logger)
 		{
-			return false;
+			using (logger.Block)
+				return ExecuteTool(logger, "nuget.exe", "pack " + FullPath);
 		}
 
 		public string OutputPackagePath

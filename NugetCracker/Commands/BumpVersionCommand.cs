@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using log4net;
 using NugetCracker.Interfaces;
 using NugetCracker.Data;
 
@@ -21,8 +20,7 @@ namespace NugetCracker.Commands
 		{
 			get
 			{
-				return @"
-BumpVersion [options] pattern
+				return @"BumpVersion [options] pattern
 
 	Bumps up the [AssemblyVersion]/Package Version of the component and rebuilds/repackages. 
 	The [AssemblyFileVersion] attribute also is kept in sync with the [AssemblyVersion].
@@ -47,11 +45,11 @@ BumpVersion [options] pattern
 			}
 		}
 
-		public bool Process(ILog logger, IEnumerable<string> args, ComponentsList components)
+		public bool Process(ILogger logger, IEnumerable<string> args, ComponentsList components)
 		{
 			var componentNamePattern = args.FirstOrDefault(s => !s.StartsWith("-"));
 			if (componentNamePattern == null) {
-				Console.WriteLine("ERROR: No component name specified");
+				logger.Error("No component name specified");
 				return true;
 			}
 			var component = components.FindComponent<IVersionable>(componentNamePattern);
@@ -70,44 +68,43 @@ BumpVersion [options] pattern
 			if (to != null)
 				to = to.Substring(4);
 			return BumpVersion(logger, component, cascade, partToBump, publish, to);
-
 		}
 
-		private bool BumpVersion(ILog logger, IVersionable component, bool cascade, VersionPart partToBump, bool publish, string to)
+		private bool BumpVersion(ILogger logger, IVersionable component, bool cascade, VersionPart partToBump, bool publish, string to)
 		{
 			var componentName = component.Name;
 			Version newVersion = component.CurrentVersion.Bump(partToBump);
-			Console.WriteLine("== Bumping component '{0}' version from {1} to {2}", componentName, component.CurrentVersion.ToShort(), newVersion.ToShort());
+			logger.Info("Bumping component '{0}' version from {1} to {2}", componentName, component.CurrentVersion.ToShort(), newVersion.ToShort());
 			if (cascade)
-				Console.WriteLine("==== cascading");
+				logger.Info("==== cascading");
 			if (publish || cascade) {
-				Console.WriteLine("==== publishing to '{0}'", to ?? "default source");
+				logger.Info("==== publishing to '{0}'", to ?? "default source");
 			}
 			if (!component.SetNewVersion(logger, newVersion)) {
-				Console.WriteLine("ERROR: Could not bump component '{0}' version to {1}", componentName, newVersion.ToShort());
+				logger.Error("Could not bump component '{0}' version to {1}", componentName, newVersion.ToShort());
 				return true;
 			}
 			if (component is IProject) {
-				Console.WriteLine("Building {0}.{1}", componentName, newVersion.ToShort());
+				logger.Info("Building {0}.{1}", componentName, newVersion.ToShort());
 				if (!(component as IProject).Build(logger)) {
-					Console.WriteLine("ERROR: Could not build component '{0}'", componentName);
+					logger.Error("Could not build component '{0}'", componentName);
 					return true;
 				}
 			}
 			if (component is INugetSpec) {
-				Console.WriteLine("Packaging {0}.{1}", componentName, newVersion.ToShort());
+				logger.Info("Packaging {0}.{1}", componentName, newVersion.ToShort());
 				if (!(component as INugetSpec).Pack(logger)) {
-					Console.WriteLine("ERROR: Could not package component '{0}'", componentName);
+					logger.Error("Could not package component '{0}'", componentName);
 					return true;
 				}
 				// TODO publishing package
 			}
 			if (cascade) {
-				Console.WriteLine("Cascading...");
+				logger.Info("Cascading...");
 				// TODO really cascade
 			}
 			if (publish) {
-				Console.WriteLine("Publishing...");
+				logger.Info("Publishing...");
 				// TODO really publish
 			}
 			return true;
