@@ -53,7 +53,7 @@ namespace NugetCracker
 			var inlineCommand = args.SkipWhile(s => s.ToLowerInvariant() != "-c").Skip(1);
 			if (inlineCommand.Count() > 0) {
 				ProcessCommand(inlineCommand);
-				Console.Write("Done!");
+				Console.WriteLine("Done!");
 			} else
 				do
 					Console.Write("Ready > ");
