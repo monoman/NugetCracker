@@ -11,7 +11,6 @@ using NugetCracker.Utilities;
 
 namespace NugetCracker
 {
-
 	public class Program
 	{
 		static MetaProjectPersistence _metaProjectPersistence;
@@ -21,14 +20,13 @@ namespace NugetCracker
 		};
 		static ICommand[] _commands = new ICommand[] {
 			new BumpVersionCommand(),
-			new ListCommand()
+			new ListCommand(),
+			new RebuildCommand()
 		};
 		static List<string> _helpLines = null;
 
-		static Version Version
-		{
-			get
-			{
+		static Version Version {
+			get {
 				return new System.Reflection.AssemblyName(System.Reflection.Assembly.GetCallingAssembly().FullName).Version;
 			}
 		}
@@ -56,12 +54,10 @@ namespace NugetCracker
 			if (inlineCommand.Count() > 0) {
 				ProcessCommand(inlineCommand);
 				Console.Write("Done!");
-				Console.ReadLine();
-			} else {
+			} else
 				do
 					Console.Write("Ready > ");
 				while (ProcessCommand(BreakLine(Console.ReadLine())));
-			}
 		}
 
 		private static string[] BreakLine(string command)
@@ -78,20 +74,20 @@ namespace NugetCracker
 			var commandName = args.First().ToLowerInvariant();
 			args = args.Skip(1);
 			switch (commandName) {
-				case "quit":
-				case "q":
-				case "exit":
-				case "e":
-					return false;
-				case "help":
-				case "?":
-					return HelpCommand(logger, args);
-				default:
-					foreach (ICommand command in _commands)
-						if (command.Matches(commandName))
-							using (logger.Block)
-								return command.Process(logger, args, _components);
-					break;
+			case "quit":
+			case "q":
+			case "exit":
+			case "e":
+				return false;
+			case "help":
+			case "?":
+				return HelpCommand(logger, args);
+			default:
+				foreach (ICommand command in _commands)
+					if (command.Matches(commandName))
+						using (logger.Block)
+							return command.Process(logger, args, _components);
+				break;
 			}
 			logger.Error("Unknown command '{0}'", commandName);
 			return true;
@@ -100,14 +96,13 @@ namespace NugetCracker
 		private static bool HelpCommand(ILogger logger, IEnumerable<string> args)
 		{
 			using (logger.Block) {
-				if (args.Count() > 0) {
+				if (args.Count() > 0)
 					foreach (ICommand command in _commands)
 						if (command.Matches(args.First())) {
 							logger.Info("Usage:\n");
 							logger.Info(command.Help);
 							return true;
 						}
-				}
 				logger.Info("Available Commands:");
 				using (logger.Block)
 					foreach (var s in HelpLines)
@@ -116,10 +111,8 @@ namespace NugetCracker
 			}
 		}
 
-		private static IEnumerable<string> HelpLines
-		{
-			get
-			{
+		private static IEnumerable<string> HelpLines {
+			get {
 				if (_helpLines == null) {
 					_helpLines = new List<string> {
 							"Help, ?         Show this list of commands or an specific command help",
@@ -127,7 +120,8 @@ namespace NugetCracker
 						};
 					foreach (ICommand command in _commands)
 						_helpLines.Add(command.HelpLine);
-					_helpLines.Sort(); ;
+					_helpLines.Sort();
+					;
 				}
 				return _helpLines;
 			}

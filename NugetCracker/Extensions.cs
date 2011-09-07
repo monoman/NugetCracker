@@ -5,10 +5,18 @@ using System.Linq;
 
 namespace NugetCracker
 {
-	public enum VersionPart { Major, Minor, Revision, Build }
+	public enum VersionPart
+	{
+		Major,
+		Minor,
+		Revision,
+		Build
+	}
 
 	public static class Extensions
 	{
+		static char[] PATH_SEPARATOR = new[] { Path.PathSeparator };
+
 		public static string GetMetaProjectFilePath(this IEnumerable<string> args)
 		{
 			var dir = GetFirstDirPath(args);
@@ -30,12 +38,12 @@ namespace NugetCracker
 		public static Version Bump(this Version oldVersion, VersionPart partToBump)
 		{
 			switch (partToBump) {
-				case VersionPart.Major:
-					return new Version(oldVersion.Major + 1, 0, 0, 0);
-				case VersionPart.Minor:
-					return new Version(oldVersion.Major, oldVersion.Minor + 1, 0, 0);
-				case VersionPart.Build:
-					return new Version(oldVersion.Major, oldVersion.Minor, oldVersion.Build + 1, 0);
+			case VersionPart.Major:
+				return new Version(oldVersion.Major + 1, 0, 0, 0);
+			case VersionPart.Minor:
+				return new Version(oldVersion.Major, oldVersion.Minor + 1, 0, 0);
+			case VersionPart.Build:
+				return new Version(oldVersion.Major, oldVersion.Minor, oldVersion.Build + 1, 0);
 			}
 			return new Version(oldVersion.Major, oldVersion.Minor, oldVersion.Build, oldVersion.Revision + 1);
 		}
@@ -49,20 +57,30 @@ namespace NugetCracker
 					return version.ToString(3);
 			return version.ToString();
 		}
-		
+
 		public static string Combine(this string path, string relativePath)
 		{
-			if (Path.DirectorySeparatorChar != '\\' &&  relativePath.Contains('\\'))
+			if (Path.DirectorySeparatorChar != '\\' && relativePath.Contains('\\'))
 				relativePath = relativePath.Replace('\\', Path.DirectorySeparatorChar);
-			return Path.Combine(path, relativePath);				
+			return Path.Combine(path, relativePath);
 		}
-		
+
+		static IEnumerable<string> PathsFromPATH {
+			get {
+				string pathEnvVar = Environment.GetEnvironmentVariable("PATH");
+				var paths = new List<string>(pathEnvVar.Split(PATH_SEPARATOR, StringSplitOptions.RemoveEmptyEntries));
+				paths.Insert(0, Environment.CurrentDirectory);
+				return paths;
+			}
+		}
+
 		public static string FindInPathEnvironmentVariable(this string executable)
 		{
-			var paths = new List<string>(Environment.GetEnvironmentVariable("path").Split(Path.PathSeparator));
-			paths.Insert(0, Environment.CurrentDirectory);
-			foreach (var path in paths) {
+			foreach (var path in PathsFromPATH) {
 				var candidate = Path.Combine(path, executable);
+				if (File.Exists(candidate))
+					return candidate;
+				candidate += ".exe";
 				if (File.Exists(candidate))
 					return candidate;
 			}

@@ -119,7 +119,7 @@ namespace NugetCracker.Components.CSharp
 
 		protected string BuildTool {
 			get {
-				return UseMonoTools ? "xbuild" : "msbuild.exe";
+				return UseMonoTools ? "xbuild" : "msbuild";
 			}
 		}
 
