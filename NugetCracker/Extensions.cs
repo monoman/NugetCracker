@@ -52,8 +52,8 @@ namespace NugetCracker
 		
 		public static string Combine(this string path, string relativePath)
 		{
-			if (relativePath.Contains(Path.AltDirectorySeparatorChar))
-				relativePath = relativePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+			if (Path.DirectorySeparatorChar != '\\' &&  relativePath.Contains('\\'))
+				relativePath = relativePath.Replace('\\', Path.DirectorySeparatorChar);
 			return Path.Combine(path, relativePath);				
 		}
 		
