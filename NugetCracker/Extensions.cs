@@ -49,12 +49,18 @@ namespace NugetCracker
 					return version.ToString(3);
 			return version.ToString();
 		}
-
+		
+		public static string Combine(this string path, string relativePath)
+		{
+			if (relativePath.Contains(Path.AltDirectorySeparatorChar))
+				relativePath = relativePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+			return Path.Combine(path, relativePath);				
+		}
+		
 		public static string FindInPathEnvironmentVariable(this string executable)
 		{
-			var paths = new List<string>(Environment.GetEnvironmentVariable("path").Split(';'));
+			var paths = new List<string>(Environment.GetEnvironmentVariable("path").Split(Path.PathSeparator));
 			paths.Insert(0, Environment.CurrentDirectory);
-			paths.Insert(1, "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319");
 			foreach (var path in paths) {
 				var candidate = Path.Combine(path, executable);
 				if (File.Exists(candidate))
