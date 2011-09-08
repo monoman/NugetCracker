@@ -13,7 +13,7 @@ namespace NugetCracker.Components.CSharp
 		public bool Pack(ILogger logger)
 		{
 			using (logger.Block)
-				return ExecuteTool(logger, "nuget.exe", "pack " + FullPath);
+				return ExecuteTool(logger, "nuget", "pack " + FullPath);
 		}
 
 		public string OutputPackagePath
