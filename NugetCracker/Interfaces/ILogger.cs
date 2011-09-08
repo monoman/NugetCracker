@@ -9,6 +9,7 @@ namespace NugetCracker.Interfaces
 		void Debug(string format, params object[] args);
 		void Error(Exception exception, string message = null);
 		void Error(string format, params object[] args);
+		void ErrorDetail(string format, params object[] args);
 		void Info(string format, params object[] args);
 		bool IsDebugEnabled { get; }
 		bool IsInfoEnabled { get; }

@@ -102,27 +102,34 @@ namespace NugetCracker.Components.CSharp
 
 		public bool Build(ILogger logger)
 		{
-			using (logger.QuietBlock)
-				return ExecuteTool(logger, BuildTool, FullPath);
+			var arguments = UseMonoTools ? "" : "/verbosity:minimal ";
+			using (logger.Block)
+				return ExecuteTool(logger, BuildTool, arguments + FullPath, ProcessBuildOutput);
 		}
 
-		public static bool UseMonoTools {
-			get {
-				return 
+		public static bool UseMonoTools
+		{
+			get
+			{
+				return
 					Environment.OSVersion.Platform == PlatformID.MacOSX ||
 					Environment.OSVersion.Platform == PlatformID.Unix;
 			}
 		}
 
-		protected string BuildTool {
-			get {
+		protected string BuildTool
+		{
+			get
+			{
 				return UseMonoTools ? "xbuild" : "msbuild";
 			}
 		}
 
-		protected bool ExecuteTool(ILogger logger, string toolName, string arguments)
+		protected bool ExecuteTool(ILogger logger, string toolName, string arguments, Action<ILogger, string> processToolOutput = null)
 		{
 			try {
+				if (processToolOutput == null)
+					processToolOutput = (l, s) => l.Info(s);
 				Process p = new Process();
 				p.StartInfo.UseShellExecute = false;
 				p.StartInfo.RedirectStandardError = true;
@@ -132,7 +139,7 @@ namespace NugetCracker.Components.CSharp
 				p.StartInfo.WorkingDirectory = _projectDir;
 				p.StartInfo.CreateNoWindow = true;
 				if (logger != null) {
-					p.OutputDataReceived += (object sender, DataReceivedEventArgs e) => logger.Info(e.Data);
+					p.OutputDataReceived += (object sender, DataReceivedEventArgs e) => processToolOutput(logger, e.Data);
 					p.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => logger.Error(e.Data);
 				}
 				logger.Debug("Executing " + p.StartInfo.FileName + " " + arguments);
@@ -145,6 +152,18 @@ namespace NugetCracker.Components.CSharp
 				logger.Error(e);
 			}
 			return false;
+		}
+
+		private static void ProcessBuildOutput(ILogger logger, string line)
+		{
+			if (string.IsNullOrWhiteSpace(line) || (line != line.TrimStart()))
+				return;
+			if (line.Contains(" (are you")) // shorten irritating long error message from csc (will it work with mcs?)
+				line = line.Substring(0, line.IndexOf(" (are you"));
+			if (line.Contains(": error"))
+				logger.ErrorDetail(line);
+			else
+				logger.Info(line);
 		}
 
 		public bool DeployTo(ILogger logger, string path)
@@ -182,7 +201,8 @@ namespace NugetCracker.Components.CSharp
 
 		public string FullPath { get; private set; }
 
-		public IQueryable<IComponent> Dependencies {
+		public IQueryable<IComponent> Dependencies
+		{
 			get { return _dependencies.AsQueryable<IComponent>(); }
 		}
 

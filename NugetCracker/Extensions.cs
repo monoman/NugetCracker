@@ -38,12 +38,12 @@ namespace NugetCracker
 		public static Version Bump(this Version oldVersion, VersionPart partToBump)
 		{
 			switch (partToBump) {
-			case VersionPart.Major:
-				return new Version(oldVersion.Major + 1, 0, 0, 0);
-			case VersionPart.Minor:
-				return new Version(oldVersion.Major, oldVersion.Minor + 1, 0, 0);
-			case VersionPart.Build:
-				return new Version(oldVersion.Major, oldVersion.Minor, oldVersion.Build + 1, 0);
+				case VersionPart.Major:
+					return new Version(oldVersion.Major + 1, 0, 0, 0);
+				case VersionPart.Minor:
+					return new Version(oldVersion.Major, oldVersion.Minor + 1, 0, 0);
+				case VersionPart.Build:
+					return new Version(oldVersion.Major, oldVersion.Minor, oldVersion.Build + 1, 0);
 			}
 			return new Version(oldVersion.Major, oldVersion.Minor, oldVersion.Build, oldVersion.Revision + 1);
 		}
@@ -65,8 +65,10 @@ namespace NugetCracker
 			return Path.Combine(path, relativePath);
 		}
 
-		static IEnumerable<string> PathsFromPATH {
-			get {
+		static IEnumerable<string> PathsFromPATH
+		{
+			get
+			{
 				string pathEnvVar = Environment.GetEnvironmentVariable("PATH");
 				var paths = new List<string>(pathEnvVar.Split(PATH_SEPARATOR, StringSplitOptions.RemoveEmptyEntries));
 				paths.Insert(0, Environment.CurrentDirectory);
@@ -85,6 +87,14 @@ namespace NugetCracker
 					return candidate;
 			}
 			throw new ArgumentException("Could not find '" + executable + "' in the %PATH%");
+		}
+
+		public static string EllipsedTo(this string line, int maxlength)
+		{
+			line = line.Replace("\n", "\\n");
+			if (line.Length < maxlength)
+				return line;
+			return line.Substring(0, maxlength - 3) + "...";
 		}
 	}
 }

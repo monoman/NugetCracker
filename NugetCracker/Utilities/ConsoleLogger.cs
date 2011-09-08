@@ -137,6 +137,12 @@ namespace NugetCracker.Utilities
 		{
 			LogWarn(() => Format(format, args));
 		}
+
+
+		public void ErrorDetail(string format, params object[] args)
+		{
+			Log(ConsoleColor.Yellow, "", () => Format(format, args));
+		}
 	}
 
 }
