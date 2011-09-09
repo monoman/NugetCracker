@@ -10,5 +10,9 @@ namespace NugetCracker.Interfaces
 		bool Pack(ILogger logger, string outputDirectory);
 
 		string OutputPackageFilename { get; }
+
+		IEnumerable<INugetSpec> DependentPackages { get; }
+
+		void RemoveInstalledVersions(ILogger logger, string installDir);
 	}
 }

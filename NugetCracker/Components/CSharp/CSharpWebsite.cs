@@ -28,5 +28,16 @@ namespace NugetCracker.Components.CSharp
 
 
 		public override string Type { get { return "C# Web Site"; } }
+
+		protected override void UpdatePackagesOnProject(Interfaces.INugetSpec newPackage)
+		{
+			// TODO
+		}
+
+		public override bool Build(Interfaces.ILogger logger)
+		{
+			// TODO
+			return true;
+		}
 	}
 }

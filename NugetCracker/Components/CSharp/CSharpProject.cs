@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using NugetCracker.Interfaces;
+using NugetCracker.Utilities;
 
 namespace NugetCracker.Components.CSharp
 {
@@ -74,24 +75,30 @@ namespace NugetCracker.Components.CSharp
 			}
 		}
 
-		public bool UpgradePackageDependency(ILogger logger, INugetSpec newPackage, string sourceDirectory)
+		public bool UpgradePackageDependency(ILogger logger, INugetSpec newPackage, string sourceDirectory, ICollection<string> installDirs)
 		{
 			var packagesFile = Path.Combine(_projectDir, "packages.config");
-			if (!File.Exists(packagesFile))
+			if (!File.Exists(packagesFile)) {
+				logger.ErrorDetail("Probably component '{0}' is referencing the package '{1}' as a project...", Name, newPackage.Name);
+				return true;
+			}
+			try {
+				UpdatePackagesConfig(newPackage, packagesFile);
+				UpdatePackagesOnProject(newPackage);
+				if (!installDirs.Contains(_installedPackagesDir))
+					installDirs.Add(_installedPackagesDir);
+				return true;
+
+			} catch (Exception e) {
+				logger.Error(e.Message);
+				logger.Debug(e);
 				return false;
-			UpdatePackagesConfig(newPackage, packagesFile);
-			if (!_isWeb)
-				UpdatePackageInCSProj(newPackage);
-			// TODO else clause or polimorphism
-			return true;
+			}
 		}
 
-		public bool InstallPackageDependency(ILogger logger, INugetSpec newPackage, string sourceDirectory)
+		protected virtual void UpdatePackagesOnProject(INugetSpec newPackage)
 		{
-			return ExecuteTool(logger, "nuget", "install " + newPackage.Name
-					+ " -Source " + sourceDirectory
-					+ " -ExcludeVersion"
-					+ " -OutputDirectory " + _installedPackagesDir);
+			UpdatePackageInCSProj(newPackage);
 		}
 
 		private static void UpdatePackagesConfig(INugetSpec newPackage, string packagesFile)
@@ -124,14 +131,26 @@ namespace NugetCracker.Components.CSharp
 			XNamespace nm = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003");
 			ParseAssemblyInfo(GetListOfSources(project, nm));
 			_isWeb = (project.Descendants(nm + "WebProjectProperties").Count() > 0);
+			foreach (var projectReference in GetListOfReferencedProjects(project, nm))
+				_dependencies.Add(new ProjectReference(projectReference));
 		}
 
 		private IEnumerable<string> GetListOfSources(XDocument project, XNamespace nm)
 		{
-			foreach (XElement source in project.Descendants(nm + "Compile")) {
+			return GetListForTag(project, nm, "Compile");
+		}
+
+		private IEnumerable<string> GetListOfReferencedProjects(XDocument project, XNamespace nm)
+		{
+			return GetListForTag(project, nm, "ProjectReference");
+		}
+
+		private IEnumerable<string> GetListForTag(XDocument project, XNamespace nm, string tagName)
+		{
+			foreach (XElement source in project.Descendants(nm + tagName)) {
 				var sourcePath = source.Attribute("Include").Value;
 				if (!string.IsNullOrWhiteSpace(sourcePath))
-					yield return _projectDir.Combine(sourcePath);
+					yield return Path.GetFullPath(_projectDir.Combine(sourcePath));
 			}
 		}
 
@@ -178,11 +197,11 @@ namespace NugetCracker.Components.CSharp
 			return Path.GetFileNameWithoutExtension(projectFileFullPath);
 		}
 
-		public bool Build(ILogger logger)
+		public virtual bool Build(ILogger logger)
 		{
 			var arguments = UseMonoTools ? "" : "/verbosity:minimal ";
 			using (logger.Block)
-				return ExecuteTool(logger, BuildTool, arguments + FullPath, ProcessBuildOutput);
+				return ToolHelper.ExecuteTool(logger, BuildTool, arguments + '"' + FullPath + '"', _projectDir, ProcessBuildOutput);
 		}
 
 		public static bool UseMonoTools
@@ -201,35 +220,6 @@ namespace NugetCracker.Components.CSharp
 			{
 				return UseMonoTools ? "xbuild" : "msbuild";
 			}
-		}
-
-		protected bool ExecuteTool(ILogger logger, string toolName, string arguments, Action<ILogger, string> processToolOutput = null)
-		{
-			try {
-				if (processToolOutput == null)
-					processToolOutput = (l, s) => l.Info(s);
-				Process p = new Process();
-				p.StartInfo.UseShellExecute = false;
-				p.StartInfo.RedirectStandardError = true;
-				p.StartInfo.RedirectStandardOutput = true;
-				p.StartInfo.FileName = toolName.FindInPathEnvironmentVariable();
-				p.StartInfo.Arguments = arguments;
-				p.StartInfo.WorkingDirectory = _projectDir;
-				p.StartInfo.CreateNoWindow = true;
-				if (logger != null) {
-					p.OutputDataReceived += (object sender, DataReceivedEventArgs e) => processToolOutput(logger, e.Data);
-					p.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => logger.Error(e.Data);
-				}
-				logger.Info("Executing: " + p.StartInfo.FileName + " " + arguments);
-				p.Start();
-				p.BeginOutputReadLine();
-				p.BeginErrorReadLine();
-				p.WaitForExit();
-				return p.ExitCode == 0;
-			} catch (Exception e) {
-				logger.Error(e);
-			}
-			return false;
 		}
 
 		private static void ProcessBuildOutput(ILogger logger, string line)
@@ -251,6 +241,8 @@ namespace NugetCracker.Components.CSharp
 
 		public bool SetNewVersion(ILogger logger, Version version)
 		{
+			if (version == CurrentVersion)
+				return true;
 			logger.Info("Setting new version to {0}", version.ToShort());
 			if (!File.Exists(_assemblyInfoPath)) {
 				logger.Error("There's no file to keep the version information in this component.");
@@ -313,6 +305,9 @@ namespace NugetCracker.Components.CSharp
 			var sb = new StringBuilder();
 			sb.AppendFormat("{0}{1} [{3}]\n  from '{2}'\n  dependencies:\n", Name, CurrentVersionTag, FullPath, Type);
 			foreach (var dep in _dependencies)
+				sb.AppendFormat("    {0}\n", dep);
+			sb.AppendFormat("  needed by\n");
+			foreach (var dep in DependentComponents)
 				sb.AppendFormat("    {0}\n", dep);
 			return sb.ToString();
 		}

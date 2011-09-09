@@ -69,13 +69,7 @@ namespace NugetCracker.Components
 		}
 
 
-		public bool UpgradePackageDependency(ILogger logger, INugetSpec newPackage, string sourceDirectory)
-		{
-			return true;
-		}
-
-
-		public bool InstallPackageDependency(ILogger logger, INugetSpec newPackage, string sourceDirectory)
+		public bool UpgradePackageDependency(ILogger logger, INugetSpec newPackage, string sourceDirectory, ICollection<string> installDirs)
 		{
 			return true;
 		}

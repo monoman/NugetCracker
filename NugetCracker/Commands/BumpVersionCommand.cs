@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using NugetCracker.Interfaces;
 using NugetCracker.Data;
+using System.IO;
+using NugetCracker.Utilities;
 
 namespace NugetCracker.Commands
 {
@@ -28,17 +30,17 @@ namespace NugetCracker.Commands
 	or --publish options were specified.
 
 	Options
-	-part:[major, minor, build, revision}		
+	-part:major|minor|build|revision|none		
 		Increments the major, minor, build, revision version number. 
 		If option is ommitted the default is to increment build number.
-	-cascade
+	-dontcascade
 		Update all dependent components to use the new build/package, and them their dependent 
 		components and so on. If some components generate a Nuget, the Nuget is published to 
 		a temporary output 'source' and the dependent components have their package references 
 		updated, if all goes successfully packages are them published to the default or specified
 		source.
 	-publish
-		Specifies that even if not cascaded package should be published if successful.
+		Specifies that package should be published if successful.
 	-to:<source id/path>
 		Specifies source other than the default to publish nugets to. 
 ";
@@ -55,7 +57,7 @@ namespace NugetCracker.Commands
 			var component = components.FindComponent<IVersionable>(componentNamePattern);
 			if (component == null)
 				return true;
-			bool cascade = args.Contains("-cascade");
+			bool cascade = !args.Contains("-dontcascade");
 			bool publish = args.Contains("-publish");
 			VersionPart partToBump = VersionPart.Build;
 			if (args.Contains("-part:major"))
@@ -64,6 +66,8 @@ namespace NugetCracker.Commands
 				partToBump = VersionPart.Minor;
 			else if (args.Contains("-part:revision"))
 				partToBump = VersionPart.Revision;
+			else if (args.Contains("-part:none"))
+				partToBump = VersionPart.None;
 			var to = args.FirstOrDefault(s => s.StartsWith("-to:"));
 			if (to != null)
 				to = to.Substring(4);
@@ -104,19 +108,58 @@ namespace NugetCracker.Commands
 				// TODO really publish
 			}
 			if (cascade) {
-				if (component is INugetSpec)
-					logger.Info("Cascading nuget '{0}'", (component as INugetSpec).OutputPackageFilename);
-				foreach (IComponent dependentComponent in component.DependentComponents)
-					if (component is INugetSpec)
-						if (!dependentComponent.UpgradePackageDependency(logger, (INugetSpec)component, packagesOutputDirectory))
-							return false;
+				if (!UpgradePackageDependency(logger, component as INugetSpec, packagesOutputDirectory))
+					return false;
+				var partToBumpOnDependentComponents = partToBump == VersionPart.None ? VersionPart.Build : partToBump;
 				foreach (IComponent dependentComponent in component.DependentComponents) {
-					if (component is INugetSpec)
-						if (!dependentComponent.InstallPackageDependency(logger, (INugetSpec)component, packagesOutputDirectory))
+					if (dependentComponent is IVersionable)
+						if (!BumpVersion(logger, (IVersionable)dependentComponent, false, partToBumpOnDependentComponents, publish, to, packagesOutputDirectory)) {
+							logger.Error("Could not bump version for dependent component '{0}'", dependentComponent.Name);
 							return false;
-					if (component is IVersionable)
-						if (!BumpVersion(logger, (IVersionable)dependentComponent, false, partToBump, publish, to, packagesOutputDirectory))
-							return false;
+						}
+					if (!UpgradePackageDependency(logger, dependentComponent as INugetSpec, packagesOutputDirectory))
+						return false;
+
+				}
+			}
+			return true;
+		}
+
+		private static bool UpgradePackageDependency(ILogger logger, INugetSpec package, string packagesOutputDirectory)
+		{
+			if (package == null)
+				return true;
+			var installDirs = new List<string>();
+			logger.Info("Cascading nuget '{0}'", package.OutputPackageFilename);
+			using (logger.Block) {
+				foreach (IComponent dependentComponent in package.DependentComponents)
+					if (!dependentComponent.UpgradePackageDependency(logger, (INugetSpec)package, packagesOutputDirectory, installDirs)) {
+						logger.Error("Could not upgrade package references to component '{0}'", package.Name);
+						return false;
+					}
+				if (!ReinstallPackageOn(logger, package, packagesOutputDirectory, installDirs)) {
+					logger.Error("Could not reinstall package '{0}.{1}'", package.Name, package.CurrentVersion.ToShort());
+					return false;
+				}
+			}
+			return true;
+		}
+
+		private static bool ReinstallPackageOn(ILogger logger, INugetSpec newPackage, string sourceDirectory, IEnumerable<string> installDirs)
+		{
+			foreach (string installDir in installDirs) {
+				logger.Info("Installing package {0} in '{1}'", newPackage.Name, installDir);
+				using (logger.QuietBlock) {
+					newPackage.RemoveInstalledVersions(logger, installDir);
+					foreach (var dependentPackage in newPackage.DependentPackages)
+						dependentPackage.RemoveInstalledVersions(logger, installDir);
+					if (!ToolHelper.ExecuteTool(logger, "nuget",
+							"install " + newPackage.Name
+							+ " -Source " + sourceDirectory
+							+ " -ExcludeVersion"
+							+ " -OutputDirectory " + installDir,
+							sourceDirectory))
+						return false;
 				}
 			}
 			return true;

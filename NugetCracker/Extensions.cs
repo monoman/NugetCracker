@@ -7,10 +7,11 @@ namespace NugetCracker
 {
 	public enum VersionPart
 	{
+		None,
 		Major,
 		Minor,
-		Revision,
-		Build
+		Build,
+		Revision
 	}
 
 	public static class Extensions
@@ -44,8 +45,10 @@ namespace NugetCracker
 					return new Version(oldVersion.Major, oldVersion.Minor + 1, 0, 0);
 				case VersionPart.Build:
 					return new Version(oldVersion.Major, oldVersion.Minor, oldVersion.Build + 1, 0);
+				case VersionPart.Revision:
+					return new Version(oldVersion.Major, oldVersion.Minor, oldVersion.Build, oldVersion.Revision + 1);
 			}
-			return new Version(oldVersion.Major, oldVersion.Minor, oldVersion.Build, oldVersion.Revision + 1);
+			return oldVersion;
 		}
 
 		public static string ToShort(this Version version)

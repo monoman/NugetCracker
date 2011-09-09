@@ -13,8 +13,7 @@ namespace NugetCracker.Interfaces
 		string FullPath { get; }
 
 		IEnumerable<IComponent> Dependencies { get; }
-		bool UpgradePackageDependency(ILogger logger, INugetSpec newPackage, string sourceDirectory);
-		bool InstallPackageDependency(ILogger logger, INugetSpec newPackage, string sourceDirectory);
+		bool UpgradePackageDependency(ILogger logger, INugetSpec newPackage, string sourceDirectory, ICollection<string> installDirs);
 
 		IEnumerable<IComponent> DependentComponents { get; set; }
 
