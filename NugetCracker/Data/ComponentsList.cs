@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using NugetCracker.Interfaces;
 using System.IO;
+using System.Linq;
+using NugetCracker.Interfaces;
 
 namespace NugetCracker.Data
 {
@@ -61,5 +62,51 @@ namespace NugetCracker.Data
 			scanned(path);
 		}
 
+		private class LayeredDependencies : IEnumerable<IComponent>
+		{
+			List<List<IComponent>> lists;
+
+			public LayeredDependencies(IEnumerable<IComponent> initialList)
+			{
+				lists = new List<List<IComponent>>();
+				Divide(new List<IComponent>(initialList));
+			}
+
+			private void Divide(List<IComponent> initialList)
+			{
+				if (initialList.Count == 0)
+					return;
+				List<IComponent> itemsHere = new List<IComponent>();
+				List<IComponent> itemsAbove = new List<IComponent>();
+				foreach (var component in initialList)
+					if (initialList.Any(c => c.Dependencies.Contains(component)))
+						itemsHere.Add(component);
+					else
+						itemsAbove.Add(component);
+				lists.Insert(0, itemsAbove);
+				Divide(itemsHere);
+			}
+
+
+			public IEnumerator<IComponent> GetEnumerator()
+			{
+				foreach (var list in lists)
+					foreach (var component in list)
+						yield return component;
+			}
+
+			System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+			{
+				return GetEnumerator();
+			}
+		}
+
+
+		public void FindDependents()
+		{
+			foreach (IComponent component in _list)
+				component.DependentComponents =
+					new LayeredDependencies(_list.FindAll(c => c.Dependencies.Contains(component)));
+		}
 	}
 }

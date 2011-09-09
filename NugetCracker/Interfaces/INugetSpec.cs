@@ -7,8 +7,8 @@ namespace NugetCracker.Interfaces
 {
 	public interface INugetSpec : INugetPackage, IVersionable
 	{
-		bool Pack(ILogger logger);
+		bool Pack(ILogger logger, string outputDirectory);
 
-		string OutputPackagePath { get; }
+		string OutputPackageFilename { get; }
 	}
 }

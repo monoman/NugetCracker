@@ -1,21 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using NugetCracker.Interfaces;
-using System.Text;
-using System.Diagnostics;
 
 namespace NugetCracker.Components.CSharp
 {
 	public class CSharpProject : IProject
 	{
+		public IEnumerable<IComponent> DependentComponents { get; set; }
+
 		readonly List<IComponent> _dependencies = new List<IComponent>();
 		protected string _assemblyInfoPath;
 		protected string _projectDir;
 		protected bool _isWeb;
+		string _installedPackagesDir;
 
 		public CSharpProject(string projectFileFullPath)
 		{
@@ -27,6 +30,28 @@ namespace NugetCracker.Components.CSharp
 			Description = "?";
 			ParseAvailableData();
 			_dependencies.Sort((c1, c2) => c1.Name.CompareTo(c2.Name));
+			_installedPackagesDir = FindPackagesDir(_projectDir);
+		}
+
+		private string FindPackagesDir(string dir)
+		{
+			while (!string.IsNullOrWhiteSpace(dir)) {
+				var newdir = Path.Combine(dir, "packages");
+				if (Directory.Exists(newdir))
+					return newdir;
+				if (Directory.EnumerateFiles(dir, "*.sln").Count() > 0)
+					return CreateDirectory(newdir);
+				dir = Path.GetDirectoryName(dir);
+				if (dir.Equals(Path.GetPathRoot(dir)))
+					return CreateDirectory(Path.Combine(dir, "packages"));
+			}
+			return null;
+		}
+
+		private static string CreateDirectory(string dir)
+		{
+			Directory.CreateDirectory(dir);
+			return dir;
 		}
 
 		protected virtual void ParseAvailableData()
@@ -47,6 +72,50 @@ namespace NugetCracker.Components.CSharp
 						_dependencies.Add(new NugetReference(packageId, packageVersions));
 				}
 			}
+		}
+
+		public bool UpgradePackageDependency(ILogger logger, INugetSpec newPackage, string sourceDirectory)
+		{
+			var packagesFile = Path.Combine(_projectDir, "packages.config");
+			if (!File.Exists(packagesFile))
+				return false;
+			UpdatePackagesConfig(newPackage, packagesFile);
+			if (!_isWeb)
+				UpdatePackageInCSProj(newPackage);
+			// TODO else clause or polimorphism
+			return true;
+		}
+
+		public bool InstallPackageDependency(ILogger logger, INugetSpec newPackage, string sourceDirectory)
+		{
+			return ExecuteTool(logger, "nuget", "install " + newPackage.Name
+					+ " -Source " + sourceDirectory
+					+ " -ExcludeVersion"
+					+ " -OutputDirectory " + _installedPackagesDir);
+		}
+
+		private static void UpdatePackagesConfig(INugetSpec newPackage, string packagesFile)
+		{
+			string xml = File.ReadAllText(packagesFile);
+			string pattern = "<package \\s*id=\"" + newPackage.Name + "\" \\s*version=\"([^\"]*)\"\\s*/>";
+			string replace = "<package id=\"" + newPackage.Name + "\" version=\"" + newPackage.CurrentVersion.ToShort() + "\" />";
+			xml = Regex.Replace(xml, pattern, replace, RegexOptions.Singleline);
+			File.WriteAllText(packagesFile, xml);
+		}
+
+		private void UpdatePackageInCSProj(INugetSpec newPackage)
+		{
+			string xml = File
+				.ReadAllText(FullPath)
+				.Replace("<RestorePackages>true</RestorePackages>", "<RestorePackages>false</RestorePackages>")
+				.Replace("<BuildPackage>true</BuildPackage>", "<BuildPackage>false</BuildPackage>");
+			string pattern = "<Reference \\s*Include=\"" + newPackage.Name + "[^>]*>";
+			string replace = "<Reference Include=\"" + newPackage.Name + "\">";
+			xml = Regex.Replace(xml, pattern, replace, RegexOptions.Multiline | RegexOptions.IgnoreCase);
+			pattern = "^(\\s*<HintPath>.*\\\\)(" + newPackage.Name + "[^\\\\<]*)(\\\\.*\\\\[^\\\\<]*\\.dll)([^<]*</HintPath>\\s*)$";
+			replace = "$1" + newPackage.Name + "$3$4";
+			xml = Regex.Replace(xml, pattern, replace, RegexOptions.Multiline | RegexOptions.IgnoreCase);
+			File.WriteAllText(FullPath, xml);
 		}
 
 		private void ParseProjectFile()
@@ -83,7 +152,16 @@ namespace NugetCracker.Components.CSharp
 				string pattern = "AssemblyVersion\\(\"([^\"]*)\"\\)";
 				var match = Regex.Match(info, pattern, RegexOptions.Multiline);
 				if (match.Success) {
-					CurrentVersion = new Version(match.Groups[1].Value);
+					try {
+						string version = match.Groups[1].Value;
+						if (version.Contains('*'))
+							version = version.Replace('*', '0');
+						if (version.Count(c => c == '.') < 3)
+							version = version + ".0";
+						CurrentVersion = new Version(version);
+					} catch {
+						return false;
+					}
 					found = true;
 				}
 				pattern = "AssemblyDescription\\(\"([^\"]+)\"\\)";
@@ -142,7 +220,7 @@ namespace NugetCracker.Components.CSharp
 					p.OutputDataReceived += (object sender, DataReceivedEventArgs e) => processToolOutput(logger, e.Data);
 					p.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => logger.Error(e.Data);
 				}
-				logger.Debug("Executing " + p.StartInfo.FileName + " " + arguments);
+				logger.Info("Executing: " + p.StartInfo.FileName + " " + arguments);
 				p.Start();
 				p.BeginOutputReadLine();
 				p.BeginErrorReadLine();
@@ -201,9 +279,9 @@ namespace NugetCracker.Components.CSharp
 
 		public string FullPath { get; private set; }
 
-		public IQueryable<IComponent> Dependencies
+		public IEnumerable<IComponent> Dependencies
 		{
-			get { return _dependencies.AsQueryable<IComponent>(); }
+			get { return _dependencies; }
 		}
 
 		public bool Equals(IComponent other)
@@ -249,5 +327,6 @@ namespace NugetCracker.Components.CSharp
 			return string.IsNullOrWhiteSpace(pattern) || Regex.IsMatch(Name, pattern,
 				RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
 		}
+
 	}
 }

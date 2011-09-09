@@ -31,7 +31,7 @@ namespace NugetCracker.Commands
 			}
 		}
 
-		public bool Process(ILogger logger, IEnumerable<string> args, ComponentsList components)
+		public bool Process(ILogger logger, IEnumerable<string> args, ComponentsList components, string packagesOutputDirectory)
 		{
 			var pattern = args.FirstOrDefault(s => !s.StartsWith("-"));
 			bool full = args.Contains("-full");

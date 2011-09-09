@@ -45,7 +45,7 @@ namespace NugetCracker.Commands
 			}
 		}
 
-		public bool Process(ILogger logger, IEnumerable<string> args, ComponentsList components)
+		public bool Process(ILogger logger, IEnumerable<string> args, ComponentsList components, string packagesOutputDirectory)
 		{
 			var componentNamePattern = args.FirstOrDefault(s => !s.StartsWith("-"));
 			if (componentNamePattern == null) {
@@ -67,45 +67,57 @@ namespace NugetCracker.Commands
 			var to = args.FirstOrDefault(s => s.StartsWith("-to:"));
 			if (to != null)
 				to = to.Substring(4);
-			return BumpVersion(logger, component, cascade, partToBump, publish, to);
+			BumpVersion(logger, component, cascade, partToBump, publish, to, packagesOutputDirectory);
+			return true;
 		}
 
-		private bool BumpVersion(ILogger logger, IVersionable component, bool cascade, VersionPart partToBump, bool publish, string to)
+		private bool BumpVersion(ILogger logger, IVersionable component, bool cascade, VersionPart partToBump, bool publish, string to, string packagesOutputDirectory)
 		{
 			var componentName = component.Name;
 			Version newVersion = component.CurrentVersion.Bump(partToBump);
 			logger.Info("Bumping component '{0}' version from {1} to {2}", componentName, component.CurrentVersion.ToShort(), newVersion.ToShort());
 			if (cascade)
 				logger.Info("==== cascading");
-			if (publish || cascade) {
+			if (publish) {
 				logger.Info("==== publishing to '{0}'", to ?? "default source");
 			}
 			if (!component.SetNewVersion(logger, newVersion)) {
 				logger.Error("Could not bump component '{0}' version to {1}", componentName, newVersion.ToShort());
-				return true;
+				return false;
 			}
 			if (component is IProject) {
 				logger.Info("Building {0}.{1}", componentName, newVersion.ToShort());
 				if (!(component as IProject).Build(logger)) {
 					logger.Error("Could not build component '{0}'", componentName);
-					return true;
+					return false;
 				}
 			}
 			if (component is INugetSpec) {
 				logger.Info("Packaging {0}.{1}", componentName, newVersion.ToShort());
-				if (!(component as INugetSpec).Pack(logger)) {
+				if (!(component as INugetSpec).Pack(logger, packagesOutputDirectory)) {
 					logger.Error("Could not package component '{0}'", componentName);
-					return true;
+					return false;
 				}
-				// TODO publishing package
-			}
-			if (cascade) {
-				logger.Info("Cascading...");
-				// TODO really cascade
 			}
 			if (publish) {
 				logger.Info("Publishing...");
 				// TODO really publish
+			}
+			if (cascade) {
+				if (component is INugetSpec)
+					logger.Info("Cascading nuget '{0}'", (component as INugetSpec).OutputPackageFilename);
+				foreach (IComponent dependentComponent in component.DependentComponents)
+					if (component is INugetSpec)
+						if (!dependentComponent.UpgradePackageDependency(logger, (INugetSpec)component, packagesOutputDirectory))
+							return false;
+				foreach (IComponent dependentComponent in component.DependentComponents) {
+					if (component is INugetSpec)
+						if (!dependentComponent.InstallPackageDependency(logger, (INugetSpec)component, packagesOutputDirectory))
+							return false;
+					if (component is IVersionable)
+						if (!BumpVersion(logger, (IVersionable)dependentComponent, false, partToBump, publish, to, packagesOutputDirectory))
+							return false;
+				}
 			}
 			return true;
 		}

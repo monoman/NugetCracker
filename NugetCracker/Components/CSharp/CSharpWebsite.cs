@@ -17,7 +17,11 @@ namespace NugetCracker.Components.CSharp
 
 		protected override void ParseAvailableData()
 		{
+			if (!Directory.Exists(_projectDir))
+				return;
 			var app_code = Path.Combine(_projectDir, "App_Code");
+			if (!Directory.Exists(app_code))
+				app_code = _projectDir;
 			ParseAssemblyInfo(Directory.EnumerateFiles(app_code, "*.cs", SearchOption.AllDirectories));
 			ParsePackagesFile();
 		}

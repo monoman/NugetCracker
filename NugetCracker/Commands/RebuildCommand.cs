@@ -27,7 +27,7 @@ namespace NugetCracker.Commands
 			}
 		}
 
-		public bool Process(ILogger logger, IEnumerable<string> args, ComponentsList components)
+		public bool Process(ILogger logger, IEnumerable<string> args, ComponentsList components, string packagesOutputDirectory)
 		{
 			var componentNamePattern = args.FirstOrDefault(s => !s.StartsWith("-"));
 			if (componentNamePattern == null) {

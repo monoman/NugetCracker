@@ -1,5 +1,6 @@
 ﻿using System;
 using NugetCracker.Interfaces;
+using System.IO;
 
 namespace NugetCracker.Components.CSharp
 {
@@ -10,15 +11,15 @@ namespace NugetCracker.Components.CSharp
 		{
 		}
 
-		public bool Pack(ILogger logger)
+		public bool Pack(ILogger logger, string outputDirectory)
 		{
 			using (logger.Block)
-				return ExecuteTool(logger, "nuget", "pack " + FullPath);
+				return ExecuteTool(logger, "nuget", "pack " + FullPath + " -OutputDirectory " + outputDirectory);
 		}
 
-		public string OutputPackagePath
+		public string OutputPackageFilename
 		{
-			get { throw new NotImplementedException(); }
+			get { return Path.GetFileNameWithoutExtension(FullPath) + "." + CurrentVersion.ToShort() + ".nupkg"; }
 		}
 
 		public INugetSource Source { get; set; }

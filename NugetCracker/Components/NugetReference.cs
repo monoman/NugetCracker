@@ -9,6 +9,8 @@ namespace NugetCracker.Components
 {
 	public class NugetReference : IComponent
 	{
+		public IEnumerable<IComponent> DependentComponents { get; set; }
+
 		public NugetReference(string name, string versions)
 		{
 			Name = name;
@@ -21,11 +23,11 @@ namespace NugetCracker.Components
 
 		public string Description { get; private set; }
 
-		public Version CurrentVersion { get; private set; }
+		public Version CurrentVersion { get; set; }
 
 		public string FullPath { get; private set; }
 
-		public IQueryable<IComponent> Dependencies
+		public IEnumerable<IComponent> Dependencies
 		{
 			get { return null; }
 		}
@@ -64,6 +66,18 @@ namespace NugetCracker.Components
 		public override int GetHashCode()
 		{
 			return Name.GetHashCode();
+		}
+
+
+		public bool UpgradePackageDependency(ILogger logger, INugetSpec newPackage, string sourceDirectory)
+		{
+			return true;
+		}
+
+
+		public bool InstallPackageDependency(ILogger logger, INugetSpec newPackage, string sourceDirectory)
+		{
+			return true;
 		}
 	}
 

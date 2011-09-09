@@ -16,7 +16,7 @@ namespace NugetCracker
 		static MetaProjectPersistence _metaProjectPersistence;
 		static ComponentsList _components;
 		static IComponentsFactory[] _factories = new IComponentsFactory[] {
-				  new CSharpComponentsFactory()
+			new CSharpComponentsFactory()
 		};
 		static ICommand[] _commands = new ICommand[] {
 			new BumpVersionCommand(),
@@ -25,8 +25,10 @@ namespace NugetCracker
 		};
 		static List<string> _helpLines = null;
 
-		static Version Version {
-			get {
+		static Version Version
+		{
+			get
+			{
 				return new System.Reflection.AssemblyName(System.Reflection.Assembly.GetCallingAssembly().FullName).Version;
 			}
 		}
@@ -49,6 +51,8 @@ namespace NugetCracker
 			Console.WriteLine("Found {0} components", _components.Count);
 			Console.WriteLine("Sorting...");
 			_components.SortByName();
+			Console.WriteLine("Finding dependents...");
+			_components.FindDependents();
 
 			var inlineCommand = args.SkipWhile(s => s.ToLowerInvariant() != "-c").Skip(1);
 			if (inlineCommand.Count() > 0) {
@@ -63,7 +67,9 @@ namespace NugetCracker
 		private static string[] BreakLine(string command)
 		{
 			// TODO really parse parameters
-			return string.IsNullOrWhiteSpace(command) ? new string[0] : command.Split(' ');
+			return string.IsNullOrWhiteSpace(command)
+				? new string[0]
+				: command.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
 		}
 
 		static bool ProcessCommand(IEnumerable<string> args)
@@ -74,23 +80,34 @@ namespace NugetCracker
 			var commandName = args.First().ToLowerInvariant();
 			args = args.Skip(1);
 			switch (commandName) {
-			case "quit":
-			case "q":
-			case "exit":
-			case "e":
-				return false;
-			case "help":
-			case "?":
-				return HelpCommand(logger, args);
-			default:
-				foreach (ICommand command in _commands)
-					if (command.Matches(commandName))
-						using (logger.Block)
-							return command.Process(logger, args, _components);
-				break;
+				case "quit":
+				case "q":
+				case "exit":
+				case "e":
+					return false;
+				case "help":
+				case "?":
+					return HelpCommand(logger, args);
+				default:
+					foreach (ICommand command in _commands)
+						if (command.Matches(commandName))
+							using (logger.Block)
+								return command.Process(logger, args, _components, PackagesOutputDirectory);
+					break;
 			}
 			logger.Error("Unknown command '{0}'", commandName);
 			return true;
+		}
+
+		private static string PackagesOutputDirectory
+		{
+			get
+			{
+				var path = _metaProjectPersistence.ToAbsolutePath("NugetPackages");
+				if (!Directory.Exists(path))
+					Directory.CreateDirectory(path);
+				return path;
+			}
 		}
 
 		private static bool HelpCommand(ILogger logger, IEnumerable<string> args)
@@ -111,8 +128,10 @@ namespace NugetCracker
 			}
 		}
 
-		private static IEnumerable<string> HelpLines {
-			get {
+		private static IEnumerable<string> HelpLines
+		{
+			get
+			{
 				if (_helpLines == null) {
 					_helpLines = new List<string> {
 							"Help, ?         Show this list of commands or an specific command help",
