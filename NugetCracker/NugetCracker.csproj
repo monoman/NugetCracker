@@ -56,7 +56,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\BumpVersionCommand.cs" />
+    <Compile Include="Commands\AddExcludedDirectoryCommand.cs" />
     <Compile Include="Commands\ListCommand.cs" />
+    <Compile Include="Commands\ScanCommand.cs" />
     <Compile Include="Components\NugetReference.cs" />
     <Compile Include="Components\ProjectReference.cs" />
     <Compile Include="Data\ComponentsList.cs" />
@@ -80,12 +82,10 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transactions\AddDirectoryTransaction.cs" />
+    <Compile Include="Transactions\AddExcludedDirectoryTransaction.cs" />
     <Compile Include="Utilities\ConsoleLogger.cs" />
     <Compile Include="Commands\RebuildCommand.cs" />
     <Compile Include="Utilities\ToolHelper.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">

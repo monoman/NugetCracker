@@ -11,9 +11,10 @@ namespace NugetCracker.Persistence
 {
 	public class MetaProjectPersistence : PrevaylerJrSharp<MetaProject>
 	{
-		public string FilePath { get; private set;}
+		public string FilePath { get; private set; }
 
-		public MetaProjectPersistence(string filePath) : base(filePath)
+		public MetaProjectPersistence(string filePath)
+			: base(filePath)
 		{
 			FilePath = filePath;
 			if (ListOfDirectories.Count() == 0)
@@ -55,6 +56,22 @@ namespace NugetCracker.Persistence
 		public IEnumerable<string> ListOfDirectories
 		{
 			get { return ExecuteQuery(metaProject => metaProject.Directories.OrderBy(name => name)); }
+		}
+
+		public void AddExcludedDirectory(string dirPath)
+		{
+			ExecuteTransaction(new AddExcludedDirectoryTransaction(ToRelativePath(dirPath)));
+		}
+
+		public IEnumerable<string> ListOfExcludedDirectories
+		{
+			get { return ExecuteQuery(metaProject => metaProject.ExcludedDirectories.OrderBy(name => name)); }
+		}
+
+		public bool IsExcludedDirectory(string path)
+		{
+			path = ToRelativePath(path);
+			return ExecuteQuery(metaProject => metaProject.ExcludedDirectories).Any(s => path.StartsWith(s));
 		}
 	}
 }

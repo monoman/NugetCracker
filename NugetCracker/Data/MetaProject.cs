@@ -9,10 +9,19 @@ namespace NugetCracker.Data
 	public class MetaProject
 	{
 		public List<string> Directories { get; private set; }
+		public List<string> ExcludedDirectories { get; private set; }
 
 		public MetaProject()
 		{
-			Directories = new List<string>();
+			Sanitize();
+		}
+
+		public void Sanitize()
+		{
+			if (Directories == null)
+				Directories = new List<string>();
+			if (ExcludedDirectories == null)
+				ExcludedDirectories = new List<string>();
 		}
 	}
 }

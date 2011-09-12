@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NugetCracker.Interfaces;
 using NugetCracker.Data;
+using NugetCracker.Persistence;
 
 namespace NugetCracker.Commands
 {
@@ -27,7 +28,7 @@ namespace NugetCracker.Commands
 			}
 		}
 
-		public bool Process(ILogger logger, IEnumerable<string> args, ComponentsList components, string packagesOutputDirectory)
+		public bool Process(ILogger logger, IEnumerable<string> args, MetaProjectPersistence metaProject, ComponentsList components, string packagesOutputDirectory)
 		{
 			var componentNamePattern = args.FirstOrDefault(s => !s.StartsWith("-"));
 			if (componentNamePattern == null) {

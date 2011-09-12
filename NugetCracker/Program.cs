@@ -21,7 +21,9 @@ namespace NugetCracker
 		static ICommand[] _commands = new ICommand[] {
 			new BumpVersionCommand(),
 			new ListCommand(),
-			new RebuildCommand()
+			new RebuildCommand(),
+			new ScanCommand(_factories),
+			new AddExcludedDirectoryCommand()
 		};
 		static List<string> _helpLines = null;
 
@@ -36,24 +38,16 @@ namespace NugetCracker
 		static void Main(string[] args)
 		{
 			Console.WriteLine("NugetCracker {0}\nSee https://github.com/monoman/NugetCracker\n", Version.ToString(2));
-
 			_metaProjectPersistence = new MetaProjectPersistence(args.GetMetaProjectFilePath());
-			_components = new ComponentsList();
-
 			Console.WriteLine("Using {0}", _metaProjectPersistence.FilePath);
-			scannedDirsCount = 0;
-			foreach (string dir in _metaProjectPersistence.ListOfDirectories) {
-				string path = _metaProjectPersistence.ToAbsolutePath(dir);
-				Console.WriteLine("Scanning '{0}' > '{1}'", dir, path);
-				_components.Scan(path, _factories, OnScanned);
-			}
-			Console.WriteLine("\nScanned {0} directories", scannedDirsCount);
-			Console.WriteLine("Found {0} components", _components.Count);
-			Console.WriteLine("Sorting...");
-			_components.SortByName();
-			Console.WriteLine("Finding dependents...");
-			_components.FindDependents();
-
+			Console.WriteLine("Directories that will be scanned:");
+			foreach (var dir in _metaProjectPersistence.ListOfDirectories)
+				Console.WriteLine("\t" + dir);
+			Console.WriteLine("Directories that won't be scanned:");
+			foreach (var dir in _metaProjectPersistence.ListOfExcludedDirectories)
+				Console.WriteLine("\t" + dir);
+			_components = new ComponentsList();
+			ProcessCommand(new string[] { "scan" });
 			var inlineCommand = args.SkipWhile(s => s.ToLowerInvariant() != "-c").Skip(1);
 			if (inlineCommand.Count() > 0) {
 				ProcessCommand(inlineCommand);
@@ -92,7 +86,7 @@ namespace NugetCracker
 					foreach (ICommand command in _commands)
 						if (command.Matches(commandName))
 							using (logger.Block)
-								return command.Process(logger, args, _components, PackagesOutputDirectory);
+								return command.Process(logger, args, _metaProjectPersistence, _components, PackagesOutputDirectory);
 					break;
 			}
 			logger.Error("Unknown command '{0}'", commandName);
@@ -145,15 +139,5 @@ namespace NugetCracker
 				return _helpLines;
 			}
 		}
-
-		private static int scannedDirsCount = 0;
-
-		private static void OnScanned(string path)
-		{
-			if ((scannedDirsCount & 255) == 0)
-				Console.Write('.');
-			scannedDirsCount++;
-		}
-
 	}
 }

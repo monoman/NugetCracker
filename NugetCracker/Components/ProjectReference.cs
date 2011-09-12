@@ -9,8 +9,6 @@ namespace NugetCracker.Components
 {
 	public class ProjectReference : NugetReference
 	{
-		public string FullPath { get; private set; }
-
 		public ProjectReference(string fullPath)
 			: base(Path.GetFileNameWithoutExtension(fullPath), "?")
 		{
@@ -30,6 +28,11 @@ namespace NugetCracker.Components
 		public override bool Equals(object obj)
 		{
 			return IsEqual(obj as IProject);
+		}
+
+		public override int GetHashCode ()
+		{
+			return FullPath.GetHashCode ();
 		}
 
 		public override string ToString()

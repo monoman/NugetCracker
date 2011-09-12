@@ -8,7 +8,7 @@ using NugetCracker.Data;
 namespace NugetCracker.Transactions
 {
 	[Serializable]
-	public class AddDirectoryTransaction: PrevaylerJrSharp<MetaProject>.Command
+	public class AddDirectoryTransaction : PrevaylerJrSharp<MetaProject>.Command
 	{
 		public readonly string _directoryPath;
 
@@ -19,7 +19,8 @@ namespace NugetCracker.Transactions
 
 		public void ExecuteOn(MetaProject metaProject)
 		{
-			if ( !string.IsNullOrWhiteSpace(_directoryPath) && !metaProject.Directories.Contains(_directoryPath))
+			metaProject.Sanitize();
+			if (!string.IsNullOrWhiteSpace(_directoryPath) && !metaProject.Directories.Contains(_directoryPath))
 				metaProject.Directories.Add(_directoryPath);
 		}
 	}

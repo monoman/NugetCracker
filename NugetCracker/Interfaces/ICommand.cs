@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using NugetCracker.Data;
+using NugetCracker.Persistence;
 
 namespace NugetCracker.Interfaces
 {
@@ -8,6 +9,6 @@ namespace NugetCracker.Interfaces
 		string HelpLine { get; }
 		string Help { get; }
 		bool Matches(string commandPattern);
-		bool Process(ILogger logger, IEnumerable<string> args, ComponentsList components, string packagesOutputDirectory);
+		bool Process(ILogger logger, IEnumerable<string> args, MetaProjectPersistence metaProject, ComponentsList components, string packagesOutputDirectory);
 	}
 }

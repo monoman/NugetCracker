@@ -25,7 +25,7 @@ namespace NugetCracker.Components
 
 		public Version CurrentVersion { get; set; }
 
-		public string FullPath { get; private set; }
+		public string FullPath { get; protected set; }
 
 		public IEnumerable<IComponent> Dependencies
 		{

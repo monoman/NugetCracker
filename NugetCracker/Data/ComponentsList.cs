@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NugetCracker.Interfaces;
+using NugetCracker.Persistence;
 
 namespace NugetCracker.Data
 {
@@ -53,13 +54,15 @@ namespace NugetCracker.Data
 			return _list.FindAll(c => c.MatchName(pattern));
 		}
 
-		public void Scan(string path, IEnumerable<IComponentsFactory> factories, Action<string> scanned)
+		public void Scan(MetaProjectPersistence metaProject, string path, IEnumerable<IComponentsFactory> factories, Action<string> scanned)
 		{
-			foreach (IComponentsFactory factory in factories)
-				_list.AddRange(factory.FindComponentsIn(path));
-			foreach (var dir in Directory.EnumerateDirectories(path))
-				Scan(dir, factories, scanned);
-			scanned(path);
+			if (!metaProject.IsExcludedDirectory(path)) {
+				foreach (IComponentsFactory factory in factories)
+					_list.AddRange(factory.FindComponentsIn(path));
+				foreach (var dir in Directory.EnumerateDirectories(path))
+					Scan(metaProject, dir, factories, scanned);
+				scanned(path);
+			}
 		}
 
 		private class LayeredDependencies : IEnumerable<IComponent>
@@ -107,6 +110,18 @@ namespace NugetCracker.Data
 			foreach (IComponent component in _list)
 				component.DependentComponents =
 					new LayeredDependencies(_list.FindAll(c => c.Dependencies.Contains(component)));
+		}
+
+		public void Prune(string path)
+		{
+			_list = new List<IComponent>(_list.FindAll(c => !c.FullPath.StartsWith(path)));
+			SortByName();
+			FindDependents();
+		}
+
+		public void Clear()
+		{
+			_list.Clear();
 		}
 	}
 }
