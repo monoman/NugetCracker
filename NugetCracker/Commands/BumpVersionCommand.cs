@@ -23,7 +23,7 @@ namespace NugetCracker.Commands
 		{
 			get
 			{
-				return @"BumpVersion [options] pattern
+				return @"B[umpVersion] [options] pattern
 
 	Bumps up the [AssemblyVersion]/Package Version of the component and rebuilds/repackages. 
 	The [AssemblyFileVersion] attribute also is kept in sync with the [AssemblyVersion].
@@ -44,6 +44,9 @@ namespace NugetCracker.Commands
 		Specifies that package should be published if successful.
 	-to:<source id/path>
 		Specifies source other than the default to publish nugets to. 
+	-repack
+		Rebuilds/packs all versionable components with current version, without changing versions.
+		Ignores pattern
 ";
 			}
 		}
@@ -52,14 +55,27 @@ namespace NugetCracker.Commands
 		{
 			var componentNamePattern = args.FirstOrDefault(s => !s.StartsWith("-"));
 			if (componentNamePattern == null) {
-				logger.Error("No component name specified");
+				logger.Error("No component pattern specified");
 				return true;
 			}
-			var component = components.FindComponent<IVersionable>(componentNamePattern);
-			if (component == null)
-				return true;
-			bool cascade = !args.Contains("-dontcascade");
+			bool repack = args.Contains("-repack");
 			bool publish = args.Contains("-publish");
+			var to = args.FirstOrDefault(s => s.StartsWith("-to:"));
+			if (to != null)
+				to = to.Substring(4);
+			if (repack) {
+				foreach (var component in components.FilterBy(componentNamePattern, orderByTreeDepth: true))
+					if (component is IVersionable) {
+						BumpVersion(logger, component as IVersionable, false, VersionPart.None, publish, to, packagesOutputDirectory);
+						if (!UpgradePackageDependency(logger, component as INugetSpec, packagesOutputDirectory))
+							return true;
+					}
+				return true;
+			}
+			bool cascade = !args.Contains("-dontcascade");
+			var specificComponent = components.FindComponent<IVersionable>(componentNamePattern);
+			if (specificComponent == null)
+				return true;
 			VersionPart partToBump = VersionPart.Build;
 			if (args.Contains("-part:major"))
 				partToBump = VersionPart.Major;
@@ -69,10 +85,7 @@ namespace NugetCracker.Commands
 				partToBump = VersionPart.Revision;
 			else if (args.Contains("-part:none"))
 				partToBump = VersionPart.None;
-			var to = args.FirstOrDefault(s => s.StartsWith("-to:"));
-			if (to != null)
-				to = to.Substring(4);
-			BumpVersion(logger, component, cascade, partToBump, publish, to, packagesOutputDirectory);
+			BumpVersion(logger, specificComponent, cascade, partToBump, publish, to, packagesOutputDirectory);
 			return true;
 		}
 
