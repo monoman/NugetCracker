@@ -1,5 +1,7 @@
 ﻿using System.IO;
 using System.Collections.Generic;
+using System.Linq;
+using NugetCracker.Interfaces;
 
 namespace NugetCracker.Components.CSharp
 {
@@ -11,7 +13,7 @@ namespace NugetCracker.Components.CSharp
 			base(Path.Combine(Path.GetDirectoryName(solutionPath), webApplicationPath))
 		{
 			SolutionPath = solutionPath;
-			Name = webApplicationName;
+			Name = webApplicationName.Split('\\').Last(s => !string.IsNullOrWhiteSpace(s));
 			_isWeb = true;
 		}
 
@@ -29,7 +31,7 @@ namespace NugetCracker.Components.CSharp
 
 		public override string Type { get { return "C# Web Site"; } }
 
-		protected override void UpdatePackagesOnProject(Interfaces.INugetSpec newPackage)
+		protected override void UpdatePackagesOnProject(INugetSpec newPackage)
 		{
 			// TODO
 		}
