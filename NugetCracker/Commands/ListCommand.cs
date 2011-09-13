@@ -28,6 +28,12 @@ namespace NugetCracker.Commands
 	Options
 	-full		
 		Gives more details about the components, including dependencies. 
+
+	-nugets
+		Lists only nuget projects.
+
+	-orderbytree
+		Sorts descending by number of dependent components
 ";
 			}
 		}
@@ -36,14 +42,16 @@ namespace NugetCracker.Commands
 		{
 			var pattern = args.FirstOrDefault(s => !s.StartsWith("-"));
 			bool full = args.Contains("-full");
+			bool nugets = args.Contains("-nugets");
+			bool orderByTreeDepth = args.Contains("-orderbytree");
 			if (string.IsNullOrWhiteSpace(pattern)) {
-				logger.Info("Listing all components...");
+				logger.Info("Listing all {0}...", nugets ? "nugets" : "components");
 			} else {
-				logger.Info("Listing components filtered by '{0}' ...", pattern);
+				logger.Info("Listing {1} filtered by '{0}' ...", pattern, nugets ? "nugets" : "components");
 				pattern = pattern.ToLowerInvariant();
 			}
 			var i = 0;
-			foreach (var component in components.FilterBy(pattern))
+			foreach (var component in components.FilterBy(pattern, nugets, orderByTreeDepth))
 				logger.Info("[{0:0000}] {1}", ++i, (full ? component.ToLongString() : component.ToString()));
 			return true;
 		}
