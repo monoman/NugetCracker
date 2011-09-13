@@ -21,7 +21,7 @@ namespace NugetCracker.Commands
 		{
 			get
 			{
-				return @"List [options] [pattern]
+				return @"L[ist] [options] [pattern]
 
 	Lists components, filtered by regular expression pattern if supplied.
 

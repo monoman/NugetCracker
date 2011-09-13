@@ -22,7 +22,7 @@ namespace NugetCracker.Commands
 		{
 			get
 			{
-				return @"AddExcludedDirectory [options] relativePath
+				return @"A[ddExcludedDirectory] [options] relativePath
 
 	Add directory to exclusion list, found by relativePath.
 

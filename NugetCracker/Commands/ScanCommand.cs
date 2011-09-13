@@ -29,7 +29,7 @@ namespace NugetCracker.Commands
 		{
 			get
 			{
-				return @"Scan
+				return @"S[can]
 
 	Scans back all the directories, to update the status of the components' tree.";
 			}
