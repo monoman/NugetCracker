@@ -49,9 +49,12 @@ namespace NugetCracker.Data
 
 		public int Count { get { return _list.Count; } }
 
-		public IEnumerable<IComponent> FilterBy(string pattern)
+		public IEnumerable<IComponent> FilterBy(string pattern, bool nugets = false, bool orderByTreeDepth = false)
 		{
-			return _list.FindAll(c => c.MatchName(pattern));
+			var list = _list.FindAll(c => c.MatchName(pattern) && (!nugets || c is INugetSpec));
+			if (orderByTreeDepth)
+				list.Sort((c1, c2) => (c2.DependentComponents.Count() - c1.DependentComponents.Count()));
+			return list;
 		}
 
 		public void Scan(MetaProjectPersistence metaProject, string path, IEnumerable<IComponentsFactory> factories, Action<string> scanned)
