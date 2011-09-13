@@ -10,7 +10,6 @@ namespace NugetCracker.Commands
 {
 	public class ScanCommand : ICommand
 	{
-		MetaProjectPersistence _metaProjectPersistence;
 		IComponentsFactory[] _factories;
 
 		public ScanCommand(IComponentsFactory[] factories)
@@ -38,6 +37,14 @@ namespace NugetCracker.Commands
 
 		public bool Process(ILogger logger, IEnumerable<string> args, MetaProjectPersistence metaProject, ComponentsList components, string packagesOutputDirectory)
 		{
+			logger.Info("Directories that will be scanned:");
+			using (logger.Block)
+				foreach (var dir in metaProject.ListOfDirectories)
+					logger.Info(dir);
+			logger.Info("Directories that won't be scanned:");
+			using (logger.Block)
+				foreach (var dir in metaProject.ListOfExcludedDirectories)
+					logger.Info(dir);
 			components.Clear();
 			int scannedDirsCount = 0;
 			foreach (string dir in metaProject.ListOfDirectories) {

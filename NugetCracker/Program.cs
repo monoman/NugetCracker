@@ -40,14 +40,9 @@ namespace NugetCracker
 			Console.WriteLine("NugetCracker {0}\nSee https://github.com/monoman/NugetCracker\n", Version.ToString(2));
 			_metaProjectPersistence = new MetaProjectPersistence(args.GetMetaProjectFilePath());
 			Console.WriteLine("Using {0}", _metaProjectPersistence.FilePath);
-			Console.WriteLine("Directories that will be scanned:");
-			foreach (var dir in _metaProjectPersistence.ListOfDirectories)
-				Console.WriteLine("\t" + dir);
-			Console.WriteLine("Directories that won't be scanned:");
-			foreach (var dir in _metaProjectPersistence.ListOfExcludedDirectories)
-				Console.WriteLine("\t" + dir);
 			_components = new ComponentsList();
-			ProcessCommand(new string[] { "scan" });
+			if (!args.TakeWhile(s => s.ToLowerInvariant() != "-c").Any(s => s.ToLowerInvariant() == "-noscan"))
+				ProcessCommand(new string[] { "scan" });
 			var inlineCommand = args.SkipWhile(s => s.ToLowerInvariant() != "-c").Skip(1);
 			if (inlineCommand.Count() > 0) {
 				ProcessCommand(inlineCommand);
