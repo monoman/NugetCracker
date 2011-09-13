@@ -35,7 +35,7 @@ namespace NugetCracker.Commands
 
 		public bool Process(ILogger logger, IEnumerable<string> args, MetaProjectPersistence metaProject, ComponentsList components, string packagesOutputDirectory)
 		{
-			var relativePath = args.FirstOrDefault(s => !s.StartsWith("-"));
+			var relativePath = string.Join(" ", args.Where(s => !s.StartsWith("-")));
 			if (string.IsNullOrWhiteSpace(relativePath)) {
 				logger.Error("No relativePath provided");
 				return true;
