@@ -4,6 +4,7 @@ using System.Linq;
 using NugetCracker.Interfaces;
 using NugetCracker.Data;
 using NugetCracker.Persistence;
+using NugetCracker.Utilities;
 
 namespace NugetCracker.Commands
 {
@@ -15,35 +16,28 @@ namespace NugetCracker.Commands
 			return "rebuild".StartsWith(commandPattern);
 		}
 
-		public string HelpLine { get { return "Rebuild         Rebuilds current version for a component"; } }
+		public string HelpLine { get { return "Rebuild         Rebuilds current version of matched components"; } }
 
 		public string Help
 		{
 			get
 			{
-				return @"Rebuild pattern
+				return @"R[ebuild] [pattern]
 
-	Rebuilds current version of the component matching pattern.
+	Rebuilds current version of components matching pattern.
 ";
 			}
 		}
 
 		public bool Process(ILogger logger, IEnumerable<string> args, MetaProjectPersistence metaProject, ComponentsList components, string packagesOutputDirectory)
 		{
-			var componentNamePattern = args.FirstOrDefault(s => !s.StartsWith("-"));
-			if (componentNamePattern == null) {
-				logger.Error("No component name specified");
-				return true;
-			}
-			var component = components.FindComponent<IProject>(componentNamePattern);
-			if (component == null)
-				return true;
-			var componentName = component.Name;
-			logger.Info("Rebuilding component {0}.{1}", componentName, component.CurrentVersion.ToShort());
-			if (!(component as IProject).Build(logger)) {
-				logger.Error("Could not build component '{0}'", componentName);
-				return true;
-			}
+			var componentNamePattern = args.FirstOrDefault(s => !s.StartsWith("-")) ?? ".*";
+			foreach (var component in components.FilterBy(componentNamePattern, orderByTreeDepth: true))
+				if (component is IVersionable) {
+					BuildHelper.Build(logger, component as IVersionable, packagesOutputDirectory);
+					if (!BuildHelper.UpdatePackageDependency(logger, component as INugetSpec, packagesOutputDirectory))
+						return true;
+				}
 			return true;
 		}
 	}

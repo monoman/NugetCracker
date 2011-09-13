@@ -83,6 +83,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transactions\AddDirectoryTransaction.cs" />
     <Compile Include="Transactions\AddExcludedDirectoryTransaction.cs" />
+    <Compile Include="Utilities\BuildHelper.cs" />
     <Compile Include="Utilities\ConsoleLogger.cs" />
     <Compile Include="Commands\RebuildCommand.cs" />
     <Compile Include="Utilities\ToolHelper.cs" />
