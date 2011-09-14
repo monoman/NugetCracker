@@ -37,7 +37,7 @@ namespace NugetCracker
 
 		static void Main(string[] args)
 		{
-			Console.WriteLine("NugetCracker {0}\nSee https://github.com/monoman/NugetCracker\n", Version.ToString(2));
+			Console.WriteLine("NugetCracker {0}\nSee https://github.com/monoman/NugetCracker\n", Version.ToShort());
 			_metaProjectPersistence = new MetaProjectPersistence(args.GetMetaProjectFilePath());
 			Console.WriteLine("Using {0}", _metaProjectPersistence.FilePath);
 			_components = new ComponentsList();

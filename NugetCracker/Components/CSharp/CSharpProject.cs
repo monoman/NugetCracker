@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -75,20 +74,24 @@ namespace NugetCracker.Components.CSharp
 			}
 		}
 
+		private string PackagesConfigFilePath
+		{
+			get { return Path.Combine(_projectDir, "packages.config"); }
+		}
+
 		public bool UpgradePackageDependency(ILogger logger, INugetSpec newPackage, string sourceDirectory, ICollection<string> installDirs)
 		{
-			var packagesFile = Path.Combine(_projectDir, "packages.config");
+			var packagesFile = PackagesConfigFilePath;
 			if (!File.Exists(packagesFile)) {
 				logger.ErrorDetail("Probably component '{0}' is referencing the package '{1}' as a project...", Name, newPackage.Name);
 				return true;
 			}
 			try {
 				UpdatePackagesConfig(newPackage, packagesFile);
-				UpdatePackagesOnProject(newPackage);
+				UpdatePackageReferencesOnProject(logger, newPackage);
 				if (!installDirs.Contains(_installedPackagesDir))
 					installDirs.Add(_installedPackagesDir);
 				return true;
-
 			} catch (Exception e) {
 				logger.Error(e.Message);
 				logger.Debug(e);
@@ -96,12 +99,35 @@ namespace NugetCracker.Components.CSharp
 			}
 		}
 
-		protected virtual void UpdatePackagesOnProject(INugetSpec newPackage)
+		public void InstallPackageDependencyFromSources(ILogger logger, IComponent dependency, string sourceDirectories = null)
 		{
-			UpdatePackageInCSProj(newPackage);
+			using (logger.QuietBlock)
+				UpdatePackageReferencesOnProject(logger, dependency);
+			if (!Directory.Exists(_installedPackagesDir.Combine(dependency.Name)))
+				BuildHelper.InstallPackage(logger, dependency, _installedPackagesDir, sourceDirectories);
 		}
 
-		private static void UpdatePackagesConfig(INugetSpec newPackage, string packagesFile)
+		protected virtual void UpdatePackageReferencesOnProject(ILogger logger, IComponent newPackage)
+		{
+			try {
+				string xml = File
+					.ReadAllText(FullPath)
+					.Replace("<RestorePackages>true</RestorePackages>", "<RestorePackages>false</RestorePackages>")
+					.Replace("<BuildPackage>true</BuildPackage>", "<BuildPackage>false</BuildPackage>");
+				string pattern = "<Reference \\s*Include=\"" + newPackage.Name + ",[^>]*>";
+				string replace = "<Reference Include=\"" + newPackage.Name + "\">";
+				xml = Regex.Replace(xml, pattern, replace, RegexOptions.Multiline | RegexOptions.IgnoreCase);
+				pattern = "^(\\s*<HintPath>.*\\\\)(" + newPackage.Name + "\\.\\d+[^\\\\<]*)(\\\\.*\\\\[^\\\\<]*\\.dll)([^<]*</HintPath>\\s*)$";
+				replace = "$1" + newPackage.Name + "$3$4";
+				xml = Regex.Replace(xml, pattern, replace, RegexOptions.Multiline | RegexOptions.IgnoreCase);
+				File.WriteAllText(FullPath, xml);
+			} catch (Exception e) {
+				logger.Error("Could not update references for package '{0}' in project '{1}'. Cause: {2}",
+					newPackage, FullPath, e.Message);
+			}
+		}
+
+		private static void UpdatePackagesConfig(IComponent newPackage, string packagesFile)
 		{
 			string xml = File.ReadAllText(packagesFile);
 			string pattern = "<package \\s*id=\"" + newPackage.Name + "\" \\s*version=\"([^\"]*)\"\\s*/>";
@@ -110,20 +136,6 @@ namespace NugetCracker.Components.CSharp
 			File.WriteAllText(packagesFile, xml);
 		}
 
-		private void UpdatePackageInCSProj(INugetSpec newPackage)
-		{
-			string xml = File
-				.ReadAllText(FullPath)
-				.Replace("<RestorePackages>true</RestorePackages>", "<RestorePackages>false</RestorePackages>")
-				.Replace("<BuildPackage>true</BuildPackage>", "<BuildPackage>false</BuildPackage>");
-			string pattern = "<Reference \\s*Include=\"" + newPackage.Name + "[^>]*>";
-			string replace = "<Reference Include=\"" + newPackage.Name + "\">";
-			xml = Regex.Replace(xml, pattern, replace, RegexOptions.Multiline | RegexOptions.IgnoreCase);
-			pattern = "^(\\s*<HintPath>.*\\\\)(" + newPackage.Name + "[^\\\\<]*)(\\\\.*\\\\[^\\\\<]*\\.dll)([^<]*</HintPath>\\s*)$";
-			replace = "$1" + newPackage.Name + "$3$4";
-			xml = Regex.Replace(xml, pattern, replace, RegexOptions.Multiline | RegexOptions.IgnoreCase);
-			File.WriteAllText(FullPath, xml);
-		}
 
 		private void ParseProjectFile()
 		{

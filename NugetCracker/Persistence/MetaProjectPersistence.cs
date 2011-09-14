@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Commons.Prevalence;
 using NugetCracker.Data;
 using NugetCracker.Transactions;

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace NugetCracker.Interfaces
 {
@@ -12,7 +9,5 @@ namespace NugetCracker.Interfaces
 		string OutputPackageFilename { get; }
 
 		IEnumerable<INugetSpec> DependentPackages { get; }
-
-		void RemoveInstalledVersions(ILogger logger, string installDir);
 	}
 }

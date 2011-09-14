@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Collections.Generic;
 using System.Linq;
 using NugetCracker.Interfaces;
 
@@ -31,12 +30,12 @@ namespace NugetCracker.Components.CSharp
 
 		public override string Type { get { return "C# Web Site"; } }
 
-		protected override void UpdatePackagesOnProject(INugetSpec newPackage)
+		protected override void UpdatePackageReferencesOnProject(ILogger logger, IComponent newPackage)
 		{
 			// TODO
 		}
 
-		public override bool Build(Interfaces.ILogger logger)
+		public override bool Build(ILogger logger)
 		{
 			// TODO
 			return true;

@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
+using System.IO;
 using NugetCracker.Interfaces;
 
 namespace NugetCracker.Utilities
@@ -34,7 +32,7 @@ namespace NugetCracker.Utilities
 			if (package == null)
 				return true;
 			var installDirs = new List<string>();
-			logger.Info("Cascading nuget '{0}'", package.OutputPackageFilename);
+			logger.Info("Updating references to package '{0}'", package.OutputPackageFilename);
 			using (logger.Block) {
 				foreach (IComponent dependentComponent in package.DependentComponents)
 					if (!dependentComponent.UpgradePackageDependency(logger, (INugetSpec)package, packagesOutputDirectory, installDirs)) {
@@ -51,22 +49,36 @@ namespace NugetCracker.Utilities
 
 		public static bool ReinstallPackageOn(ILogger logger, INugetSpec newPackage, string sourceDirectory, IEnumerable<string> installDirs)
 		{
-			foreach (string installDir in installDirs) {
-				logger.Info("Installing package {0} in '{1}'", newPackage.Name, installDir);
-				using (logger.QuietBlock) {
-					newPackage.RemoveInstalledVersions(logger, installDir);
-					foreach (var dependentPackage in newPackage.DependentPackages)
-						dependentPackage.RemoveInstalledVersions(logger, installDir);
-					if (!ToolHelper.ExecuteTool(logger, "nuget",
-							"install " + newPackage.Name
-							+ " -Source " + sourceDirectory
-							+ " -ExcludeVersion"
-							+ " -OutputDirectory " + installDir,
-							sourceDirectory))
-						return false;
-				}
+			foreach (string installDir in installDirs)
+				if (!InstallPackage(logger, newPackage, installDir, sourceDirectory))
+					return false;
+			return true;
+		}
+
+		public static bool InstallPackage(ILogger logger, IComponent newPackage, string installDir, string sourceDirectory = null)
+		{
+			logger.Info("Installing package {0} in '{1}'", newPackage.Name, installDir);
+			using (logger.QuietBlock) {
+				RemoveInstalledVersions(logger, newPackage, installDir);
+				string arguments = "install " + newPackage.Name
+						+ " -ExcludeVersion"
+						+ " -OutputDirectory " + installDir;
+				if (!string.IsNullOrWhiteSpace(sourceDirectory))
+					arguments += " -Source " + sourceDirectory;
+				if (!ToolHelper.ExecuteTool(logger, "nuget", arguments, installDir))
+					return false;
 			}
 			return true;
+		}
+
+		public static void RemoveInstalledVersions(ILogger logger, IComponent package, string installDir)
+		{
+			foreach (string dirToRemove in Directory.EnumerateDirectories(installDir, package.Name + ".*.*"))
+				try {
+					Directory.Delete(dirToRemove, true);
+				} catch {
+					logger.Error("Could not delete directory '{0}'", dirToRemove);
+				}
 		}
 
 	}

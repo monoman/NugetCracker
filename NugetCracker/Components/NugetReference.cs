@@ -1,21 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NugetCracker.Interfaces;
 using System.Text.RegularExpressions;
+using NugetCracker.Interfaces;
 
 namespace NugetCracker.Components
 {
-	public class NugetReference : IComponent
+	public class BasicReference : IComponent
 	{
 		public IEnumerable<IComponent> DependentComponents { get; set; }
-
-		public NugetReference(string name, string versions)
-		{
-			Name = name;
-			Versions = versions;
-		}
 
 		public string Versions { get; protected set; }
 
@@ -72,6 +64,20 @@ namespace NugetCracker.Components
 		public bool UpgradePackageDependency(ILogger logger, INugetSpec newPackage, string sourceDirectory, ICollection<string> installDirs)
 		{
 			return true;
+		}
+
+
+		public void InstallPackageDependencyFromSources(ILogger logger, IComponent dependency, string sourceDirectories = null)
+		{
+		}
+	}
+
+	public class NugetReference : BasicReference
+	{
+		public NugetReference(string name, string versions)
+		{
+			Name = name;
+			Versions = versions;
 		}
 	}
 

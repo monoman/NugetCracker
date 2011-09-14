@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using NugetCracker.Data;
 using NugetCracker.Interfaces;
 using NugetCracker.Persistence;

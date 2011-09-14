@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NugetCracker.Interfaces;
@@ -39,14 +38,5 @@ namespace NugetCracker.Components.CSharp
 
 		public override string Type { get { return "C# Nuget Project"; } }
 
-		public void RemoveInstalledVersions(ILogger logger, string installDir)
-		{
-			foreach (string dirToRemove in Directory.EnumerateDirectories(installDir, Name + "*"))
-				try {
-					Directory.Delete(dirToRemove, true);
-				} catch {
-					logger.Error("Could not delete directory '{0}'", dirToRemove);
-				}
-		}
 	}
 }

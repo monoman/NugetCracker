@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NugetCracker.Interfaces;
 using System.IO;
+using NugetCracker.Interfaces;
 
 namespace NugetCracker.Components
 {
-	public class ProjectReference : NugetReference
+	public class ProjectReference : BasicReference
 	{
 		public ProjectReference(string fullPath)
-			: base(Path.GetFileNameWithoutExtension(fullPath), "?")
 		{
+			Name = Path.GetFileNameWithoutExtension(fullPath);
+			Versions = "?";
 			FullPath = fullPath;
 		}
 
@@ -30,9 +28,9 @@ namespace NugetCracker.Components
 			return IsEqual(obj as IProject);
 		}
 
-		public override int GetHashCode ()
+		public override int GetHashCode()
 		{
-			return FullPath.GetHashCode ();
+			return FullPath.GetHashCode();
 		}
 
 		public override string ToString()

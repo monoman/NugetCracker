@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using NugetCracker.Interfaces;
+using NugetCracker.Components;
 using NugetCracker.Data;
+using NugetCracker.Interfaces;
 using NugetCracker.Persistence;
 using NugetCracker.Utilities;
 
@@ -31,6 +31,10 @@ namespace NugetCracker.Commands
 
 		public bool Process(ILogger logger, IEnumerable<string> args, MetaProjectPersistence metaProject, ComponentsList components, string packagesOutputDirectory)
 		{
+			foreach (IComponent component in components)
+				foreach (IComponent dependency in component.Dependencies)
+					if (dependency is NugetReference)
+						component.InstallPackageDependencyFromSources(logger, dependency);
 			var componentNamePattern = args.FirstOrDefault(s => !s.StartsWith("-")) ?? ".*";
 			foreach (var component in components.FilterBy(componentNamePattern, orderByTreeDepth: true))
 				if (component is IVersionable) {
@@ -40,5 +44,6 @@ namespace NugetCracker.Commands
 				}
 			return true;
 		}
+
 	}
 }

@@ -7,7 +7,7 @@ using NugetCracker.Persistence;
 
 namespace NugetCracker.Data
 {
-	public class ComponentsList : IComponentFinder
+	public class ComponentsList : IComponentFinder, IEnumerable<IComponent>
 	{
 		List<IComponent> _list = new List<IComponent>();
 
@@ -125,6 +125,21 @@ namespace NugetCracker.Data
 		public void Clear()
 		{
 			_list.Clear();
+		}
+
+		public bool Contains(IComponent component)
+		{
+			return _list.Any(c => component.Equals(c));
+		}
+
+		public IEnumerator<IComponent> GetEnumerator()
+		{
+			return _list.GetEnumerator();
+		}
+
+		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+		{
+			return _list.GetEnumerator();
 		}
 	}
 }

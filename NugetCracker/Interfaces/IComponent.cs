@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 
 namespace NugetCracker.Interfaces
@@ -13,6 +12,7 @@ namespace NugetCracker.Interfaces
 		string FullPath { get; }
 
 		IEnumerable<IComponent> Dependencies { get; }
+		void InstallPackageDependencyFromSources(ILogger logger, IComponent dependency, string sourceDirectories = null);
 		bool UpgradePackageDependency(ILogger logger, INugetSpec newPackage, string sourceDirectory, ICollection<string> installDirs);
 
 		IEnumerable<IComponent> DependentComponents { get; set; }
@@ -20,5 +20,6 @@ namespace NugetCracker.Interfaces
 		bool MatchName(string pattern);
 
 		string ToLongString();
+
 	}
 }

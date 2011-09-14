@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using NugetCracker.Data;
 using NugetCracker.Interfaces;
 using NugetCracker.Persistence;
-using System.IO;
 
 namespace NugetCracker.Commands
 {
