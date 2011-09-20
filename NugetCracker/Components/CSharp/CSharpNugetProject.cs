@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using NugetCracker.Interfaces;
 using NugetCracker.Utilities;
+using System.Text.RegularExpressions;
 
 namespace NugetCracker.Components.CSharp
 {
@@ -37,6 +38,7 @@ namespace NugetCracker.Components.CSharp
 		public INugetSource Source { get; set; }
 
 		public override string Type { get { return "C# Nuget Project"; } }
+
 
 	}
 }

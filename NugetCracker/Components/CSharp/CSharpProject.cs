@@ -110,32 +110,153 @@ namespace NugetCracker.Components.CSharp
 		protected virtual void UpdatePackageReferencesOnProject(ILogger logger, IComponent newPackage)
 		{
 			try {
-				string xml = File
-					.ReadAllText(FullPath)
-					.Replace("<RestorePackages>true</RestorePackages>", "<RestorePackages>false</RestorePackages>")
-					.Replace("<BuildPackage>true</BuildPackage>", "<BuildPackage>false</BuildPackage>");
-				string pattern = "<Reference \\s*Include=\"" + newPackage.Name + ",[^>]*>";
-				string replace = "<Reference Include=\"" + newPackage.Name + "\">";
-				xml = Regex.Replace(xml, pattern, replace, RegexOptions.Multiline | RegexOptions.IgnoreCase);
-				pattern = "^(\\s*<HintPath>.*\\\\)(" + newPackage.Name + "\\.\\d+[^\\\\<]*)(\\\\.*\\\\[^\\\\<]*\\.dll)([^<]*</HintPath>\\s*)$";
-				replace = "$1" + newPackage.Name + "$3$4";
-				xml = Regex.Replace(xml, pattern, replace, RegexOptions.Multiline | RegexOptions.IgnoreCase);
-				File.WriteAllText(FullPath, xml);
+				File.WriteAllText(FullPath, FixPackageReference(File.ReadAllText(FullPath), newPackage.Name));
 			} catch (Exception e) {
 				logger.Error("Could not update references for package '{0}' in project '{1}'. Cause: {2}",
 					newPackage, FullPath, e.Message);
 			}
 		}
 
-		private static void UpdatePackagesConfig(IComponent newPackage, string packagesFile)
+		public static string FixPackageReference(string xml, string packageName)
 		{
-			string xml = File.ReadAllText(packagesFile);
-			string pattern = "<package \\s*id=\"" + newPackage.Name + "\" \\s*version=\"([^\"]*)\"\\s*/>";
-			string replace = "<package id=\"" + newPackage.Name + "\" version=\"" + newPackage.CurrentVersion.ToShort() + "\" />";
-			xml = Regex.Replace(xml, pattern, replace, RegexOptions.Singleline);
-			File.WriteAllText(packagesFile, xml);
+			string pattern = "<Reference \\s*Include=\"" + packageName + ",[^>]*>";
+			string pattern2 = "^(\\s*<HintPath>.*\\\\)(" + packageName + "\\.\\d+[^\\\\<]*)(\\\\.*\\\\[^\\\\<]*\\.dll)([^<]*</HintPath>\\s*)$";
+			return xml
+				.Replace("<RestorePackages>true</RestorePackages>", "<RestorePackages>false</RestorePackages>")
+				.Replace("<BuildPackage>true</BuildPackage>", "<BuildPackage>false</BuildPackage>")
+				.RegexReplace(pattern, "<Reference Include=\"" + packageName + "\">")
+				.RegexReplace(pattern2, "$1" + packageName + "$3$4");
 		}
 
+		public IComponent PromoteToNuget(ILogger logger, string outputDirectory, string tags, string licenseUrl = null,
+			string projectUrl = null, string iconUrl = null, string copyright = null, bool requireLicenseAcceptance = false)
+		{
+			if (this is CSharpNugetProject)
+				return null;
+			try {
+				string nuspec = Name + ".nuspec";
+				if (ToolHelper.ExecuteTool(logger, "nuget", "spec", _projectDir) && File.Exists(_projectDir.Combine(nuspec))) {
+					AddNuspecToProject(nuspec);
+					AdjustNuspec(nuspec, tags, licenseUrl, projectUrl, iconUrl, copyright, requireLicenseAcceptance);
+					var project = new CSharpNugetProject(FullPath);
+					project.DependentComponents = DependentComponents;
+					string assemblyName = project.AssemblyName;
+					string framework = project.TargetFrameworkVersion;
+					var installDirs = new List<string>();
+					foreach (var reference in project.DependentComponents)
+						if (reference is IProject)
+							((IProject)reference).ReplaceProjectReference(logger, project, assemblyName, framework, installDirs);
+					if (project.Build(logger) && project.Pack(logger, outputDirectory)) {
+						foreach (var installDir in installDirs)
+							BuildHelper.InstallPackage(logger, project, installDir, outputDirectory);
+					} else {
+						logger.Error("Could not build and pack the new nuget");
+					}
+					return project;
+				} else {
+					logger.Error("Could not create the nuspec file: {0}", nuspec);
+				}
+			} catch (Exception e) {
+				logger.Error("Could not promote to package the project '{0}'. Cause: {1}", FullPath, e.Message);
+			}
+			return null;
+		}
+
+		private string AssemblyName
+		{
+			get
+			{
+				return File.ReadAllText(FullPath).GetElementValue("AssemblyName", Name);
+			}
+		}
+
+		private string TargetFrameworkVersion
+		{
+			get
+			{
+				return File.ReadAllText(FullPath).GetElementValue("TargetFrameworkVersion", "v4.0");
+			}
+		}
+
+		private void AdjustNuspec(string nuspec, string tags, string licenseUrl, string projectUrl, string iconUrl, string copyright, bool requireLicenseAcceptance)
+		{
+			_projectDir.Combine(nuspec).TransformFile(xml => AdjustElements(xml, tags, licenseUrl, projectUrl, iconUrl, copyright, requireLicenseAcceptance));
+		}
+
+		public static string AdjustElements(string xml, string tags, string licenseUrl, string projectUrl, string iconUrl, string copyright, bool requireLicenseAcceptance)
+		{
+			return xml
+				.SetMetadata("tags", tags)
+				.SetMetadata("licenseUrl", licenseUrl)
+				.SetMetadata("projectUrl", projectUrl)
+				.SetMetadata("iconUrl", iconUrl)
+				.SetMetadata("copyright", copyright)
+				.SetMetadata("requireLicenseAcceptance", requireLicenseAcceptance ? "true" : "false");
+		}
+
+		private void AddNuspecToProject(string nuspec)
+		{
+			FullPath.TransformFile(xml => AddNoneFile(xml, nuspec));
+		}
+
+		public static string AddNoneFile(string xml, string fileToAdd)
+		{
+			string pattern = "(<ItemGroup>\\s*)()(<None)";
+			string replace = "$1<None Include=\"" + fileToAdd + "\" />$3";
+			string altPattern = "(</PropertyGroup>\\s*)(<ItemGroup>)";
+			string altReplace = "$1<ItemGroup>\r\n    <None Include=\"" + fileToAdd + "\" />\r\n  </ItemGroup>\r\n  $2";
+			return xml.RegexReplace(pattern, replace, altPattern, altReplace);
+		}
+
+		public bool ReplaceProjectReference(ILogger logger, INugetSpec package, string assemblyName, string framework, ICollection<string> installDirs)
+		{
+			try {
+				logger.Info("Replacing project reference in {0)", Name);
+				ReplaceProjectByNuget(package, assemblyName, framework);
+				AddToPackagesConfig(package, PackagesConfigFilePath);
+				if (!installDirs.Contains(_installedPackagesDir))
+					installDirs.Add(_installedPackagesDir);
+				return true;
+			} catch (Exception e) {
+				logger.Error("Could not change project reference to nuget reference. Cause: {0}", e.Message);
+			}
+			return false;
+		}
+
+		protected virtual void ReplaceProjectByNuget(INugetSpec package, string assemblyName, string framework)
+		{
+			FullPath.TransformFile(xml => ReplaceProjectByNuget(xml, package.Name, assemblyName, framework, _installedPackagesDir));
+		}
+
+		public static string ReplaceProjectByNuget(string xml, string packageName, string assemblyName, string framework, string installedPackagesDir)
+		{
+			string pattern = "<ProjectReference [^>]*" + packageName + "\\.[^\\.]*proj[^>]*>.*<Name>" + packageName + "</Name>\\s*</ProjectReference>";
+			var match = Regex.Match(xml, pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+			if (match.Success)
+				xml = xml.Remove(match.Index, match.Length);
+			string packageReference = "\r\n    <Reference Include=\"" + packageName +
+				"\" >\r\n      <HintPath>" + installedPackagesDir + "\\" + packageName +
+				"\\lib\\" + framework.ToLibFolder() + "\\" + assemblyName + ".dll</HintPath>\r\n    </Reference>";
+			pattern = "(<ItemGroup>)()(\\s*<Reference)";
+			string replace = "$1" + packageReference + "$3";
+			string altPattern = "(</PropertyGroup>\\s*)(<ItemGroup>)";
+			string altReplace = "$1<ItemGroup>\r\n    " + packageReference + "\r\n  </ItemGroup>\r\n  $2";
+			return xml.RegexReplace(pattern, replace, altPattern, altReplace);
+		}
+
+		private static void UpdatePackagesConfig(IComponent newPackage, string packagesFile)
+		{
+			string pattern = "<package \\s*id=\"" + newPackage.Name + "\" \\s*version=\"([^\"]*)\"\\s*/>";
+			string replace = "<package id=\"" + newPackage.Name + "\" version=\"" + newPackage.CurrentVersion.ToShort() + "\" />";
+			packagesFile.TransformFile(xml => Regex.Replace(xml, pattern, replace, RegexOptions.Singleline));
+		}
+
+		private static void AddToPackagesConfig(IComponent newPackage, string packagesFile)
+		{
+			string pattern = "</packages>";
+			string replace = "  <package id=\"" + newPackage.Name + "\" version=\"" + newPackage.CurrentVersion.ToShort() + "\" />\r\n</packages>";
+			packagesFile.TransformFile(xml => Regex.Replace(xml, pattern, replace, RegexOptions.Singleline));
+		}
 
 		private void ParseProjectFile()
 		{
@@ -261,12 +382,7 @@ namespace NugetCracker.Components.CSharp
 				return false;
 			}
 			try {
-				string info = File.ReadAllText(_assemblyInfoPath);
-				string pattern = "AssemblyVersion\\(\"([^\"]*)\"\\)";
-				info = Regex.Replace(info, pattern, "AssemblyVersion(\"" + version + "\")", RegexOptions.Multiline);
-				pattern = "AssemblyFileVersion\\(\"([^\"]*)\"\\)";
-				info = Regex.Replace(info, pattern, "AssemblyFileVersion(\"" + version + "\")", RegexOptions.Multiline);
-				File.WriteAllText(_assemblyInfoPath, info);
+				_assemblyInfoPath.SetVersion(version);
 				CurrentVersion = version;
 				return true;
 			} catch (Exception e) {

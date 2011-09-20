@@ -40,5 +40,10 @@ namespace NugetCracker.Components.CSharp
 			// TODO
 			return true;
 		}
+
+		protected override void ReplaceProjectByNuget(INugetSpec package, string assemblyName, string framework)
+		{
+			// TODO
+		}
 	}
 }

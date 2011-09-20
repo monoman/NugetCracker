@@ -23,7 +23,8 @@ namespace NugetCracker
 			new ListCommand(),
 			new RebuildCommand(),
 			new ScanCommand(_factories),
-			new AddExcludedDirectoryCommand()
+			new AddExcludedDirectoryCommand(),
+			new NugetifyCommand()
 		};
 		static List<string> _helpLines = null;
 

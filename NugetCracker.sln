@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NugetCracker", "NugetCracke
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Commons.Prevalence", "Commons.Prevalence\Commons.Prevalence.csproj", "{A5BEC694-1421-438E-B444-08246BCB7161}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnit.NugetCracker", "NUnit.NugetCracker\NUnit.NugetCracker.csproj", "{FBFC8CC3-1EB6-4F15-8457-9973F87DA316}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,15 @@ Global
 		{A5BEC694-1421-438E-B444-08246BCB7161}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A5BEC694-1421-438E-B444-08246BCB7161}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A5BEC694-1421-438E-B444-08246BCB7161}.Release|x86.ActiveCfg = Release|Any CPU
+		{FBFC8CC3-1EB6-4F15-8457-9973F87DA316}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBFC8CC3-1EB6-4F15-8457-9973F87DA316}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBFC8CC3-1EB6-4F15-8457-9973F87DA316}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FBFC8CC3-1EB6-4F15-8457-9973F87DA316}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBFC8CC3-1EB6-4F15-8457-9973F87DA316}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBFC8CC3-1EB6-4F15-8457-9973F87DA316}.Release|x86.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = NugetCracker\NugetCracker.csproj
@@ -57,8 +68,5 @@ Global
 		$3.inheritsSet = Mono
 		$3.inheritsScope = text/plain
 		$3.scope = text/plain
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

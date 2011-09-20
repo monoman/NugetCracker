@@ -11,10 +11,12 @@ namespace NugetCracker.Data
 	{
 		List<IComponent> _list = new List<IComponent>();
 
-		public T FindComponent<T>(string componentNamePattern) where T : class
+		public T FindComponent<T>(string componentNamePattern, Func<T, bool> filter = null) where T : class
 		{
 			try {
 				var list = _list.FindAll(c => c is T && c.MatchName(componentNamePattern));
+				if (filter != null)
+					list = list.FindAll(c => filter(c as T));
 				if (list.Count == 1)
 					return (T)list[0];
 				if (list.Count > 20)

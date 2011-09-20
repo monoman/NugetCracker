@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="Commands\BumpVersionCommand.cs" />
     <Compile Include="Commands\AddExcludedDirectoryCommand.cs" />
+    <Compile Include="Commands\NugetifyCommand.cs" />
     <Compile Include="Commands\ListCommand.cs" />
     <Compile Include="Commands\ScanCommand.cs" />
     <Compile Include="Components\NugetReference.cs" />

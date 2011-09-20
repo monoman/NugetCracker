@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace NugetCracker
 {
@@ -98,6 +99,60 @@ namespace NugetCracker
 			if (line.Length < maxlength)
 				return line;
 			return line.Substring(0, maxlength - 3) + "...";
+		}
+
+		public static string RegexReplace(this string text, string pattern, string replace, string altPattern = null, string altReplace = null)
+		{
+			if (Regex.IsMatch(text, pattern, RegexOptions.Multiline | RegexOptions.IgnoreCase))
+				return Regex.Replace(text, pattern, replace, RegexOptions.Multiline | RegexOptions.IgnoreCase);
+			else if (!string.IsNullOrWhiteSpace(altPattern))
+				return Regex.Replace(text, altPattern, altReplace, RegexOptions.Multiline | RegexOptions.IgnoreCase);
+			return text;
+		}
+
+		public static void TransformFile(this string filename, Func<string, string> transformer)
+		{
+			File.WriteAllText(filename, transformer(File.ReadAllText(filename)));
+		}
+
+		public static string ToLibFolder(this string framework)
+		{
+			switch (framework) {
+				case "v2.0": return "net20";
+				case "v3.0": return "net30";
+				case "v3.5": return "net35";
+				default: return "net40";
+			}
+		}
+
+		public static string GetElementValue(this string xml, string element, string defaultValue)
+		{
+			string pattern = "<" + element + ">([^<]*)</" + element + ">";
+			var match = Regex.Match(xml, pattern);
+			if (match.Success)
+				return match.Groups[1].Value;
+			return defaultValue;
+		}
+
+
+		public static void SetVersion(this string versionFile, Version version)
+		{
+			string pattern = "(Assembly(File|))(Version\\(\")([^\"]*)(\"\\s*\\))";
+			string replace = "$1Version(\"" + version + "$5";
+			versionFile.TransformFile(xml => xml.RegexReplace(pattern, replace));
+		}
+
+		public static string SetMetadata(this string xml, string element, string elementValue)
+		{
+			string pattern = "(\\s*<" + element + "\\s*>)[^<]*(</" + element + "\\s*>\\s*)";
+			string replace = "$1" + elementValue + "$2";
+			string altPattern = "</metadata>";
+			string altReplace = "    <" + element + ">" + elementValue + "</" + element + ">\r\n  </metadata>";
+			if (string.IsNullOrWhiteSpace(elementValue))
+				xml = xml.RegexReplace(pattern, "");
+			else
+				xml = xml.RegexReplace(pattern, replace, altPattern, altReplace);
+			return xml;
 		}
 	}
 }

@@ -7,7 +7,7 @@ namespace NugetCracker.Commands
 {
 	public class ScanCommand : ICommand
 	{
-		IComponentsFactory[] _factories;
+		private static IComponentsFactory[] _factories;
 
 		public ScanCommand(IComponentsFactory[] factories)
 		{
@@ -42,6 +42,12 @@ namespace NugetCracker.Commands
 			using (logger.Block)
 				foreach (var dir in metaProject.ListOfExcludedDirectories)
 					logger.Info(dir);
+			Rescan(logger, metaProject, components);
+			return true;
+		}
+
+		public static void Rescan(ILogger logger, MetaProjectPersistence metaProject, ComponentsList components)
+		{
 			components.Clear();
 			int scannedDirsCount = 0;
 			foreach (string dir in metaProject.ListOfDirectories) {
@@ -59,7 +65,7 @@ namespace NugetCracker.Commands
 			components.SortByName();
 			logger.Info("Finding dependents...");
 			components.FindDependents();
-			return true;
+			return;
 		}
 	}
 }
