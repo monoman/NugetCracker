@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Text;
 
 namespace NugetCracker
 {
@@ -113,6 +114,24 @@ namespace NugetCracker
 		public static void TransformFile(this string filename, Func<string, string> transformer)
 		{
 			File.WriteAllText(filename, transformer(File.ReadAllText(filename)));
+		}
+
+
+		public static string ParseBrokenStringParameter(this IEnumerable<string> args, string paramName)
+		{
+			var sb = new StringBuilder();
+			foreach (var part in args.SkipWhile(s => !s.StartsWith("-" + paramName + ":\""))) {
+				sb.Append(part);
+				if (part.EndsWith("\""))
+					break;
+				sb.Append(' ');
+			}
+			if (sb.Length == 0)
+				return null;
+			var concatenation = sb.ToString();
+			var startindex = paramName.Length + 3;
+			var length = (concatenation.Length - startindex) - 1;
+			return length > 0 ? concatenation.Substring(startindex, length) : null;
 		}
 
 		public static string ToLibFolder(this string framework)
