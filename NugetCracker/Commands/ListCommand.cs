@@ -25,14 +25,17 @@ namespace NugetCracker.Commands
 	Lists components, filtered by regular expression pattern if supplied.
 
 	Options
-	-full		
+	-f[ull]		
 		Gives more details about the components, including dependencies. 
 
-	-nugets
+	-n[ugets]
 		Lists only nuget projects.
 
-	-orderbytree
+	-o[rderbytree]
 		Sorts descending by number of dependent components
+
+	-g[roupbytype]
+		Groups by component type, with group header lines
 ";
 			}
 		}
@@ -40,18 +43,29 @@ namespace NugetCracker.Commands
 		public bool Process(ILogger logger, IEnumerable<string> args, MetaProjectPersistence metaProject, ComponentsList components, string packagesOutputDirectory)
 		{
 			var pattern = args.FirstOrDefault(s => !s.StartsWith("-"));
-			bool full = args.Contains("-full");
-			bool nugets = args.Contains("-nugets");
-			bool orderByTreeDepth = args.Contains("-orderbytree");
+			bool full = args.Contains("-full") || args.Contains("-f");
+			bool nugets = args.Contains("-nugets") || args.Contains("-n");
+			bool orderByTreeDepth = args.Contains("-orderbytree") || args.Contains("-o");
+			bool groupByType = (args.Contains("-groupbytype") || args.Contains("-g")) && !nugets;
 			if (string.IsNullOrWhiteSpace(pattern)) {
 				logger.Info("Listing all {0}...", nugets ? "nugets" : "components");
 			} else {
 				logger.Info("Listing {1} filtered by '{0}' ...", pattern, nugets ? "nugets" : "components");
 				pattern = pattern.ToLowerInvariant();
 			}
+			if (orderByTreeDepth)
+				logger.Info("-- ordered by dependents components tree depth (most referenced first)");
+			if (groupByType)
+				logger.Info("-- grouped by type");
 			var i = 0;
-			foreach (var component in components.FilterBy(pattern, nugets, orderByTreeDepth))
+			var lastGroup = "";
+			foreach (var component in components.FilterBy(pattern, nugets, orderByTreeDepth, groupByType)) {
+				if (groupByType && component.Type != lastGroup) {
+					lastGroup = component.Type;
+					logger.Info("=========== [{0}]", lastGroup);
+				}
 				logger.Info("[{0:0000}] {1}", ++i, (full ? component.ToLongString() : component.ToString()));
+			}
 			return true;
 		}
 	}

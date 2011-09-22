@@ -20,6 +20,20 @@ namespace NugetCracker.Components.CSharp
 				return ToolHelper.ExecuteTool(logger, "nuget", "pack " + '"' + FullPath + '"' + " -OutputDirectory " + outputDirectory, _projectDir);
 		}
 
+		public bool FixReferencesToNuget(ILogger logger, string outputDirectory)
+		{
+			var installDirs = new List<string>();
+			foreach (var reference in DependentComponents)
+				if (reference is IProject)
+					((IProject)reference).ReplaceProjectReference(logger, this, _assemblyName, _targetFrameworkVersion, installDirs);
+			if (!File.Exists(outputDirectory.Combine(OutputPackageFilename)))
+				if (!(Build(logger) && Pack(logger, outputDirectory)))
+					return false;
+			foreach (var installDir in installDirs)
+				BuildHelper.InstallPackage(logger, this, installDir, outputDirectory);
+			return true;
+		}
+
 		public string OutputPackageFilename
 		{
 			get { return Path.GetFileNameWithoutExtension(FullPath) + "." + CurrentVersion.ToShort() + ".nupkg"; }

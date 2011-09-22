@@ -51,7 +51,7 @@ namespace NugetCracker.Commands
 				logger.Error("Requiring license acceptance demands a license url");
 				return true;
 			}
-			var specificComponent = components.FindComponent<IProject>(componentNamePattern, c => c != null && !(c is INugetSpec));
+			var specificComponent = components.FindComponent<IProject>(componentNamePattern, c => c.CanBecomeNugget);
 			if (specificComponent == null)
 				return true;
 			if (specificComponent.PromoteToNuget(logger, packagesOutputDirectory, tags,

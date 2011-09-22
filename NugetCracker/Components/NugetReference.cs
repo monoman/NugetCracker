@@ -5,7 +5,7 @@ using NugetCracker.Interfaces;
 
 namespace NugetCracker.Components
 {
-	public class BasicReference : IComponent
+	public abstract class BasicReference : IComponent
 	{
 		public IEnumerable<IComponent> DependentComponents { get; set; }
 
@@ -33,11 +33,6 @@ namespace NugetCracker.Components
 		public string ToLongString()
 		{
 			return ToString();
-		}
-
-		public override string ToString()
-		{
-			return string.Format("Nuget Reference: {0} {1}", Name, Versions);
 		}
 
 		public bool Equals(IComponent other)
@@ -70,6 +65,9 @@ namespace NugetCracker.Components
 		public void InstallPackageDependencyFromSources(ILogger logger, IComponent dependency, string sourceDirectories = null)
 		{
 		}
+
+		public abstract string Type { get; }
+
 	}
 
 	public class NugetReference : BasicReference
@@ -78,6 +76,16 @@ namespace NugetCracker.Components
 		{
 			Name = name;
 			Versions = versions;
+		}
+
+		public override string ToString()
+		{
+			return string.Format("Nuget Reference: {0} {1}", Name, Versions);
+		}
+
+		public override string Type
+		{
+			get { return "Nuget Reference"; }
 		}
 	}
 

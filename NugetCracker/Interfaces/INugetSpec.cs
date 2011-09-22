@@ -5,6 +5,7 @@ namespace NugetCracker.Interfaces
 	public interface INugetSpec : INugetPackage, IVersionable
 	{
 		bool Pack(ILogger logger, string outputDirectory);
+		bool FixReferencesToNuget(ILogger logger, string outputDirectory);
 
 		string OutputPackageFilename { get; }
 

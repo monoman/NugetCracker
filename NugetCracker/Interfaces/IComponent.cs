@@ -18,7 +18,7 @@ namespace NugetCracker.Interfaces
 		IEnumerable<IComponent> DependentComponents { get; set; }
 
 		bool MatchName(string pattern);
-
+		string Type { get; }
 		string ToLongString();
 
 	}

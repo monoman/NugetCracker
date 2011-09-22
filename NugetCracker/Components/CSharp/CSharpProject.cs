@@ -19,6 +19,9 @@ namespace NugetCracker.Components.CSharp
 		protected string _projectDir;
 		protected bool _isWeb;
 		string _installedPackagesDir;
+		protected string _assemblyName;
+		protected string _targetFrameworkVersion;
+		string _status;
 
 		public CSharpProject(string projectFileFullPath)
 		{
@@ -27,7 +30,7 @@ namespace NugetCracker.Components.CSharp
 			_isWeb = false;
 			Name = GetProjectName(projectFileFullPath);
 			CurrentVersion = new Version("1.0.0.0");
-			Description = "?";
+			Description = string.Empty;
 			ParseAvailableData();
 			_dependencies.Sort((c1, c2) => c1.Name.CompareTo(c2.Name));
 			_installedPackagesDir = FindPackagesDir(_projectDir);
@@ -110,7 +113,7 @@ namespace NugetCracker.Components.CSharp
 		protected virtual void UpdatePackageReferencesOnProject(ILogger logger, IComponent newPackage)
 		{
 			try {
-				File.WriteAllText(FullPath, FixPackageReference(File.ReadAllText(FullPath), newPackage.Name));
+				FullPath.TransformFile(xml => FixPackageReference(xml, newPackage.Name));
 			} catch (Exception e) {
 				logger.Error("Could not update references for package '{0}' in project '{1}'. Cause: {2}",
 					newPackage, FullPath, e.Message);
@@ -121,9 +124,8 @@ namespace NugetCracker.Components.CSharp
 		{
 			string pattern = "<Reference \\s*Include=\"" + packageName + ",[^>]*>";
 			string pattern2 = "^(\\s*<HintPath>.*\\\\)(" + packageName + "\\.\\d+[^\\\\<]*)(\\\\.*\\\\[^\\\\<]*\\.dll)([^<]*</HintPath>\\s*)$";
-			return xml
-				.Replace("<RestorePackages>true</RestorePackages>", "<RestorePackages>false</RestorePackages>")
-				.Replace("<BuildPackage>true</BuildPackage>", "<BuildPackage>false</BuildPackage>")
+			return
+				DisableNugetPowerToolsActions(xml)
 				.RegexReplace(pattern, "<Reference Include=\"" + packageName + "\">")
 				.RegexReplace(pattern2, "$1" + packageName + "$3$4");
 		}
@@ -140,18 +142,8 @@ namespace NugetCracker.Components.CSharp
 					AdjustNuspec(nuspec, tags, licenseUrl, projectUrl, iconUrl, copyright, requireLicenseAcceptance);
 					var project = new CSharpNugetProject(FullPath);
 					project.DependentComponents = DependentComponents;
-					string assemblyName = project.AssemblyName;
-					string framework = project.TargetFrameworkVersion;
-					var installDirs = new List<string>();
-					foreach (var reference in project.DependentComponents)
-						if (reference is IProject)
-							((IProject)reference).ReplaceProjectReference(logger, project, assemblyName, framework, installDirs);
-					if (project.Build(logger) && project.Pack(logger, outputDirectory)) {
-						foreach (var installDir in installDirs)
-							BuildHelper.InstallPackage(logger, project, installDir, outputDirectory);
-					} else {
+					if (!project.FixReferencesToNuget(logger, outputDirectory))
 						logger.Error("Could not build and pack the new nuget");
-					}
 					return project;
 				} else {
 					logger.Error("Could not create the nuspec file: {0}", nuspec);
@@ -160,22 +152,6 @@ namespace NugetCracker.Components.CSharp
 				logger.Error("Could not promote to package the project '{0}'. Cause: {1}", FullPath, e.Message);
 			}
 			return null;
-		}
-
-		private string AssemblyName
-		{
-			get
-			{
-				return File.ReadAllText(FullPath).GetElementValue("AssemblyName", Name);
-			}
-		}
-
-		private string TargetFrameworkVersion
-		{
-			get
-			{
-				return File.ReadAllText(FullPath).GetElementValue("TargetFrameworkVersion", "v4.0");
-			}
 		}
 
 		private void AdjustNuspec(string nuspec, string tags, string licenseUrl, string projectUrl, string iconUrl, string copyright, bool requireLicenseAcceptance)
@@ -201,21 +177,30 @@ namespace NugetCracker.Components.CSharp
 
 		public static string AddNoneFile(string xml, string fileToAdd)
 		{
-			string pattern = "(<ItemGroup>\\s*)()(<None)";
-			string replace = "$1<None Include=\"" + fileToAdd + "\" />$3";
+			string pattern = "(<ItemGroup>)(\\s*)()(<None)";
+			string replace = "$1$2<None Include=\"" + fileToAdd + "\" />$2$4";
 			string altPattern = "(</PropertyGroup>\\s*)(<ItemGroup>)";
 			string altReplace = "$1<ItemGroup>\r\n    <None Include=\"" + fileToAdd + "\" />\r\n  </ItemGroup>\r\n  $2";
-			return xml.RegexReplace(pattern, replace, altPattern, altReplace);
+			return DisableNugetPowerToolsActions(xml).RegexReplace(pattern, replace, altPattern, altReplace);
+		}
+
+		private static string DisableNugetPowerToolsActions(string xml)
+		{
+			return xml
+				.Replace("<RestorePackages>true</RestorePackages>", "<RestorePackages>false</RestorePackages>")
+				.Replace("<BuildPackage>true</BuildPackage>", "<BuildPackage>false</BuildPackage>");
 		}
 
 		public bool ReplaceProjectReference(ILogger logger, INugetSpec package, string assemblyName, string framework, ICollection<string> installDirs)
 		{
 			try {
-				logger.Info("Replacing project reference in {0)", Name);
-				ReplaceProjectByNuget(package, assemblyName, framework);
-				AddToPackagesConfig(package, PackagesConfigFilePath);
-				if (!installDirs.Contains(_installedPackagesDir))
-					installDirs.Add(_installedPackagesDir);
+				if (Dependencies.Any(dependency => dependency.Equals(package) && dependency is ProjectReference)) {
+					logger.Info("Replacing project reference in {0} for {1}", Name, package.Name);
+					ReplaceProjectByNuget(package, assemblyName, framework);
+					AddToPackagesConfig(package, PackagesConfigFilePath);
+					if (!installDirs.Contains(_installedPackagesDir))
+						installDirs.Add(_installedPackagesDir);
+				}
 				return true;
 			} catch (Exception e) {
 				logger.Error("Could not change project reference to nuget reference. Cause: {0}", e.Message);
@@ -223,7 +208,7 @@ namespace NugetCracker.Components.CSharp
 			return false;
 		}
 
-		protected virtual void ReplaceProjectByNuget(INugetSpec package, string assemblyName, string framework)
+		public virtual void ReplaceProjectByNuget(INugetSpec package, string assemblyName, string framework)
 		{
 			FullPath.TransformFile(xml => ReplaceProjectByNuget(xml, package.Name, assemblyName, framework, _installedPackagesDir));
 		}
@@ -241,7 +226,7 @@ namespace NugetCracker.Components.CSharp
 			string replace = "$1" + packageReference + "$3";
 			string altPattern = "(</PropertyGroup>\\s*)(<ItemGroup>)";
 			string altReplace = "$1<ItemGroup>\r\n    " + packageReference + "\r\n  </ItemGroup>\r\n  $2";
-			return xml.RegexReplace(pattern, replace, altPattern, altReplace);
+			return DisableNugetPowerToolsActions(xml).RegexReplace(pattern, replace, altPattern, altReplace);
 		}
 
 		private static void UpdatePackagesConfig(IComponent newPackage, string packagesFile)
@@ -253,19 +238,56 @@ namespace NugetCracker.Components.CSharp
 
 		private static void AddToPackagesConfig(IComponent newPackage, string packagesFile)
 		{
-			string pattern = "</packages>";
-			string replace = "  <package id=\"" + newPackage.Name + "\" version=\"" + newPackage.CurrentVersion.ToShort() + "\" />\r\n</packages>";
-			packagesFile.TransformFile(xml => Regex.Replace(xml, pattern, replace, RegexOptions.Singleline));
+			var newXmlLine = "<package id=\"" + newPackage.Name + "\" version=\"" + newPackage.CurrentVersion.ToShort() + "\" />";
+			if (!File.Exists(packagesFile)) {
+				File.WriteAllText(packagesFile,
+@"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  {0}
+</packages>".FormatWith(newXmlLine));
+				return;
+			}
+			string pattern = "<package\\s+id=\"" + newPackage.Name + "\"[^>]*>";
+			string altPattern = "()(</packages>)";
+			string altReplace = "$1  " + newXmlLine + "\r\n$2";
+			packagesFile.TransformFile(xml => xml.RegexReplace(pattern, newXmlLine, altPattern, altReplace));
 		}
 
 		private void ParseProjectFile()
 		{
-			XDocument project = XDocument.Load(FullPath);
-			XNamespace nm = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003");
-			ParseAssemblyInfo(GetListOfSources(project, nm));
-			_isWeb = (project.Descendants(nm + "WebProjectProperties").Count() > 0);
-			foreach (var projectReference in GetListOfReferencedProjects(project, nm))
-				_dependencies.Add(new ProjectReference(projectReference));
+			try {
+				XDocument project = XDocument.Load(FullPath);
+				XNamespace nm = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003");
+				ParseAssemblyInfo(GetListOfSources(project, nm));
+				_isWeb = (project.Descendants(nm + "WebProjectProperties").Count() > 0);
+				_assemblyName = ExtractProjectProperty(project, nm + "AssemblyName", Name);
+				_targetFrameworkVersion = ExtractProjectProperty(project, nm + "TargetFrameworkVersion", "v4.0");
+				UsesNUnit = GetListOfReferencedLibraries(project, nm).Any(s => s.Equals("nunit.framework", StringComparison.OrdinalIgnoreCase));
+				ComponentType = TranslateType(UsesNUnit, ExtractProjectProperty(project, nm + "OutputType", "Library"));
+				foreach (var projectReference in GetListOfReferencedProjects(project, nm))
+					_dependencies.Add(new ProjectReference(projectReference));
+			} catch (Exception e) {
+				_status = "Error while loading: " + e.Message;
+			}
+		}
+
+		public bool CanBecomeNugget { get { return !(UsesNUnit || _isWeb || (this is INugetSpec)); } }
+
+		private static string TranslateType(bool usesNUnit, string targetType)
+		{
+			if (usesNUnit)
+				return "Unit Testing";
+			switch (targetType.ToLowerInvariant()) {
+				case "exe": return "Console Application";
+				case "winexe": return "Desktop Application";
+				default: return targetType;
+			}
+		}
+
+		private static string ExtractProjectProperty(XDocument project, XName name, string @default)
+		{
+			var element = project.Descendants(name).FirstOrDefault();
+			return (element == null) ? @default : element.Value;
 		}
 
 		private IEnumerable<string> GetListOfSources(XDocument project, XNamespace nm)
@@ -277,6 +299,14 @@ namespace NugetCracker.Components.CSharp
 		{
 			return GetListForTag(project, nm, "ProjectReference");
 		}
+
+		private IEnumerable<string> GetListOfReferencedLibraries(XDocument project, XNamespace nm)
+		{
+			foreach (XElement reference in project.Descendants(nm + "Reference"))
+				yield return reference.Attribute("Include").Value.Split(',')[0];
+		}
+
+		private bool UsesNUnit { get; set; }
 
 		private IEnumerable<string> GetListForTag(XDocument project, XNamespace nm, string tagName)
 		{
@@ -424,7 +454,9 @@ namespace NugetCracker.Components.CSharp
 			return FullPath.GetHashCode();
 		}
 
-		public virtual string Type { get { return _isWeb ? "C# Web Project" : "C# Project"; } }
+		private string ComponentType { get; set; }
+
+		public virtual string Type { get { return _isWeb ? "C# Web Project" : ("C# {0} Project".FormatWith(ComponentType)); } }
 
 		private string CurrentVersionTag { get { return string.Format(_isWeb ? " ({0})" : ".{0}", CurrentVersion.ToShort()); } }
 
@@ -442,7 +474,7 @@ namespace NugetCracker.Components.CSharp
 
 		public override string ToString()
 		{
-			return string.Format("{0}{1} - {2} [{3}]", Name, CurrentVersionTag, Description, Type);
+			return string.Format("{0}{1} - {2} [{3} - {4}] {5}", Name, CurrentVersionTag, Description, Type, _targetFrameworkVersion.ToLibFolder(), _status);
 		}
 
 		public bool MatchName(string pattern)
@@ -450,6 +482,5 @@ namespace NugetCracker.Components.CSharp
 			return string.IsNullOrWhiteSpace(pattern) || Regex.IsMatch(Name, pattern,
 				RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
 		}
-
 	}
 }

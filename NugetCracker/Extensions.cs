@@ -102,6 +102,11 @@ namespace NugetCracker
 			return line.Substring(0, maxlength - 3) + "...";
 		}
 
+		public static string FormatWith(this string format, params string[] args)
+		{
+			return string.Format(format, args);
+		}
+
 		public static string RegexReplace(this string text, string pattern, string replace, string altPattern = null, string altReplace = null)
 		{
 			if (Regex.IsMatch(text, pattern, RegexOptions.Multiline | RegexOptions.IgnoreCase))
@@ -115,7 +120,6 @@ namespace NugetCracker
 		{
 			File.WriteAllText(filename, transformer(File.ReadAllText(filename)));
 		}
-
 
 		public static string ParseBrokenStringParameter(this IEnumerable<string> args, string paramName)
 		{

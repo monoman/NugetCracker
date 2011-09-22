@@ -51,11 +51,25 @@ namespace NugetCracker.Data
 
 		public int Count { get { return _list.Count; } }
 
-		public IEnumerable<IComponent> FilterBy(string pattern, bool nugets = false, bool orderByTreeDepth = false)
+		public IEnumerable<IComponent> FilterBy(string pattern, bool nugets = false, bool orderByTreeDepth = false, bool groupByType = false)
 		{
 			var list = _list.FindAll(c => c.MatchName(pattern) && (!nugets || c is INugetSpec));
-			if (orderByTreeDepth)
-				list.Sort((c1, c2) => (c2.DependentComponents.Count() - c1.DependentComponents.Count()));
+			if (groupByType) {
+				if (orderByTreeDepth)
+					list.Sort((c1, c2) =>
+					{
+						var typeCompare = c1.Type.CompareTo(c2.Type);
+						return typeCompare != 0 ? typeCompare : (c2.DependentComponents.Count() - c1.DependentComponents.Count());
+					});
+				else
+					list.Sort((c1, c2) =>
+					{
+						var typeCompare = c1.Type.CompareTo(c2.Type);
+						return typeCompare != 0 ? typeCompare : (c1.Name.CompareTo(c2.Name));
+					});
+			} else
+				if (orderByTreeDepth)
+					list.Sort((c1, c2) => (c2.DependentComponents.Count() - c1.DependentComponents.Count()));
 			return list;
 		}
 
