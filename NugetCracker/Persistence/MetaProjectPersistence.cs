@@ -72,5 +72,6 @@ namespace NugetCracker.Persistence
 			path = ToRelativePath(path);
 			return ExecuteQuery(metaProject => metaProject.ExcludedDirectories).Any(s => path.StartsWith(s));
 		}
+
 	}
 }

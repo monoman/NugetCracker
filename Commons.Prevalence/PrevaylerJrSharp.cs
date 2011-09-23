@@ -5,25 +5,24 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Commons.Prevalence
 {
-	public class PrevaylerJrSharp<TSystemRoot> where TSystemRoot : class, new()
+	public class PrevaylerJrSharp<TSystemRoot> : IDisposable where TSystemRoot : class, new()
 	{
 		public interface Command
 		{
 			void ExecuteOn(TSystemRoot system);
 		}
 
+		private readonly string _storageFilePath;
 		private readonly TSystemRoot _system;
-		private readonly FileStream _journal;
+		private FileStream _journal;
 		private readonly IFormatter _formatter;
 
 		public PrevaylerJrSharp(string storageFilePath, IFormatter formatter = null)
 		{
 			_formatter = formatter ?? new BinaryFormatter();
-			_system = RestoreState(storageFilePath);
-			var backup = new MoveToBackup(storageFilePath);
-			_journal = new FileStream(storageFilePath, FileMode.Create);
-			WriteToJournal(_system);
-			backup.Delete();
+			_storageFilePath = storageFilePath;
+			_system = RestoreState();
+			SaveSnapshot();
 		}
 
 		public void ExecuteTransaction(Command transaction)
@@ -46,12 +45,12 @@ namespace Commons.Prevalence
 			_journal.Flush();
 		}
 
-		private TSystemRoot RestoreState(string storageFilePath)
+		private TSystemRoot RestoreState()
 		{
 			TSystemRoot state = new TSystemRoot();
 			try {
-				if (File.Exists(storageFilePath)) {
-					using (var input = new FileStream(storageFilePath, FileMode.Open, FileAccess.Read, FileShare.Delete)) {
+				if (File.Exists(_storageFilePath)) {
+					using (var input = new FileStream(_storageFilePath, FileMode.Open, FileAccess.Read, FileShare.Delete)) {
 						state = (TSystemRoot)_formatter.Deserialize(input);
 						while (true) {
 							var transaction = (Command)_formatter.Deserialize(input);
@@ -61,6 +60,22 @@ namespace Commons.Prevalence
 				}
 			} catch (Exception) { }
 			return state;
+		}
+
+		private void SaveSnapshot()
+		{
+			if (_journal != null)
+				_journal.Close();
+			var backup = new MoveToBackup(_storageFilePath);
+			_journal = new FileStream(_storageFilePath, FileMode.Create);
+			WriteToJournal(_system);
+			backup.Delete();
+		}
+
+		public void Dispose()
+		{
+			SaveSnapshot();
+			_journal.Close();
 		}
 	}
 }

@@ -40,19 +40,20 @@ namespace NugetCracker
 		static void Main(string[] args)
 		{
 			Console.WriteLine("NugetCracker {0}\nSee https://github.com/monoman/NugetCracker\n", Version.ToShort());
-			_metaProjectPersistence = new MetaProjectPersistence(args.GetMetaProjectFilePath());
-			Console.WriteLine("Using {0}", _metaProjectPersistence.FilePath);
-			_components = new ComponentsList();
-			if (!args.TakeWhile(s => s.ToLowerInvariant() != "-c").Any(s => s.ToLowerInvariant() == "-noscan"))
-				ProcessCommand(new string[] { "scan" });
-			var inlineCommand = args.SkipWhile(s => s.ToLowerInvariant() != "-c").Skip(1);
-			if (inlineCommand.Count() > 0) {
-				ProcessCommand(inlineCommand);
-				Console.WriteLine("Done!");
-			} else
-				do
-					Console.Write("Ready > ");
-				while (ProcessCommand(BreakLine(Console.ReadLine())));
+			using (_metaProjectPersistence = new MetaProjectPersistence(args.GetMetaProjectFilePath())) {
+				Console.WriteLine("Using {0}", _metaProjectPersistence.FilePath);
+				_components = new ComponentsList();
+				if (!args.TakeWhile(s => s.ToLowerInvariant() != "-c").Any(s => s.ToLowerInvariant() == "-noscan"))
+					ProcessCommand(new string[] { "scan" });
+				var inlineCommand = args.SkipWhile(s => s.ToLowerInvariant() != "-c").Skip(1);
+				if (inlineCommand.Count() > 0) {
+					ProcessCommand(inlineCommand);
+					Console.WriteLine("Done!");
+				} else
+					do
+						Console.Write("Ready > ");
+					while (ProcessCommand(BreakLine(Console.ReadLine())));
+			}
 		}
 
 		private static string[] BreakLine(string command)
