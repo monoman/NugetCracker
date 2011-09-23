@@ -35,8 +35,8 @@ Now if we allow the Package Manager to get away with forcing bindingRedirects in
     </assemblyBinding>
   </runtime>
 
-Now this may work if the changes were non-breaking, but if, for example, add a new method to some interface in core that the other libraries implement and the program uses, we will have to 
-update the intermediary nugets, build and publish new nugets, and them update the program. 
+Now this may work if the changes were non-breaking, but if, for example, we add a new method to some interface in core that the other libraries implement and the program uses, we will have to 
+update the intermediary nugets, build and publish these new nugets, and them update the program. 
 
 I think that now you can easily extrapolate that for my real scenario that means many iterations of building/publishing/updating across many solutions.
 
@@ -45,36 +45,106 @@ Well time to fast-forward to what I expect to be able to do when NugetCracker 1.
 In the command line:
 
 > NugetCracker
-Scanning for solutions in .
-Found NugetCracker.sln
--- Project NugetCracker.Core generates nuget for version 1.0.0.0
--- Project NugetCracker.CLI generates nuget for version 1.0.0.0 depends on NugetCracker.Core
--- Project NugetCracker.Web generates nuget for version 1.0.0.0 depends on NugetCracker.Core, NancyFx
--- Project NugetCracker generates program for version 1.0.0.0 depends on NugetCracker.CLI, NugetCracker.Web
-No nugets sources specified using default feed
-No publishing feed/share specified, publishing to folder .\NugetPackages
-Command > BumpVersion --minor --cascade NugetCracker.Core
-Bumping version of package NugetCracker.Core to 1.1.0.0
-Building NugetCracker.Core
-Packaging NugetCracker.Core.1.1
-Publishing NugetCracker.Core.1.1 to .\NugetPackages
-Updating Package Dependency on NugetCracker.Core to 1.1 in NugetCracker.CLI, NugetCracker.Web
-Bumping version of package NugetCracker.CLI to 1.1.0.0
-Building NugetCracker.CLI
-Packaging NugetCracker.CLI.1.1
-Publishing NugetCracker.CLI.1.1 to .\NugetPackages
-Bumping version of package NugetCracker.Web to 1.1.0.0
-Building NugetCracker.Web
-Packaging NugetCracker.Web.1.1
-Publishing NugetCracker.Web.1.1 to .\NugetPackages
-Updating Package Dependency on NugetCracker.CLI to 1.1 in NugetCracker
-Updating Package Dependency on NugetCracker.Web to 1.1 in NugetCracker
-Bumping version of program NugetCracker.Core to 1.1.0.0
-Building NugetCracker
-Packaging .\NugetCracker.1.1.zip for zip installation
+NugetCracker 1.0
+See https://github.com/monoman/NugetCracker
+
+Using C:\Projects\NugetCracker\MetaProject.NugetCracker
+    Directories that will be scanned:
+        .
+    Directories that won't be scanned:
+        tools\
+    Scanning '.' > 'C:\Projects\NugetCracker'
+    Scanned 80 directories
+    Found 4 components
+    Sorting...
+    Finding dependents...
+Ready > help
+    Available Commands:
+        AddExcludedDir  Add directory to exclusion list
+        BumpVersion     Bumps up a version for a component
+        FixReferences   Fix project references to nuget components
+        Help, ?         Show this list of commands or an specific command help
+        List            List components, optionally filtered by regular expression
+        Nugetify        Turns a project component into a nuget and fix references
+        Quit, Exit      Stops interactive mode
+        Rebuild         Rebuilds current version of matched components
+        Scan            Scans back all the directories
+Ready > list -g
+    Listing all components...
+    -- grouped by type
+    =========== [C# Console Application Project]
+    [0001] NugetCracker.1.0 - Tool for webs of Nugets  [C# Console Application Project - net40]
+    =========== [C# Nuget Project]
+    [0002] NugetCracker.Core.1.0 - Core NugetCracker Library [C# Nuget Project - net40]
+    [0003] NugetCracker.CLI.1.0 - Console UI NugetCracker Library [C# Nuget Project - net40]
+    [0004] NugetCracker.Web.1.0 - Web UI NugetCracker Library [C# Nuget Project - net20]
+Ready > help bumpversion
+    Usage:
+
+    B[umpVersion] [options] pattern
+
+        Bumps up the [AssemblyVersion]/Package Version of the component and rebuilds/repackages.
+        The [AssemblyFileVersion] attribute also is kept in sync with the [AssemblyVersion].
+
+        Options
+        -part:major|minor|build|revision|none
+                Increments the major, minor, build, revision version number.
+                If option is ommitted the default is to increment build number.
+        -cascade
+                Update all dependent components to use the new build/package, and them their dependent
+                components and so on. If some components generate a Nuget, the Nuget is published to
+                a temporary output 'source' and the dependent components have their package references
+                updated.
+Ready > bumpversion -part:minor -cascade NugetCracker.Core
+    Bumping component 'NugetCracker.Core' version from 1.0 to 1.1
+    ==== cascading
+    Setting new version to 1.1
+    Building NugetCracker.Core.1.1
+        Microsoft (R) Build Engine Version 4.0.30319.1
+        [Microsoft .NET Framework, Version 4.0.30319.431]
+        Copyright (C) Microsoft Corporation 2007. All rights reserved.
+    Packaging NugetCracker.Core.1.1
+        Attempting to build package from 'NugetCracker.Core.csproj'.
+        Packing files from 'C:\Projects\NugetCracker\NugetCracker.Core\bin\Debug'.
+        Using 'OpenCS.MTrusted.AspNet.Components.nuspec' for metadata.
+        Successfully created package 'C:\Projects\NugetCracker\NugetPackages\NugetCracker.Core.1.1.nupkg'.
+    Updating references to package 'NugetCracker.Core.1.1.nupkg'
+        Installing package NugetCracker.Core in 'C:\Projects\NugetCracker\packages'
+    Bumping component 'NugetCracker.CLI' version from 1.0 to 1.1
+    Setting new version to 1.1
+    Building NugetCracker.CLI.1.1
+        Microsoft (R) Build Engine Version 4.0.30319.1
+        [Microsoft .NET Framework, Version 4.0.30319.431]
+        Copyright (C) Microsoft Corporation 2007. All rights reserved.
+    Packaging NugetCracker.CLI.1.1
+        Attempting to build package from 'NugetCracker.CLI.csproj'.
+        Packing files from 'C:\Projects\NugetCracker\NugetCracker.CLI\bin\Debug'.
+        Using 'OpenCS.MTrusted.AspNet.Components.nuspec' for metadata.
+        Successfully created package 'C:\Projects\NugetCracker\NugetPackages\NugetCracker.CLI.1.1.nupkg'.
+    Updating references to package 'NugetCracker.CLI.1.1.nupkg'
+        Installing package NugetCracker.CLI in 'C:\Projects\NugetCracker\packages'
+    Bumping component 'NugetCracker.Web' version from 1.0 to 1.1
+    Setting new version to 1.1
+    Building NugetCracker.Web.1.1
+        Microsoft (R) Build Engine Version 4.0.30319.1
+        [Microsoft .NET Framework, Version 4.0.30319.431]
+        Copyright (C) Microsoft Corporation 2007. All rights reserved.
+    Packaging NugetCracker.Web.1.1
+        Attempting to build package from 'NugetCracker.Web.csproj'.
+        Packing files from 'C:\Projects\NugetCracker\NugetCracker.Web\bin\Debug'.
+        Using 'OpenCS.MTrusted.AspNet.Components.nuspec' for metadata.
+        Successfully created package 'C:\Projects\NugetCracker\NugetPackages\NugetCracker.Web.1.1.nupkg'.
+    Updating references to package 'NugetCracker.Web.1.1.nupkg'
+        Installing package NugetCracker.Web in 'C:\Projects\NugetCracker\packages'
+    Bumping component 'NugetCracker' version from 1.0 to 1.1
+    Setting new version to 1.1
+    Building NugetCracker.1.1
+        Microsoft (R) Build Engine Version 4.0.30319.1
+        [Microsoft .NET Framework, Version 4.0.30319.431]
+        Copyright (C) Microsoft Corporation 2007. All rights reserved.
 Command > PublishTo -Apikey xxxxxxx -Source http://nuget.mycompany.com/
 Publishing NugetCracker.Core.1.1 to http://nuget.mycompany.com/
 Publishing NugetCracker.CLI.1.1 to http://nuget.mycompany.com/
 Publishing NugetCracker.Web.1.1 to http://nuget.mycompany.com/
 
-Becoming reality soon...
+Already an "alpha-quality" reality...
