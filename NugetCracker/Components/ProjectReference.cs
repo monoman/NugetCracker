@@ -9,7 +9,6 @@ namespace NugetCracker.Components
 		public ProjectReference(string fullPath)
 		{
 			Name = Path.GetFileNameWithoutExtension(fullPath);
-			Versions = "?";
 			FullPath = fullPath;
 		}
 
@@ -38,9 +37,6 @@ namespace NugetCracker.Components
 			return string.Format("Project Reference: {0}", FullPath);
 		}
 
-		public override string Type
-		{
-			get { return "Project Reference"; }
-		}
+		public string FullPath { get; private set; }
 	}
 }

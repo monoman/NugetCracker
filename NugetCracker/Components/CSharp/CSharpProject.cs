@@ -14,11 +14,10 @@ namespace NugetCracker.Components.CSharp
 	{
 		public IEnumerable<IComponent> DependentComponents { get; set; }
 
-		readonly List<IComponent> _dependencies = new List<IComponent>();
+		readonly List<IReference> _dependencies = new List<IReference>();
 		protected string _assemblyInfoPath;
 		protected string _projectDir;
 		protected bool _isWeb;
-		string _installedPackagesDir;
 		protected string _assemblyName;
 		protected string _targetFrameworkVersion;
 		string _status;
@@ -33,7 +32,7 @@ namespace NugetCracker.Components.CSharp
 			Description = string.Empty;
 			ParseAvailableData();
 			_dependencies.Sort((c1, c2) => c1.Name.CompareTo(c2.Name));
-			_installedPackagesDir = FindPackagesDir(_projectDir);
+			InstalledPackagesDir = FindPackagesDir(_projectDir);
 		}
 
 		private string FindPackagesDir(string dir)
@@ -82,7 +81,7 @@ namespace NugetCracker.Components.CSharp
 			get { return Path.Combine(_projectDir, "packages.config"); }
 		}
 
-		public bool UpgradePackageDependency(ILogger logger, INugetSpec newPackage, string sourceDirectory, ICollection<string> installDirs)
+		public bool UpgradePackageDependency(ILogger logger, IComponent newPackage, string sourceDirectory, ICollection<string> installDirs)
 		{
 			var packagesFile = PackagesConfigFilePath;
 			if (!File.Exists(packagesFile)) {
@@ -92,8 +91,8 @@ namespace NugetCracker.Components.CSharp
 			try {
 				UpdatePackagesConfig(newPackage, packagesFile);
 				UpdatePackageReferencesOnProject(logger, newPackage);
-				if (!installDirs.Contains(_installedPackagesDir))
-					installDirs.Add(_installedPackagesDir);
+				if (!installDirs.Contains(InstalledPackagesDir))
+					installDirs.Add(InstalledPackagesDir);
 				return true;
 			} catch (Exception e) {
 				logger.Error(e.Message);
@@ -102,15 +101,15 @@ namespace NugetCracker.Components.CSharp
 			}
 		}
 
-		public void InstallPackageDependencyFromSources(ILogger logger, IComponent dependency, string sourceDirectories = null)
+		public void InstallPackageDependencyFromSources(ILogger logger, IReference dependency, string sourceDirectories = null)
 		{
 			using (logger.QuietBlock)
 				UpdatePackageReferencesOnProject(logger, dependency);
-			if (!Directory.Exists(_installedPackagesDir.Combine(dependency.Name)))
-				BuildHelper.InstallPackage(logger, dependency, _installedPackagesDir, sourceDirectories);
+			if (!Directory.Exists(InstalledPackagesDir.Combine(dependency.Name)))
+				BuildHelper.InstallPackage(logger, dependency, InstalledPackagesDir, sourceDirectories);
 		}
 
-		protected virtual void UpdatePackageReferencesOnProject(ILogger logger, IComponent newPackage)
+		protected virtual void UpdatePackageReferencesOnProject(ILogger logger, IReference newPackage)
 		{
 			try {
 				FullPath.TransformFile(xml => FixPackageReference(xml, newPackage.Name));
@@ -198,8 +197,8 @@ namespace NugetCracker.Components.CSharp
 					logger.Info("Replacing project reference in {0} for {1}", Name, package.Name);
 					ReplaceProjectByNuget(package, assemblyName, framework);
 					AddToPackagesConfig(package, PackagesConfigFilePath);
-					if (!installDirs.Contains(_installedPackagesDir))
-						installDirs.Add(_installedPackagesDir);
+					if (!installDirs.Contains(InstalledPackagesDir))
+						installDirs.Add(InstalledPackagesDir);
 				}
 				return true;
 			} catch (Exception e) {
@@ -210,7 +209,7 @@ namespace NugetCracker.Components.CSharp
 
 		public virtual void ReplaceProjectByNuget(INugetSpec package, string assemblyName, string framework)
 		{
-			FullPath.TransformFile(xml => ReplaceProjectByNuget(xml, package.Name, assemblyName, framework, _installedPackagesDir));
+			FullPath.TransformFile(xml => ReplaceProjectByNuget(xml, package.Name, assemblyName, framework, InstalledPackagesDir));
 		}
 
 		public static string ReplaceProjectByNuget(string xml, string packageName, string assemblyName, string framework, string installedPackagesDir)
@@ -429,24 +428,26 @@ namespace NugetCracker.Components.CSharp
 
 		public string FullPath { get; private set; }
 
-		public IEnumerable<IComponent> Dependencies
+		public string InstalledPackagesDir { get; private set; }
+
+		public IEnumerable<IReference> Dependencies
 		{
 			get { return _dependencies; }
 		}
 
-		public bool Equals(IComponent other)
+		public bool Equals(IReference other)
 		{
 			return IsEqual(other);
 		}
 
-		private bool IsEqual(IComponent other)
+		private bool IsEqual(IReference other)
 		{
-			return other != null && other is IProject && FullPath == other.FullPath;
+			return other != null && other is IProject && FullPath == ((IProject)other).FullPath;
 		}
 
 		public override bool Equals(object obj)
 		{
-			return IsEqual(obj as IComponent);
+			return IsEqual(obj as IReference);
 		}
 
 		public override int GetHashCode()

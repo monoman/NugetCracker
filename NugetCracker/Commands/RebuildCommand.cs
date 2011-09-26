@@ -32,7 +32,7 @@ namespace NugetCracker.Commands
 		public bool Process(ILogger logger, IEnumerable<string> args, MetaProjectPersistence metaProject, ComponentsList components, string packagesOutputDirectory)
 		{
 			foreach (IComponent component in components)
-				foreach (IComponent dependency in component.Dependencies)
+				foreach (IReference dependency in component.Dependencies)
 					if (dependency is NugetReference)
 						component.InstallPackageDependencyFromSources(logger, dependency);
 			var componentNamePattern = args.FirstOrDefault(s => !s.StartsWith("-")) ?? ".*";

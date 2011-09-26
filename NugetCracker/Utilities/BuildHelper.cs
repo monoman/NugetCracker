@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using NugetCracker.Interfaces;
 
 namespace NugetCracker.Utilities
@@ -27,15 +29,15 @@ namespace NugetCracker.Utilities
 			return true;
 		}
 
-		public static bool UpdatePackageDependency(ILogger logger, INugetSpec package, string packagesOutputDirectory)
+		public static bool UpdatePackageDependency(ILogger logger, IComponent package, string packagesOutputDirectory)
 		{
 			if (package == null)
 				return true;
 			var installDirs = new List<string>();
-			logger.Info("Updating references to package '{0}'", package.OutputPackageFilename);
+			logger.Info("Updating references to package '{0}'", package.Name);
 			using (logger.Block) {
 				foreach (IComponent dependentComponent in package.DependentComponents)
-					if (!dependentComponent.UpgradePackageDependency(logger, (INugetSpec)package, packagesOutputDirectory, installDirs)) {
+					if (!dependentComponent.UpgradePackageDependency(logger, package, packagesOutputDirectory, installDirs)) {
 						logger.Error("Could not upgrade package references to component '{0}'", package.Name);
 						return false;
 					}
@@ -47,7 +49,24 @@ namespace NugetCracker.Utilities
 			return true;
 		}
 
-		public static bool ReinstallPackageOn(ILogger logger, INugetSpec newPackage, string sourceDirectory, IEnumerable<string> installDirs)
+		public static void ClearPackageInstallDirectories(ILogger logger, IEnumerable<IComponent> components)
+		{
+			var installDirs = new List<string>();
+			foreach (var component in components) {
+				var installedPackagesDir = component.InstalledPackagesDir;
+				if ((!installDirs.Contains(installedPackagesDir)) && Directory.Exists(installedPackagesDir))
+					installDirs.Add(installedPackagesDir);
+			}
+			logger.Info("Clearing all package installation directories ({0})", installDirs.Count);
+			foreach (var dir in installDirs)
+				foreach (var package in Directory.EnumerateDirectories(dir))
+					try {
+						Directory.Delete(package, true);
+					} catch (Exception e) {
+						logger.ErrorDetail("Could not delete package installed at {0} . Cause: {1}", dir, e.Message);
+					}
+		}
+		public static bool ReinstallPackageOn(ILogger logger, IReference newPackage, string sourceDirectory, IEnumerable<string> installDirs)
 		{
 			foreach (string installDir in installDirs)
 				if (!InstallPackage(logger, newPackage, installDir, sourceDirectory))
@@ -55,7 +74,7 @@ namespace NugetCracker.Utilities
 			return true;
 		}
 
-		public static bool InstallPackage(ILogger logger, IComponent newPackage, string installDir, string sourceDirectory = null)
+		public static bool InstallPackage(ILogger logger, IReference newPackage, string installDir, string sourceDirectory = null)
 		{
 			logger.Info("Installing package {0} in '{1}'", newPackage.Name, installDir);
 			using (logger.QuietBlock) {
@@ -71,7 +90,7 @@ namespace NugetCracker.Utilities
 			return true;
 		}
 
-		public static void RemoveInstalledVersions(ILogger logger, IComponent package, string installDir)
+		public static void RemoveInstalledVersions(ILogger logger, IReference package, string installDir)
 		{
 			foreach (string dirToRemove in Directory.EnumerateDirectories(installDir, package.Name + ".*.*"))
 				try {

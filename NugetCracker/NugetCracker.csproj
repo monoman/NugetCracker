@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="Commands\BumpVersionCommand.cs" />
     <Compile Include="Commands\AddExcludedDirectoryCommand.cs" />
+    <Compile Include="Commands\UpdatePackagesCommand.cs" />
     <Compile Include="Commands\FixReferencesCommand.cs" />
     <Compile Include="Commands\NugetifyCommand.cs" />
     <Compile Include="Commands\ListCommand.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="Interfaces\INugetPackage.cs" />
     <Compile Include="Interfaces\INugetSource.cs" />
     <Compile Include="Interfaces\IProject.cs" />
+    <Compile Include="Interfaces\IReference.cs" />
     <Compile Include="Interfaces\IVersionable.cs" />
     <Compile Include="Persistence\MetaProjectPersistence.cs" />
     <Compile Include="Program.cs" />

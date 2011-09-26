@@ -30,7 +30,7 @@ namespace NugetCracker.Components.CSharp
 
 		public override string Type { get { return "C# Web Site"; } }
 
-		protected override void UpdatePackageReferencesOnProject(ILogger logger, IComponent newPackage)
+		protected override void UpdatePackageReferencesOnProject(ILogger logger, IReference newPackage)
 		{
 			// TODO
 		}

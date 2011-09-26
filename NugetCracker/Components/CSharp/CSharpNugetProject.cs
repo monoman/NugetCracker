@@ -44,7 +44,7 @@ namespace NugetCracker.Components.CSharp
 			get
 			{
 				return DependentComponents
-					.Where(c => (c is INugetSpec) && c.Dependencies.Contains(this))
+					.Where(c => (c is INugetSpec) && c.Dependencies.Any(r => r.Equals(this)))
 					.Cast<INugetSpec>();
 			}
 		}

@@ -101,7 +101,7 @@ namespace NugetCracker.Data
 				List<IComponent> itemsHere = new List<IComponent>();
 				List<IComponent> itemsAbove = new List<IComponent>();
 				foreach (var component in initialList)
-					if (initialList.Any(c => c.Dependencies.Contains(component)))
+					if (initialList.Any(c => c.Dependencies.Any(r => r.Equals(component))))
 						itemsHere.Add(component);
 					else
 						itemsAbove.Add(component);
@@ -128,7 +128,7 @@ namespace NugetCracker.Data
 		{
 			foreach (IComponent component in _list)
 				component.DependentComponents =
-					new LayeredDependencies(_list.FindAll(c => c.Dependencies.Contains(component)));
+					new LayeredDependencies(_list.FindAll(c => c.Dependencies.Any(r => r.Equals(component))));
 		}
 
 		public void Prune(string path)
