@@ -24,21 +24,20 @@ namespace NugetCracker.Commands
 		{
 			get
 			{
-				return @"U[pdateReferences] source
+				return @"U[pdatePackages] [sources]
 
-	Update packages on all projects from specified source.
+	Update packages on all projects from specified sources, or the default ones.
 ";
 			}
 		}
 
 		public bool Process(ILogger logger, IEnumerable<string> args, MetaProjectPersistence metaProject, ComponentsList components, string packagesOutputDirectory)
 		{
-			var source = args.FirstOrDefault(s => !s.StartsWith("-"));
-			if (string.IsNullOrWhiteSpace(source)) {
-				logger.Error("No source specified!!!");
-				return true;
-			}
-			logger.Info("Updating all package references from source: {0}", source);
+			var sources = args.FirstOrDefault(s => !s.StartsWith("-"));
+			if (string.IsNullOrWhiteSpace(sources)) {
+				logger.Info("Updating all package references from default sources");
+			} else
+				logger.Info("Updating all package references from sources: {0}", sources);
 			BuildHelper.ClearPackageInstallDirectories(logger, components);
 			var list = new List<Tuple<IComponent, IReference>>();
 			foreach (var component in components)
@@ -47,7 +46,7 @@ namespace NugetCracker.Commands
 						list.Add(new Tuple<IComponent, IReference>(component, dependency));
 			list.Sort((t1, t2) => t1.Item2.Name.CompareTo(t2.Item2.Name));
 			foreach (var tuple in list)
-				tuple.Item1.InstallPackageDependencyFromSources(logger, tuple.Item2, source);
+				tuple.Item1.InstallPackageDependencyFromSources(logger, tuple.Item2, sources);
 			return true;
 		}
 
