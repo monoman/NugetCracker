@@ -10,5 +10,8 @@ namespace NugetCracker.Interfaces
 		string OutputPackageFilename { get; }
 
 		IEnumerable<INugetSpec> DependentPackages { get; }
+
+		IEnumerable<string> AssemblyNames { get; }
+		string CompatibleFramework(string consumerFramework);
 	}
 }

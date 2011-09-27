@@ -70,6 +70,27 @@ namespace NugetCracker
 			return Path.Combine(path, relativePath);
 		}
 
+		public static string Relativize(this string projectDir, string packagesDir)
+		{
+			try {
+				string[] projectDirParts = projectDir.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+				string[] packagesDirParts = packagesDir.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+				StringBuilder sb = new StringBuilder();
+				int i = 0;
+				for (; i < packagesDirParts.Length && i < projectDirParts.Length; i++)
+					if (!projectDirParts[i].Equals(packagesDirParts[i], StringComparison.OrdinalIgnoreCase))
+						break;
+				for (int j = i; j < projectDirParts.Length; j++)
+					sb.Append("..").Append(Path.DirectorySeparatorChar);
+				for (; i < packagesDirParts.Length; i++)
+					sb.Append(packagesDirParts[i]).Append(Path.DirectorySeparatorChar);
+				return sb.ToString();
+			} catch (Exception) {
+				return packagesDir;
+			}
+		}
+
+
 		static IEnumerable<string> PathsFromPATH
 		{
 			get
@@ -144,9 +165,27 @@ namespace NugetCracker
 				case "v2.0": return "net20";
 				case "v3.0": return "net30";
 				case "v3.5": return "net35";
+				case "v4.5": return "net45";
 				default: return "net40";
 			}
 		}
+
+		public static string CompatibleFramework(this string framework, string consumerFramework)
+		{
+			if (IsInvalidFrameworkVersion(framework) || IsInvalidFrameworkVersion(consumerFramework))
+				return null;
+			float f, cf;
+			if (float.TryParse(framework.Substring(1), out f) && float.TryParse(consumerFramework.Substring(1), out cf))
+				if (f <= cf)
+					return framework;
+			return null;
+		}
+
+		private static bool IsInvalidFrameworkVersion(string framework)
+		{
+			return string.IsNullOrWhiteSpace(framework) || framework[0] != 'v';
+		}
+
 
 		public static string GetElementValue(this string xml, string element, string defaultValue)
 		{

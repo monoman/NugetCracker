@@ -53,6 +53,14 @@ namespace NugetCracker.Components.CSharp
 
 		public override string Type { get { return "C# Nuget Project"; } }
 
+		public IEnumerable<string> AssemblyNames
+		{
+			get { return new[] { base._assemblyName }; }
+		}
 
+		public string CompatibleFramework(string consumerFramework)
+		{
+			return _targetFrameworkVersion.CompatibleFramework(consumerFramework);
+		}
 	}
 }

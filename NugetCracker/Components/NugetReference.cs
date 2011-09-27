@@ -37,6 +37,12 @@ namespace NugetCracker.Components
 			Versions = versions;
 		}
 
+		public NugetReference(IComponent nuget)
+		{
+			Name = nuget.Name;
+			Versions = nuget.CurrentVersion.ToString();
+		}
+
 		public override string ToString()
 		{
 			return string.Format("Nuget Reference: {0} {1}", Name, Versions);

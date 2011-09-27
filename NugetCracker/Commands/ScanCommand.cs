@@ -17,7 +17,7 @@ namespace NugetCracker.Commands
 		public bool Matches(string commandPattern)
 		{
 			commandPattern = commandPattern.Trim().ToLowerInvariant();
-			return "scan".StartsWith(commandPattern) || commandPattern.Length > 1;
+			return "scan".StartsWith(commandPattern);
 		}
 
 		public string HelpLine { get { return "Scan            Scans back all the directories"; } }

@@ -56,6 +56,56 @@ namespace NUnit.NugetCracker
 		}
 
 		[Test]
+		public void TestCompatibleFramework()
+		{
+			Assert.IsNull("v2.0".CompatibleFramework("v1.0"));
+			Assert.IsNull("v2.0".CompatibleFramework("v1.1"));
+			Assert.IsNull("v2.0".CompatibleFramework("v2."));
+			Assert.IsNull("v2.0".CompatibleFramework("v2"));
+			Assert.IsNull("v2.0".CompatibleFramework("v"));
+			Assert.IsNull("v2.0".CompatibleFramework(""));
+			Assert.IsNull("v2.0".CompatibleFramework(null));
+			Assert.IsNull("v2.0".CompatibleFramework("a"));
+			Assert.IsNull("z2.0".CompatibleFramework("v2.0"));
+			string result = "v2.0".CompatibleFramework("v2.0");
+			Assert.That<string>(ref result, Is.EqualTo("v2.0"));
+			result = "v2.0".CompatibleFramework("v3.0");
+			Assert.That<string>(ref result, Is.EqualTo("v2.0"));
+			result = "v2.0".CompatibleFramework("v3.0");
+			Assert.That<string>(ref result, Is.EqualTo("v2.0"));
+			result = "v2.0".CompatibleFramework("v3.5");
+			Assert.That<string>(ref result, Is.EqualTo("v2.0"));
+			result = "v2.0".CompatibleFramework("v4.0");
+			Assert.That<string>(ref result, Is.EqualTo("v2.0"));
+			result = "v2.0".CompatibleFramework("v4.5");
+			Assert.That<string>(ref result, Is.EqualTo("v2.0"));
+
+			result = "v3.0".CompatibleFramework("v3.0");
+			Assert.That<string>(ref result, Is.EqualTo("v3.0"));
+			result = "v3.0".CompatibleFramework("v3.5");
+			Assert.That<string>(ref result, Is.EqualTo("v3.0"));
+			result = "v3.0".CompatibleFramework("v4.0");
+			Assert.That<string>(ref result, Is.EqualTo("v3.0"));
+			result = "v3.0".CompatibleFramework("v4.5");
+			Assert.That<string>(ref result, Is.EqualTo("v3.0"));
+
+			result = "v3.5".CompatibleFramework("v3.5");
+			Assert.That<string>(ref result, Is.EqualTo("v3.5"));
+			result = "v3.5".CompatibleFramework("v4.0");
+			Assert.That<string>(ref result, Is.EqualTo("v3.5"));
+			result = "v3.5".CompatibleFramework("v4.5");
+			Assert.That<string>(ref result, Is.EqualTo("v3.5"));
+
+			result = "v4.0".CompatibleFramework("v4.0");
+			Assert.That<string>(ref result, Is.EqualTo("v4.0"));
+			result = "v4.0".CompatibleFramework("v4.5");
+			Assert.That<string>(ref result, Is.EqualTo("v4.0"));
+
+			result = "v4.5".CompatibleFramework("v4.5");
+			Assert.That<string>(ref result, Is.EqualTo("v4.5"));
+		}
+
+		[Test]
 		public void TestParseBrokenStringParameter()
 		{
 			var result = "command -param:\"This is broken in many pieces\" object".Split(' ').ParseBrokenStringParameter("param");

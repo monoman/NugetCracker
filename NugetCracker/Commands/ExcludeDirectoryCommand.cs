@@ -8,21 +8,21 @@ using NugetCracker.Persistence;
 
 namespace NugetCracker.Commands
 {
-	public class AddExcludedDirectoryCommand : ICommand
+	public class ExcludeDirectoryCommand : ICommand
 	{
 		public bool Matches(string commandPattern)
 		{
 			commandPattern = commandPattern.Trim().ToLowerInvariant();
-			return "addexcludeddirectory".StartsWith(commandPattern);
+			return "excludedirectory".StartsWith(commandPattern) && commandPattern.Length > 1;
 		}
 
-		public string HelpLine { get { return "AddExcludedDir  Add directory to exclusion list"; } }
+		public string HelpLine { get { return "ExcludeDirectory Add directory to exclusion list"; } }
 
 		public string Help
 		{
 			get
 			{
-				return @"A[ddExcludedDirectory] [options] relativePath
+				return @"Ex[cludeDirectory] [options] relativePath
 
 	Add directory to exclusion list, found by relativePath.
 

@@ -23,8 +23,9 @@ namespace NugetCracker
 			new ListCommand(),
 			new RebuildCommand(),
 			new ScanCommand(_factories),
-			new AddExcludedDirectoryCommand(),
+			new ExcludeDirectoryCommand(),
 			new NugetifyCommand(),
+			new AddNugetCommand(),
 			new FixReferencesCommand(),
 			new UpdatePackagesCommand()
 		};
