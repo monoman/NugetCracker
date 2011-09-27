@@ -225,9 +225,10 @@ namespace NugetCracker.Components.CSharp
 
 		private static string AddSingleLibReference(string xml, string packageName, string assemblyName, string framework, string installedPackagesDir)
 		{
-			string packageReference = "\r\n    <Reference Include=\"" + packageName +
-				"\" >\r\n      <HintPath>" + installedPackagesDir + "\\" + packageName +
-				"\\lib\\" + framework.ToLibFolder() + "\\" + assemblyName + ".dll</HintPath>\r\n    </Reference>";
+			string packageReference = "\r\n" +
+				"    <Reference Include=\"" + packageName + "\" >\r\n" +
+				"      <HintPath>" + installedPackagesDir + packageName + "\\lib\\" + framework.ToLibFolder() + "\\" + assemblyName + ".dll</HintPath>\r\n" +
+				"    </Reference>";
 			string pattern = "(<ItemGroup>)()(\\s*<Reference)";
 			string replace = "$1" + packageReference + "$3";
 			string altPattern = "(</PropertyGroup>\\s*)(<ItemGroup>)";
@@ -494,26 +495,33 @@ namespace NugetCracker.Components.CSharp
 
 		public virtual bool AddNuget(ILogger logger, INugetSpec nugetComponent, IComponentFinder components, string packagesOutputDirectory)
 		{
+			DoAddNuget(logger, nugetComponent, components, packagesOutputDirectory, true);
+			return true;
+		}
+
+		private void DoAddNuget(ILogger logger, INugetSpec nugetComponent, IComponentFinder components, string packagesOutputDirectory, bool firstlevel)
+		{
 			try {
-				if (Dependencies.Any(c => c.Equals(nugetComponent)))
-					logger.Info("Component already references nuget");
-				else {
+				if (Dependencies.Any(c => c.Equals(nugetComponent))) {
+					if (firstlevel)
+						logger.Info("Component already references nuget {0}", nugetComponent.Name);
+				} else {
 					AddToPackagesConfig(nugetComponent, PackagesConfigFilePath);
 					_dependencies.Add(new NugetReference(nugetComponent));
 					var framework = nugetComponent.CompatibleFramework(_targetFrameworkVersion);
 					foreach (var assembly in nugetComponent.AssemblyNames)
 						FullPath.TransformFile(xml => AddSingleLibReference(xml, nugetComponent.Name, assembly, framework, RelativeInstalledPackagesDir));
 				}
-				using (logger.QuietBlock)
-					foreach (var subdependency in nugetComponent.Dependencies) {
-						var dep = components.FindComponent<INugetSpec>("^" + subdependency.Name + "$", interactive: false);
-						if (dep != null)
-							AddNuget(logger, dep, components, packagesOutputDirectory);
-					}
+				foreach (var subdependency in nugetComponent.Dependencies) {
+					var dep = components.FindComponent<INugetSpec>("^" + subdependency.Name + "$", interactive: false);
+					if (dep != null)
+						DoAddNuget(logger, dep, components, packagesOutputDirectory, false);
+				}
+				if (!Directory.Exists(InstalledPackagesDir.Combine(nugetComponent.Name)))
+					BuildHelper.InstallPackage(logger, nugetComponent, InstalledPackagesDir, packagesOutputDirectory);
 			} catch (Exception e) {
-				logger.ErrorDetail("Could not add all recursive references of needed nugets");
+				logger.ErrorDetail("Could not add all recursive references of needed nugets. Cause: {0}", e.Message);
 			}
-			return true;
 		}
 
 		public string RelativeInstalledPackagesDir { get; private set; }
