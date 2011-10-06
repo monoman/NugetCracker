@@ -27,7 +27,8 @@ namespace NugetCracker
 			new NugetifyCommand(),
 			new AddNugetCommand(),
 			new FixReferencesCommand(),
-			new UpdatePackagesCommand()
+			new UpdatePackagesCommand(),
+			new PublishPackagesCommand()
 		};
 		static List<string> _helpLines = null;
 

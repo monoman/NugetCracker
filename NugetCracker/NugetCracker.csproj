@@ -48,6 +48,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NuGet">
+      <HintPath>..\packages\NuGet.CommandLine.1.5.20905.5\tools\NuGet.exe</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -57,6 +60,7 @@
   <ItemGroup>
     <Compile Include="Commands\BumpVersionCommand.cs" />
     <Compile Include="Commands\AddNugetCommand.cs" />
+    <Compile Include="Commands\PublishPackagesCommand.cs" />
     <Compile Include="Commands\ExcludeDirectoryCommand.cs" />
     <Compile Include="Commands\UpdatePackagesCommand.cs" />
     <Compile Include="Commands\FixReferencesCommand.cs" />

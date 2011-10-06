@@ -100,5 +100,24 @@ namespace NugetCracker.Utilities
 				}
 		}
 
+
+		public static void CopyIfNew(ILogger logger, INugetSpec nuget, string packagesOutputDirectory, string destination)
+		{
+			var package = nuget.OutputPackageFilename;
+			var destinationPackage = destination.Combine(package);
+			var originPackage = packagesOutputDirectory.Combine(package);
+			if (File.Exists(destinationPackage))
+				return;
+			if (!File.Exists(originPackage)) {
+				logger.ErrorDetail("No built package for nuget '{0}'", nuget.Name);
+				return;
+			}
+			try {
+				logger.Info("Publishing package '{0}' to '{1}'", package, destination);
+				File.Copy(originPackage, destinationPackage);
+			} catch (Exception e) {
+				logger.Error(e);
+			}
+		}
 	}
 }
