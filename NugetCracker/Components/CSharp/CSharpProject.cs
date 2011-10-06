@@ -227,7 +227,7 @@ namespace NugetCracker.Components.CSharp
 		{
 			string packageReference = "\r\n" +
 				"    <Reference Include=\"" + packageName + "\" >\r\n" +
-				"      <HintPath>" + installedPackagesDir + packageName + "\\lib\\" + framework.ToLibFolder() + "\\" + assemblyName + ".dll</HintPath>\r\n" +
+				"      <HintPath>" + installedPackagesDir.Combine(packageName) + "\\lib\\" + framework.ToLibFolder() + "\\" + assemblyName + ".dll</HintPath>\r\n" +
 				"    </Reference>";
 			string pattern = "(<ItemGroup>)()(\\s*<Reference)";
 			string replace = "$1" + packageReference + "$3";
