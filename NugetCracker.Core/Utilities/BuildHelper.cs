@@ -59,9 +59,9 @@ namespace NugetCracker.Utilities
 			}
 			logger.Info("Clearing all package installation directories ({0})", installDirs.Count);
 			foreach (var dir in installDirs)
-				foreach (var package in Directory.EnumerateDirectories(dir))
+				foreach (var packageDir in Directory.EnumerateDirectories(dir))
 					try {
-						Directory.Delete(package, true);
+						Directory.Delete(packageDir, true);
 					} catch (Exception e) {
 						logger.ErrorDetail("Could not delete package installed at {0} . Cause: {1}", dir, e.Message);
 					}
@@ -81,9 +81,9 @@ namespace NugetCracker.Utilities
 				RemoveInstalledVersions(logger, newPackage, installDir);
 				string arguments = "install " + newPackage.Name
 						+ " -ExcludeVersion"
-						+ " -OutputDirectory " + installDir;
+						+ " -OutputDirectory \"" + installDir + "\"";
 				if (!string.IsNullOrWhiteSpace(sourceDirectory))
-					arguments += " -Source " + sourceDirectory;
+					arguments += " -Source \"" + sourceDirectory + "\"";
 				if (!ToolHelper.ExecuteTool(logger, "nuget", arguments, installDir))
 					return false;
 			}
