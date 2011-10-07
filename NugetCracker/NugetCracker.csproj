@@ -48,9 +48,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NugetCracker.Core" >
-      <HintPath>C:\Users\rafael.teixeira\My Projects\NugetCracker\packages\NugetCracker.Core\lib\net40\NugetCracker.Core.dll</HintPath>
-    </Reference>
     <Reference Include="Commons.Prevalence">
       <HintPath>.\packages\Commons.Prevalence\lib\net35\Commons.Prevalence.dll</HintPath>
     </Reference>
@@ -88,7 +85,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    
+    <ProjectReference Include="..\NugetCracker.Core\NugetCracker.Core.csproj">
+      <Project>{E951C1AC-2284-4792-A78E-5FA43BEFE704}</Project>
+      <Name>NugetCracker.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

@@ -34,7 +34,8 @@ namespace NugetCracker.Commands
 			foreach (IComponent component in components)
 				foreach (IReference dependency in component.Dependencies)
 					if (dependency is NugetReference)
-						component.InstallPackageDependencyFromSources(logger, dependency);
+						if (!component.InstallPackageDependencyFromSources(logger, dependency, packagesOutputDirectory))
+							return true;
 			var componentNamePattern = args.FirstOrDefault(s => !s.StartsWith("-")) ?? ".*";
 			foreach (var component in components.FilterBy(componentNamePattern, orderByTreeDepth: true))
 				if (component is IVersionable) {

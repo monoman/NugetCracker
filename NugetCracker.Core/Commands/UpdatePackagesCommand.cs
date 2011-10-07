@@ -33,7 +33,7 @@ namespace NugetCracker.Commands
 
 		public bool Process(ILogger logger, IEnumerable<string> args, MetaProjectPersistence metaProject, ComponentsList components, string packagesOutputDirectory)
 		{
-			var sources = args.FirstOrDefault(s => !s.StartsWith("-"));
+			var sources = ExtractListOfSources(args.FirstOrDefault(s => !s.StartsWith("-")), packagesOutputDirectory);
 			if (string.IsNullOrWhiteSpace(sources)) {
 				logger.Info("Updating all package references from default sources");
 			} else
@@ -46,8 +46,16 @@ namespace NugetCracker.Commands
 						list.Add(new Tuple<IComponent, IReference>(component, dependency));
 			list.Sort((t1, t2) => t1.Item2.Name.CompareTo(t2.Item2.Name));
 			foreach (var tuple in list)
-				tuple.Item1.InstallPackageDependencyFromSources(logger, tuple.Item2, sources);
+				if (!tuple.Item1.InstallPackageDependencyFromSources(logger, tuple.Item2, sources))
+					return true;
 			return true;
+		}
+
+		private static string ExtractListOfSources(string sources, string packagesOutputDirectory)
+		{
+			// TODO: gather the real default sources from Nuget.Core
+			sources = (string.IsNullOrWhiteSpace(sources) ? "https://go.microsoft.com/fwlink/?LinkID=206669" : sources);
+			return packagesOutputDirectory + ";" + sources;
 		}
 
 

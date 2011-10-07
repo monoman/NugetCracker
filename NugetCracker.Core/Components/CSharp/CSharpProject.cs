@@ -103,12 +103,14 @@ namespace NugetCracker.Components.CSharp
 			}
 		}
 
-		public void InstallPackageDependencyFromSources(ILogger logger, IReference dependency, string sourceDirectories = null)
+		public bool InstallPackageDependencyFromSources(ILogger logger, IReference dependency, string sourceDirectories = null, bool force = false)
 		{
+			if (force || !Directory.Exists(InstalledPackagesDir.Combine(dependency.Name)))
+				if (!BuildHelper.InstallPackage(logger, dependency, InstalledPackagesDir, sourceDirectories))
+					return false;
 			using (logger.QuietBlock)
 				UpdatePackageReferencesOnProject(logger, dependency);
-			if (!Directory.Exists(InstalledPackagesDir.Combine(dependency.Name)))
-				BuildHelper.InstallPackage(logger, dependency, InstalledPackagesDir, sourceDirectories);
+			return true;
 		}
 
 		protected virtual void UpdatePackageReferencesOnProject(ILogger logger, IReference newPackage)

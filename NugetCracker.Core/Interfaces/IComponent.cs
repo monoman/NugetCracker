@@ -15,7 +15,7 @@ namespace NugetCracker.Interfaces
 		string ToLongString();
 
 		IEnumerable<IReference> Dependencies { get; }
-		void InstallPackageDependencyFromSources(ILogger logger, IReference dependency, string sourceDirectories = null);
+		bool InstallPackageDependencyFromSources(ILogger logger, IReference dependency, string sourceDirectories = null, bool force = false);
 		bool UpgradePackageDependency(ILogger logger, IComponent newPackage, string sourceDirectory, ICollection<string> installDirs);
 
 		IEnumerable<IComponent> DependentComponents { get; set; }

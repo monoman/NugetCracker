@@ -66,6 +66,7 @@ namespace NugetCracker.Utilities
 						logger.ErrorDetail("Could not delete package installed at {0} . Cause: {1}", dir, e.Message);
 					}
 		}
+
 		public static bool ReinstallPackageOn(ILogger logger, IReference newPackage, string sourceDirectory, IEnumerable<string> installDirs)
 		{
 			foreach (string installDir in installDirs)
