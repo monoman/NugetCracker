@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -12,6 +12,7 @@
     <AssemblyName>NugetCracker</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -24,7 +25,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -48,8 +48,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NuGet">
-      <HintPath>..\packages\NuGet.CommandLine.1.5.20905.5\tools\NuGet.exe</HintPath>
+    <Reference Include="NugetCracker.Core" >
+      <HintPath>C:\Users\rafael.teixeira\My Projects\NugetCracker\packages\NugetCracker.Core\lib\net40\NugetCracker.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Commons.Prevalence">
+      <HintPath>.\packages\Commons.Prevalence\lib\net35\Commons.Prevalence.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -58,44 +61,9 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Commands\BumpVersionCommand.cs" />
-    <Compile Include="Commands\AddNugetCommand.cs" />
-    <Compile Include="Commands\PublishPackagesCommand.cs" />
-    <Compile Include="Commands\ExcludeDirectoryCommand.cs" />
-    <Compile Include="Commands\UpdatePackagesCommand.cs" />
-    <Compile Include="Commands\FixReferencesCommand.cs" />
-    <Compile Include="Commands\NugetifyCommand.cs" />
-    <Compile Include="Commands\ListCommand.cs" />
-    <Compile Include="Commands\ScanCommand.cs" />
-    <Compile Include="Components\NugetReference.cs" />
-    <Compile Include="Components\ProjectReference.cs" />
-    <Compile Include="Data\ComponentsList.cs" />
-    <Compile Include="Interfaces\ILogger.cs" />
-    <Compile Include="Interfaces\ICommand.cs" />
-    <Compile Include="Components\CSharp\CSharpNugetProject.cs" />
-    <Compile Include="Components\CSharp\CSharpProject.cs" />
-    <Compile Include="Components\CSharp\CSharpComponentsFactory.cs" />
-    <Compile Include="Components\CSharp\CSharpWebsite.cs" />
-    <Compile Include="Interfaces\IComponentFinder.cs" />
-    <Compile Include="Interfaces\IComponentsFactory.cs" />
-    <Compile Include="Data\MetaProject.cs" />
-    <Compile Include="Extensions.cs" />
-    <Compile Include="Interfaces\INugetSpec.cs" />
-    <Compile Include="Interfaces\IComponent.cs" />
-    <Compile Include="Interfaces\INugetPackage.cs" />
-    <Compile Include="Interfaces\INugetSource.cs" />
-    <Compile Include="Interfaces\IProject.cs" />
-    <Compile Include="Interfaces\IReference.cs" />
-    <Compile Include="Interfaces\IVersionable.cs" />
-    <Compile Include="Persistence\MetaProjectPersistence.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Transactions\AddDirectoryTransaction.cs" />
-    <Compile Include="Transactions\AddExcludedDirectoryTransaction.cs" />
-    <Compile Include="Utilities\BuildHelper.cs" />
     <Compile Include="Utilities\ConsoleLogger.cs" />
-    <Compile Include="Commands\RebuildCommand.cs" />
-    <Compile Include="Utilities\ToolHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
@@ -120,12 +88,8 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Commons.Prevalence\Commons.Prevalence.csproj">
-      <Project>{A5BEC694-1421-438E-B444-08246BCB7161}</Project>
-      <Name>Commons.Prevalence</Name>
-    </ProjectReference>
+    
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

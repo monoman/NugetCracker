@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <licenseUrl>https://github.com/monoman/NugetCracker/wiki/License:--BSD-simplified</licenseUrl>
+    <projectUrl>https://github.com/monoman/NugetCracker/wiki/NugetCracker-Project</projectUrl>
+    <owners>$author$</owners><requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <copyright>Copyright © NugetCracker Team 2011</copyright>
+    <description>$description$</description>
+    <tags>package management</tags>
+    <dependencies>
+      <dependency id="Commons.Prevalence" version="1.1.0.0"/>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\Debug\NugetCracker.Core.pdb" target="lib\net40\" />
+  </files>
+</package>

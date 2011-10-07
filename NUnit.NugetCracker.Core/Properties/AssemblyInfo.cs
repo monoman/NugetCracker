@@ -1,8 +1,8 @@
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("NugetCracker")]
-[assembly: AssemblyDescription("A builder for versioned nugets within a web of dependencies")]
+[assembly: AssemblyTitle("NUnit.NugetCracker.Core")]
+[assembly: AssemblyDescription("Unit tests for core library of NugetCracker")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("NugetCracker Team")]
 [assembly: AssemblyProduct("NugetCracker")]
@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 
 [assembly: ComVisible(false)]
 
-[assembly: Guid("1654cc24-907b-48c5-9297-e6f1e7ed14c2")]
+[assembly: Guid("79574eaf-18f4-4629-8f39-61fffd4ccd12")]
 
 [assembly: AssemblyVersion("0.9.0.0")]
 [assembly: AssemblyFileVersion("0.9.0.0")]

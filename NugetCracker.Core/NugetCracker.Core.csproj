@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E951C1AC-2284-4792-A78E-5FA43BEFE704}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NugetCracker</RootNamespace>
+    <AssemblyName>NugetCracker.Core</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Commons.Prevalence">
+      <HintPath>C:\Users\rafael.teixeira\My Projects\NugetCracker\packages\Commons.Prevalence\lib\net35\Commons.Prevalence.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.Core">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\NuGet.Core\lib\net40-Client\NuGet.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Commands\AddNugetCommand.cs" />
+    <Compile Include="Commands\BumpVersionCommand.cs" />
+    <Compile Include="Commands\ExcludeDirectoryCommand.cs" />
+    <Compile Include="Commands\FixReferencesCommand.cs" />
+    <Compile Include="Commands\ListCommand.cs" />
+    <Compile Include="Commands\NugetifyCommand.cs" />
+    <Compile Include="Commands\PublishPackagesCommand.cs" />
+    <Compile Include="Commands\RebuildCommand.cs" />
+    <Compile Include="Commands\ScanCommand.cs" />
+    <Compile Include="Commands\UpdatePackagesCommand.cs" />
+    <Compile Include="Components\CSharp\CSharpComponentsFactory.cs" />
+    <Compile Include="Components\CSharp\CSharpNugetProject.cs" />
+    <Compile Include="Components\CSharp\CSharpProject.cs" />
+    <Compile Include="Components\CSharp\CSharpWebsite.cs" />
+    <Compile Include="Components\NugetReference.cs" />
+    <Compile Include="Components\ProjectReference.cs" />
+    <Compile Include="Data\ComponentsList.cs" />
+    <Compile Include="Data\MetaProject.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="Interfaces\ICommand.cs" />
+    <Compile Include="Interfaces\IComponent.cs" />
+    <Compile Include="Interfaces\IComponentFinder.cs" />
+    <Compile Include="Interfaces\IComponentsFactory.cs" />
+    <Compile Include="Interfaces\ILogger.cs" />
+    <Compile Include="Interfaces\INugetPackage.cs" />
+    <Compile Include="Interfaces\INugetSource.cs" />
+    <Compile Include="Interfaces\INugetSpec.cs" />
+    <Compile Include="Interfaces\IProject.cs" />
+    <Compile Include="Interfaces\IReference.cs" />
+    <Compile Include="Interfaces\IVersionable.cs" />
+    <Compile Include="Persistence\MetaProjectPersistence.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Transactions\AddDirectoryTransaction.cs" />
+    <Compile Include="Transactions\AddExcludedDirectoryTransaction.cs" />
+    <Compile Include="Utilities\BuildHelper.cs" />
+    <Compile Include="Utilities\ToolHelper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="NugetCracker.Core.nuspec" />
+    <None Include="nuspec.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

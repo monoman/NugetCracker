@@ -1,8 +1,8 @@
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("NugetCracker")]
-[assembly: AssemblyDescription("A builder for versioned nugets within a web of dependencies")]
+[assembly: AssemblyTitle("NugetCracker.Core")]
+[assembly: AssemblyDescription("Core library to manage versioned nugets within a web of dependencies")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("NugetCracker Team")]
 [assembly: AssemblyProduct("NugetCracker")]
