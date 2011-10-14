@@ -28,6 +28,32 @@ namespace NugetCracker
 				Path.Combine(dir, "MetaProject.NugetCracker"));
 		}
 
+		public static IEnumerable<string> ParseArguments(this string commandLine)
+		{
+			if (string.IsNullOrWhiteSpace(commandLine))
+				yield break;
+			var sb = new StringBuilder();
+			bool inQuote = false;
+			foreach (char c in commandLine) {
+				if (c == '"' && !inQuote) {
+					inQuote = true;
+					continue;
+				}
+				if (c != '"' && !(char.IsWhiteSpace(c) && !inQuote)) {
+					sb.Append(c);
+					continue;
+				}
+				if (sb.Length > 0) {
+					var result = sb.ToString();
+					sb.Clear();
+					inQuote = false;
+					yield return result;
+				}
+			}
+			if (sb.Length > 0)
+				yield return sb.ToString();
+		}
+
 		public static string FirstOrDefaultPath(this IEnumerable<string> args, Func<string, bool> filter, string defaultfilePath)
 		{
 			return Path.GetFullPath(args.FirstOrDefault(filter) ?? defaultfilePath);
@@ -41,14 +67,14 @@ namespace NugetCracker
 		public static Version Bump(this Version oldVersion, VersionPart partToBump)
 		{
 			switch (partToBump) {
-				case VersionPart.Major:
-					return new Version(oldVersion.Major + 1, 0, 0, 0);
-				case VersionPart.Minor:
-					return new Version(oldVersion.Major, oldVersion.Minor + 1, 0, 0);
-				case VersionPart.Build:
-					return new Version(oldVersion.Major, oldVersion.Minor, oldVersion.Build + 1, 0);
-				case VersionPart.Revision:
-					return new Version(oldVersion.Major, oldVersion.Minor, oldVersion.Build, oldVersion.Revision + 1);
+			case VersionPart.Major:
+				return new Version(oldVersion.Major + 1, 0, 0, 0);
+			case VersionPart.Minor:
+				return new Version(oldVersion.Major, oldVersion.Minor + 1, 0, 0);
+			case VersionPart.Build:
+				return new Version(oldVersion.Major, oldVersion.Minor, oldVersion.Build + 1, 0);
+			case VersionPart.Revision:
+				return new Version(oldVersion.Major, oldVersion.Minor, oldVersion.Build, oldVersion.Revision + 1);
 			}
 			return oldVersion;
 		}
@@ -90,11 +116,8 @@ namespace NugetCracker
 			}
 		}
 
-
-		static IEnumerable<string> PathsFromPATH
-		{
-			get
-			{
+		static IEnumerable<string> PathsFromPATH {
+			get {
 				string pathEnvVar = Environment.GetEnvironmentVariable("PATH");
 				var paths = new List<string>(pathEnvVar.Split(PATH_SEPARATOR, StringSplitOptions.RemoveEmptyEntries));
 				paths.Insert(0, Environment.CurrentDirectory);
@@ -133,7 +156,7 @@ namespace NugetCracker
 			if (Regex.IsMatch(text, pattern, RegexOptions.Multiline | RegexOptions.IgnoreCase))
 				return Regex.Replace(text, pattern, replace, RegexOptions.Multiline | RegexOptions.IgnoreCase);
 			else if (!string.IsNullOrWhiteSpace(altPattern))
-				return Regex.Replace(text, altPattern, altReplace, RegexOptions.Multiline | RegexOptions.IgnoreCase);
+					return Regex.Replace(text, altPattern, altReplace, RegexOptions.Multiline | RegexOptions.IgnoreCase);
 			return text;
 		}
 
@@ -162,11 +185,16 @@ namespace NugetCracker
 		public static string ToLibFolder(this string framework)
 		{
 			switch (framework) {
-				case "v2.0": return "net20";
-				case "v3.0": return "net30";
-				case "v3.5": return "net35";
-				case "v4.5": return "net45";
-				default: return "net40";
+			case "v2.0":
+				return "net20";
+			case "v3.0":
+				return "net30";
+			case "v3.5":
+				return "net35";
+			case "v4.5":
+				return "net45";
+			default:
+				return "net40";
 			}
 		}
 
@@ -186,7 +214,6 @@ namespace NugetCracker
 			return string.IsNullOrWhiteSpace(framework) || framework[0] != 'v';
 		}
 
-
 		public static string GetElementValue(this string xml, string element, string defaultValue)
 		{
 			string pattern = "<" + element + ">([^<]*)</" + element + ">";
@@ -195,7 +222,6 @@ namespace NugetCracker
 				return match.Groups[1].Value;
 			return defaultValue;
 		}
-
 
 		public static void SetVersion(this string versionFile, Version version)
 		{

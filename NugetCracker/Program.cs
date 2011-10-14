@@ -52,41 +52,19 @@ namespace NugetCracker
 					ProcessCommand(inlineCommand);
 					Console.WriteLine("Done!");
 				} else
-					do
-						Console.Write("Ready > "); while (ProcessCommand(BreakLine(Console.ReadLine())));
+					InteractiveLoop();
 			}
 		}
 
-		private static string[] BreakLine(string command)
+		static void InteractiveLoop()
 		{
-			return string.IsNullOrWhiteSpace(command)
-				? new string[0]
-				: ParseArguments(command).ToArray();
+			string inputLine = null;
+			do {
+				Console.Write("Ready > ");
+				inputLine = Console.ReadLine();
+			} while (ProcessCommand(inputLine.ParseArguments()));
 		}
 
-		static IEnumerable<string> ParseArguments(string commandLine)
-		{
-			var sb = new StringBuilder();
-			bool inQuote = false;
-			foreach(char c in commandLine)
-			{
-				if (c == '"' && !inQuote) {
-					inQuote = true;
-					continue;
-				}
-				if (c != '"' && !(char.IsWhiteSpace(c) && !inQuote)) {
-					sb.Append(c);
-					continue;
-				}
-				if (sb.Length > 0) {
-					var result = sb.ToString();
-					sb.Clear();
-					inQuote = false;
-					yield return result;
-				}
-			}
-		}
-		
 		static bool ProcessCommand(IEnumerable<string> args)
 		{
 			if (args.Count() == 0)

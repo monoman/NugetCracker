@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using NUnit.Framework;
-using NugetCracker;
 using System.IO;
+using System.Linq;
+using NugetCracker;
+using NUnit.Framework;
 
 namespace NUnit.NugetCracker
 {
@@ -138,6 +137,41 @@ namespace NUnit.NugetCracker
   </metadata>
 </package>";
 
-
+		[Test]
+		public void TestParseArguments()
+		{
+			var result = "command -param:\"This is broken in many pieces\" object".ParseArguments().ToArray();
+			Assert.AreEqual(3, result.Length);
+			Assert.That(ref result[0], Is.EqualTo("command"));
+			Assert.That(ref result[1], Is.EqualTo("-param:This is broken in many pieces"));
+			Assert.That(ref result[2], Is.EqualTo("object"));
+			result = "command -param:This is broken in many pieces object".ParseArguments().ToArray();
+			Assert.AreEqual(8, result.Length);
+			Assert.That(ref result[0], Is.EqualTo("command"));
+			Assert.That(ref result[1], Is.EqualTo("-param:This"));
+			Assert.That(ref result[2], Is.EqualTo("is"));
+			Assert.That(ref result[3], Is.EqualTo("broken"));
+			Assert.That(ref result[4], Is.EqualTo("in"));
+			Assert.That(ref result[5], Is.EqualTo("many"));
+			Assert.That(ref result[6], Is.EqualTo("pieces"));
+			Assert.That(ref result[7], Is.EqualTo("object"));
+			result = "command -param:\"\" object".ParseArguments().ToArray();
+			Assert.AreEqual(3, result.Length);
+			Assert.That(ref result[0], Is.EqualTo("command"));
+			Assert.That(ref result[1], Is.EqualTo("-param:"));
+			Assert.That(ref result[2], Is.EqualTo("object"));
+			result = "command -param:\"An unclosed string".ParseArguments().ToArray();
+			Assert.AreEqual(2, result.Length);
+			Assert.That(ref result[0], Is.EqualTo("command"));
+			Assert.That(ref result[1], Is.EqualTo("-param:An unclosed string"));
+			result = "command   \t -param:some".ParseArguments().ToArray();
+			Assert.AreEqual(2, result.Length);
+			Assert.That(ref result[0], Is.EqualTo("command"));
+			Assert.That(ref result[1], Is.EqualTo("-param:some"));
+			result = "command \"This object is broken in many pieces\"".ParseArguments().ToArray();
+			Assert.AreEqual(2, result.Length);
+			Assert.That(ref result[0], Is.EqualTo("command"));
+			Assert.That(ref result[1], Is.EqualTo("This object is broken in many pieces"));
+		}
 	}
 }
