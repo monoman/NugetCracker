@@ -8,6 +8,7 @@ using NugetCracker.Data;
 using NugetCracker.Interfaces;
 using NugetCracker.Persistence;
 using NugetCracker.Utilities;
+using System.Text;
 
 namespace NugetCracker
 {
@@ -32,10 +33,8 @@ namespace NugetCracker
 		};
 		static List<string> _helpLines = null;
 
-		static Version Version
-		{
-			get
-			{
+		static Version Version {
+			get {
 				return new System.Reflection.AssemblyName(System.Reflection.Assembly.GetCallingAssembly().FullName).Version;
 			}
 		}
@@ -54,19 +53,40 @@ namespace NugetCracker
 					Console.WriteLine("Done!");
 				} else
 					do
-						Console.Write("Ready > ");
-					while (ProcessCommand(BreakLine(Console.ReadLine())));
+						Console.Write("Ready > "); while (ProcessCommand(BreakLine(Console.ReadLine())));
 			}
 		}
 
 		private static string[] BreakLine(string command)
 		{
-			// TODO really parse parameters
 			return string.IsNullOrWhiteSpace(command)
 				? new string[0]
-				: command.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+				: ParseArguments(command).ToArray();
 		}
 
+		static IEnumerable<string> ParseArguments(string commandLine)
+		{
+			var sb = new StringBuilder();
+			bool inQuote = false;
+			foreach(char c in commandLine)
+			{
+				if (c == '"' && !inQuote) {
+					inQuote = true;
+					continue;
+				}
+				if (c != '"' && !(char.IsWhiteSpace(c) && !inQuote)) {
+					sb.Append(c);
+					continue;
+				}
+				if (sb.Length > 0) {
+					var result = sb.ToString();
+					sb.Clear();
+					inQuote = false;
+					yield return result;
+				}
+			}
+		}
+		
 		static bool ProcessCommand(IEnumerable<string> args)
 		{
 			if (args.Count() == 0)
@@ -75,29 +95,27 @@ namespace NugetCracker
 			var commandName = args.First().ToLowerInvariant();
 			args = args.Skip(1);
 			switch (commandName) {
-				case "quit":
-				case "q":
-				case "exit":
-				case "e":
-					return false;
-				case "help":
-				case "?":
-					return HelpCommand(logger, args);
-				default:
-					foreach (ICommand command in _commands)
-						if (command.Matches(commandName))
-							using (logger.Block)
-								return command.Process(logger, args, _metaProjectPersistence, _components, PackagesOutputDirectory);
-					break;
+			case "quit":
+			case "q":
+			case "exit":
+			case "e":
+				return false;
+			case "help":
+			case "?":
+				return HelpCommand(logger, args);
+			default:
+				foreach (ICommand command in _commands)
+					if (command.Matches(commandName))
+						using (logger.Block)
+							return command.Process(logger, args, _metaProjectPersistence, _components, PackagesOutputDirectory);
+				break;
 			}
 			logger.Error("Unknown command '{0}'", commandName);
 			return true;
 		}
 
-		private static string PackagesOutputDirectory
-		{
-			get
-			{
+		private static string PackagesOutputDirectory {
+			get {
 				var path = _metaProjectPersistence.ToAbsolutePath("NugetPackages");
 				if (!Directory.Exists(path))
 					Directory.CreateDirectory(path);
@@ -123,10 +141,8 @@ namespace NugetCracker
 			}
 		}
 
-		private static IEnumerable<string> HelpLines
-		{
-			get
-			{
+		private static IEnumerable<string> HelpLines {
+			get {
 				if (_helpLines == null) {
 					_helpLines = new List<string> {
 							"Help, ?         Show this list of commands or an specific command help",
