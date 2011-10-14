@@ -37,6 +37,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Optimize>false</Optimize>
+    <Commandlineparameters>../../.. -c list -f</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <OutputPath>bin\Release\</OutputPath>
@@ -48,9 +49,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Commons.Prevalence">
-      <HintPath>.\packages\Commons.Prevalence\lib\net35\Commons.Prevalence.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -88,6 +86,10 @@
     <ProjectReference Include="..\NugetCracker.Core\NugetCracker.Core.csproj">
       <Project>{E951C1AC-2284-4792-A78E-5FA43BEFE704}</Project>
       <Name>NugetCracker.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Commons.Prevalence\Commons.Prevalence.csproj">
+      <Project>{A5BEC694-1421-438E-B444-08246BCB7161}</Project>
+      <Name>Commons.Prevalence</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -12,7 +12,6 @@
     <AssemblyName>NugetCracker.Core</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -32,17 +31,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Commons.Prevalence">
-      <HintPath>C:\Users\rafael.teixeira\My Projects\NugetCracker\packages\Commons.Prevalence\lib\net35\Commons.Prevalence.dll</HintPath>
-    </Reference>
-    <Reference Include="NuGet.Core">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NuGet.Core\lib\net40-Client\NuGet.Core.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="NuGet.Core, Version=1.5.20902.9026, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\NuGet.Core\lib\net40-Client\NuGet.Core.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\AddNugetCommand.cs" />
@@ -99,4 +95,10 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <ProjectReference Include="..\Commons.Prevalence\Commons.Prevalence.csproj">
+      <Project>{A5BEC694-1421-438E-B444-08246BCB7161}</Project>
+      <Name>Commons.Prevalence</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>
