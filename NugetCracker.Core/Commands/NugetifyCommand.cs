@@ -41,11 +41,11 @@ namespace NugetCracker.Commands
 				logger.Error("No component pattern specified");
 				return true;
 			}
-			string tags = args.ParseBrokenStringParameter("tags");
-			string licenseUrl = args.ParseBrokenStringParameter("licenseUrl");
-			string projectUrl = args.ParseBrokenStringParameter("projectUrl");
-			string iconUrl = args.ParseBrokenStringParameter("iconUrl");
-			string copyright = args.ParseBrokenStringParameter("copyright");
+			string tags = args.ParseStringParameter("tags");
+			string licenseUrl = args.ParseStringParameter("licenseUrl");
+			string projectUrl = args.ParseStringParameter("projectUrl");
+			string iconUrl = args.ParseStringParameter("iconUrl");
+			string copyright = args.ParseStringParameter("copyright");
 			bool requireLicenseAcceptance = args.Contains("-r");
 			if (licenseUrl == null && requireLicenseAcceptance) {
 				logger.Error("Requiring license acceptance demands a license url");

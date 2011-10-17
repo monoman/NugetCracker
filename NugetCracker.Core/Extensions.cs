@@ -67,14 +67,14 @@ namespace NugetCracker
 		public static Version Bump(this Version oldVersion, VersionPart partToBump)
 		{
 			switch (partToBump) {
-			case VersionPart.Major:
-				return new Version(oldVersion.Major + 1, 0, 0, 0);
-			case VersionPart.Minor:
-				return new Version(oldVersion.Major, oldVersion.Minor + 1, 0, 0);
-			case VersionPart.Build:
-				return new Version(oldVersion.Major, oldVersion.Minor, oldVersion.Build + 1, 0);
-			case VersionPart.Revision:
-				return new Version(oldVersion.Major, oldVersion.Minor, oldVersion.Build, oldVersion.Revision + 1);
+				case VersionPart.Major:
+					return new Version(oldVersion.Major + 1, 0, 0, 0);
+				case VersionPart.Minor:
+					return new Version(oldVersion.Major, oldVersion.Minor + 1, 0, 0);
+				case VersionPart.Build:
+					return new Version(oldVersion.Major, oldVersion.Minor, oldVersion.Build + 1, 0);
+				case VersionPart.Revision:
+					return new Version(oldVersion.Major, oldVersion.Minor, oldVersion.Build, oldVersion.Revision + 1);
 			}
 			return oldVersion;
 		}
@@ -116,8 +116,10 @@ namespace NugetCracker
 			}
 		}
 
-		static IEnumerable<string> PathsFromPATH {
-			get {
+		static IEnumerable<string> PathsFromPATH
+		{
+			get
+			{
 				string pathEnvVar = Environment.GetEnvironmentVariable("PATH");
 				var paths = new List<string>(pathEnvVar.Split(PATH_SEPARATOR, StringSplitOptions.RemoveEmptyEntries));
 				paths.Insert(0, Environment.CurrentDirectory);
@@ -156,7 +158,7 @@ namespace NugetCracker
 			if (Regex.IsMatch(text, pattern, RegexOptions.Multiline | RegexOptions.IgnoreCase))
 				return Regex.Replace(text, pattern, replace, RegexOptions.Multiline | RegexOptions.IgnoreCase);
 			else if (!string.IsNullOrWhiteSpace(altPattern))
-					return Regex.Replace(text, altPattern, altReplace, RegexOptions.Multiline | RegexOptions.IgnoreCase);
+				return Regex.Replace(text, altPattern, altReplace, RegexOptions.Multiline | RegexOptions.IgnoreCase);
 			return text;
 		}
 
@@ -165,36 +167,28 @@ namespace NugetCracker
 			File.WriteAllText(filename, transformer(File.ReadAllText(filename)));
 		}
 
-		public static string ParseBrokenStringParameter(this IEnumerable<string> args, string paramName)
+		public static string ParseStringParameter(this IEnumerable<string> args, string paramName, string @default = null)
 		{
-			var sb = new StringBuilder();
-			foreach (var part in args.SkipWhile(s => !s.StartsWith("-" + paramName + ":\""))) {
-				sb.Append(part);
-				if (part.EndsWith("\""))
-					break;
-				sb.Append(' ');
-			}
-			if (sb.Length == 0)
-				return null;
-			var concatenation = sb.ToString();
-			var startindex = paramName.Length + 3;
-			var length = (concatenation.Length - startindex) - 1;
-			return length > 0 ? concatenation.Substring(startindex, length) : null;
+			paramName = paramName.Trim().ToLowerInvariant();
+			var arg = args.FirstOrDefault(s => s.ToLowerInvariant().StartsWith("-" + paramName + ":"));
+			if (arg == null)
+				return @default;
+			return arg.Substring(paramName.Length + 2);
 		}
 
 		public static string ToLibFolder(this string framework)
 		{
 			switch (framework) {
-			case "v2.0":
-				return "net20";
-			case "v3.0":
-				return "net30";
-			case "v3.5":
-				return "net35";
-			case "v4.5":
-				return "net45";
-			default:
-				return "net40";
+				case "v2.0":
+					return "net20";
+				case "v3.0":
+					return "net30";
+				case "v3.5":
+					return "net35";
+				case "v4.5":
+					return "net45";
+				default:
+					return "net40";
 			}
 		}
 

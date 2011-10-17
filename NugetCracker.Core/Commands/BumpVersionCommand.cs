@@ -50,20 +50,31 @@ namespace NugetCracker.Commands
 				return true;
 			}
 			bool cascade = args.Contains("-cascade");
+			var partToBump = ParsePartToBump(logger, args);
 			var specificComponent = components.FindComponent<IVersionable>(componentNamePattern);
 			if (specificComponent == null)
 				return true;
-			VersionPart partToBump = VersionPart.Build;
-			if (args.Contains("-part:major"))
-				partToBump = VersionPart.Major;
-			else if (args.Contains("-part:minor"))
-				partToBump = VersionPart.Minor;
-			else if (args.Contains("-part:revision"))
-				partToBump = VersionPart.Revision;
-			else if (args.Contains("-part:none"))
-				partToBump = VersionPart.None;
 			BumpVersion(logger, specificComponent, cascade, partToBump, packagesOutputDirectory);
 			return true;
+		}
+
+		private static VersionPart ParsePartToBump(ILogger logger, IEnumerable<string> args)
+		{
+			var part = args.ParseStringParameter("part", "build");
+			switch (part) {
+				case "major":
+					return VersionPart.Major;
+				case "minor":
+					return VersionPart.Minor;
+				case "build":
+					return VersionPart.Build;
+				case "revision":
+					return VersionPart.Revision;
+				case "none":
+					return VersionPart.None;
+			}
+			logger.ErrorDetail("Invalid value for 'part' option: '{0}'. Using default value 'build'.", part);
+			return VersionPart.Build;
 		}
 
 		private bool BumpVersion(ILogger logger, IVersionable component, bool cascade, VersionPart partToBump, string packagesOutputDirectory)
