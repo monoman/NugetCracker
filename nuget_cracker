@@ -1,0 +1,2 @@
+#!/bin/sh 
+exec /usr/bin/mono NugetCracker/bin/Debug/NugetCracker.exe "$@"
