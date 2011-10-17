@@ -91,6 +91,20 @@ namespace NugetCracker.Utilities
 			return true;
 		}
 
+		private static NuGet.IPackage FindPackage(ILogger logger, IReference newPackage, string sourceDirectory)
+		{
+			var repo = new NuGet.LocalPackageRepository(sourceDirectory, false);
+			var packages = (from p in repo.GetPackages()
+							where p.Id == newPackage.Name
+							orderby p.Version descending
+							select p);
+			var package = packages.FirstOrDefault();
+			if (package == null) {
+				logger.Error("Could not find package '{0}' in '{1}'!", newPackage.Name, sourceDirectory);
+			}
+			return package;
+		}
+
 		public static void RemoveInstalledVersions(ILogger logger, IReference package, string installDir)
 		{
 			foreach (string dirToRemove in Directory.EnumerateDirectories(installDir, package.Name + ".*.*"))
