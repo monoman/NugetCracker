@@ -105,17 +105,21 @@ namespace NUnit.NugetCracker
 		}
 
 		[Test]
-		public void TestParseBrokenStringParameter()
+		public void TestParseStringParameter()
 		{
-			var result = "command -param:\"This is broken in many pieces\" object".Split(' ').ParseBrokenStringParameter("param");
+			var result = "command -param:\"This is broken in many pieces\" object".ParseArguments().ParseStringParameter("param");
 			Assert.That(ref result, Is.EqualTo("This is broken in many pieces"));
-			result = "command -param:\"Solid\" object".Split(' ').ParseBrokenStringParameter("param");
+			result = "command -param:\"Solid\" object".ParseArguments().ParseStringParameter("param");
 			Assert.That(ref result, Is.EqualTo("Solid"));
-			result = "command -param:\"\" object".Split(' ').ParseBrokenStringParameter("param");
+			result = "command -param:\"\" object".ParseArguments().ParseStringParameter("param");
 			Assert.That(ref result, Is.Null);
-			result = "command -param:\"Some values\" object".Split(' ').ParseBrokenStringParameter("otherparam");
+			result = "command -param:\"Some values\" object".ParseArguments().ParseStringParameter("otherparam");
 			Assert.That(ref result, Is.Null);
-			result = "command -param:\"An unclosed string".Split(' ').ParseBrokenStringParameter("param");
+			result = "command -param:\"\" object".ParseArguments().ParseStringParameter("param", "default");
+			Assert.That(ref result, Is.EqualTo("default"));
+			result = "command -param:\"Some values\" object".ParseArguments().ParseStringParameter("otherparam", "default");
+			Assert.That(ref result, Is.EqualTo("default"));
+			result = "command -param:\"An unclosed string".ParseArguments().ParseStringParameter("param");
 			Assert.That(ref result, Is.EqualTo("An unclosed string"));
 		}
 

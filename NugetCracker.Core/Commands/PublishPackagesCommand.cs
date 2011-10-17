@@ -37,10 +37,9 @@ namespace NugetCracker.Commands
 
 		public bool Process(ILogger logger, IEnumerable<string> args, MetaProjectPersistence metaProject, ComponentsList components, string packagesOutputDirectory)
 		{
-			var destination = args.FirstOrDefault(s => s.StartsWith("-to:"));
+			var destination = args.ParseStringParameter("to");
 			if (string.IsNullOrWhiteSpace(destination))
 				return true;
-			destination = destination.Substring(4);
 			if (!Directory.Exists(destination)) {
 				logger.Error("Could not find destination folder: '{0}'", destination);
 				return true;

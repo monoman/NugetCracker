@@ -169,11 +169,11 @@ namespace NugetCracker
 
 		public static string ParseStringParameter(this IEnumerable<string> args, string paramName, string @default = null)
 		{
-			paramName = paramName.Trim().ToLowerInvariant();
-			var arg = args.FirstOrDefault(s => s.ToLowerInvariant().StartsWith("-" + paramName + ":"));
-			if (arg == null)
+			paramName = "-" + paramName.Trim().ToLowerInvariant() + ":";
+			var arg = args.FirstOrDefault(s => s.ToLowerInvariant().StartsWith(paramName));
+			if (arg == null || arg.Length <= paramName.Length)
 				return @default;
-			return arg.Substring(paramName.Length + 2);
+			return arg.Substring(paramName.Length);
 		}
 
 		public static string ToLibFolder(this string framework)
