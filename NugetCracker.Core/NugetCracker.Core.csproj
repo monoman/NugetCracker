@@ -35,7 +35,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="NuGet.Core, Version=1.5.20902.9026, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+    <Reference Include="NuGet.Core">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\NuGet.Core\lib\net40-Client\NuGet.Core.dll</HintPath>
     </Reference>
