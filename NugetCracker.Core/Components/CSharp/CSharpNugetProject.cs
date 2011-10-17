@@ -17,7 +17,8 @@ namespace NugetCracker.Components.CSharp
 		public bool Pack(ILogger logger, string outputDirectory)
 		{
 			using (logger.Block)
-				return ToolHelper.ExecuteTool(logger, "nuget", "pack \"" + FullPath + "\" -Verbose -OutputDirectory \"" + outputDirectory + "\"", _projectDir);
+				return ToolHelper.ExecuteTool(logger, "nuget", "pack \"" + FullPath + "\" -Verbose ", outputDirectory);
+			//return ToolHelper.ExecuteTool(logger, "nuget", "pack \"" + FullPath + "\" -Verbose -OutputDirectory \"" + outputDirectory + "\"", _projectDir);
 		}
 
 		public bool FixReferencesToNuget(ILogger logger, string outputDirectory)
