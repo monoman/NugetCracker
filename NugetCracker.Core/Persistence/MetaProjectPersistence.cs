@@ -5,6 +5,8 @@ using System.Linq;
 using Commons.Prevalence;
 using NugetCracker.Data;
 using NugetCracker.Transactions;
+using System.Runtime.Serialization;
+using System.Collections;
 
 namespace NugetCracker.Persistence
 {
