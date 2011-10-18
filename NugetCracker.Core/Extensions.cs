@@ -164,7 +164,17 @@ namespace NugetCracker
 
 		public static void TransformFile(this string filename, Func<string, string> transformer)
 		{
+			TurnOffReadOnlyAttribute(filename);
 			File.WriteAllText(filename, transformer(File.ReadAllText(filename)));
+		}
+
+		private static void TurnOffReadOnlyAttribute(string filename)
+		{
+			var attribs = File.GetAttributes(filename);
+			if (attribs.HasFlag(FileAttributes.ReadOnly)) {
+				attribs ^= FileAttributes.ReadOnly;
+				File.SetAttributes(filename, attribs);
+			}
 		}
 
 		public static string ParseStringParameter(this IEnumerable<string> args, string paramName, string @default = null)

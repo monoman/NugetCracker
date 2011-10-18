@@ -26,18 +26,18 @@ namespace NugetCracker.Commands
 
 	Bumps up the [AssemblyVersion]/Package Version of the component and rebuilds/repackages. 
 	The [AssemblyFileVersion] attribute also is kept in sync with the [AssemblyVersion].
-	If component generates a Nuget it is not automatically published unless the --cascade 
-	or --publish options were specified.
+
+	Update all dependent components to use the new build/package, also bumping up their 
+	version numbers using the same policy (-part option), and them their dependent components 
+	and so on. 
+
+	If some components generate a Nuget, the Nuget is published to a temporary output 'source' 
+	and the dependent components have their package references updated.
 
 	Options
-	-part:major|minor|build|revision|none		
+	-part:major|minor|build|revision		
 		Increments the major, minor, build, revision version number. 
 		If option is ommitted the default is to increment build number.
-	-cascade
-		Update all dependent components to use the new build/package, and them their dependent 
-		components and so on. If some components generate a Nuget, the Nuget is published to 
-		a temporary output 'source' and the dependent components have their package references 
-		updated.
 ";
 			}
 		}
@@ -49,12 +49,11 @@ namespace NugetCracker.Commands
 				logger.Error("No component pattern specified");
 				return true;
 			}
-			bool cascade = args.Contains("-cascade");
 			var partToBump = ParsePartToBump(logger, args);
 			var specificComponent = components.FindComponent<IVersionable>(componentNamePattern);
 			if (specificComponent == null)
 				return true;
-			BumpVersion(logger, specificComponent, cascade, partToBump, packagesOutputDirectory);
+			BumpVersion(logger, specificComponent, partToBump, packagesOutputDirectory);
 			return true;
 		}
 
@@ -70,39 +69,54 @@ namespace NugetCracker.Commands
 					return VersionPart.Build;
 				case "revision":
 					return VersionPart.Revision;
-				case "none":
-					return VersionPart.None;
 			}
 			logger.ErrorDetail("Invalid value for 'part' option: '{0}'. Using default value 'build'.", part);
 			return VersionPart.Build;
 		}
 
-		private bool BumpVersion(ILogger logger, IVersionable component, bool cascade, VersionPart partToBump, string packagesOutputDirectory)
+		private bool BumpVersion(ILogger logger, IVersionable component, VersionPart partToBump, string packagesOutputDirectory)
 		{
-			var componentName = component.Name;
-			Version newVersion = component.CurrentVersion.Bump(partToBump);
-			logger.Info("Bumping component '{0}' version from {1} to {2}", componentName, component.CurrentVersion.ToShort(), newVersion.ToShort());
-			if (cascade)
-				logger.Info("==== cascading");
-			if (!component.SetNewVersion(logger, newVersion)) {
-				logger.Error("Could not bump component '{0}' version to {1}", componentName, newVersion.ToShort());
-				return false;
+			var componentsToRebuild = new List<IProject>();
+			logger.Info("Bumping versions. Affected version part: {0} number", partToBump);
+			using (logger.Block) {
+				if (!BumpUp(logger, component, partToBump))
+					return false;
+				foreach (IComponent dependentComponent in component.DependentComponents) {
+					if (dependentComponent is IVersionable)
+						if (BumpUp(logger, (IVersionable)dependentComponent, partToBump))
+							componentsToRebuild.Add((IProject)dependentComponent);
+				}
 			}
+			logger.Info("Rebuilding bumped components");
+			using (logger.Block) {
+				if (!BuildAndUpdate(logger, component, packagesOutputDirectory))
+					return false;
+				foreach (IProject dependentComponent in componentsToRebuild)
+					BuildAndUpdate(logger, dependentComponent, packagesOutputDirectory);
+			}
+			return true;
+		}
+
+		private static bool BuildAndUpdate(ILogger logger, IVersionable component, string packagesOutputDirectory)
+		{
 			if (!BuildHelper.Build(logger, component, packagesOutputDirectory))
 				return false;
 			if (!BuildHelper.UpdatePackageDependency(logger, component as INugetSpec, packagesOutputDirectory))
 				return false;
-			if (cascade) {
-				var partToBumpOnDependentComponents = partToBump == VersionPart.None ? VersionPart.Build : partToBump;
-				foreach (IComponent dependentComponent in component.DependentComponents) {
-					if (dependentComponent is IVersionable)
-						if (!BumpVersion(logger, (IVersionable)dependentComponent, false, partToBumpOnDependentComponents, packagesOutputDirectory)) {
-							logger.Error("Could not bump version for dependent component '{0}'", dependentComponent.Name);
-							return false;
-						}
-				}
-			}
 			return true;
+		}
+
+		private static bool BumpUp(ILogger logger, IVersionable component, VersionPart partToBump)
+		{
+			var componentName = component.Name;
+			Version currentVersion = component.CurrentVersion;
+			Version newVersion = currentVersion.Bump(partToBump);
+			if (component.SetNewVersion(logger, newVersion)) {
+				logger.Info("Bumped component '{0}' version from {1} to {2}", componentName, currentVersion.ToShort(), newVersion.ToShort());
+				return true;
+			}
+			logger.Error("Could not bump component '{0}' version to {1}", componentName, newVersion.ToShort());
+			return false;
 		}
 
 	}

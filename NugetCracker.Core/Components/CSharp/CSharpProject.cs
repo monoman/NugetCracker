@@ -415,7 +415,6 @@ namespace NugetCracker.Components.CSharp
 		{
 			if (version == CurrentVersion)
 				return true;
-			logger.Info("Setting new version to {0}", version.ToShort());
 			if (!File.Exists(_assemblyInfoPath)) {
 				logger.Error("There's no file to keep the version information in this component.");
 				return false;
