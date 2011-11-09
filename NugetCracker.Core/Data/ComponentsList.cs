@@ -128,9 +128,19 @@ namespace NugetCracker.Data
 
 		public void FindDependents()
 		{
-			foreach (IComponent component in _list)
-				component.DependentComponents =
-					new LayeredDependencies(_list.FindAll(c => c.Dependencies.Any(r => r.Equals(component))));
+			foreach (IComponent component in _list) {
+				var preLista = _list.FindAll(c => c.Dependencies.Any(r => r.Equals(component)));
+				var initialCount = 0;
+				do {
+					initialCount = preLista.Count;
+					var delta = new List<IComponent>();
+					foreach (IComponent dependentComponent in preLista)
+						delta.AddRange(_list.FindAll(c => c.Dependencies.Any(r => r.Equals(dependentComponent))));
+					preLista.AddRange(delta.Distinct());
+					preLista = new List<IComponent>(preLista.Distinct());
+				} while (initialCount < preLista.Count);
+				component.DependentComponents = new LayeredDependencies(preLista);
+			}
 		}
 
 		public void Prune(string path)
