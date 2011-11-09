@@ -32,7 +32,6 @@ namespace NugetCracker.Components.CSharp
 			CurrentVersion = new Version("1.0.0.0");
 			Description = string.Empty;
 			ParseAvailableData();
-			_dependencies.Sort((c1, c2) => c1.Name.CompareTo(c2.Name));
 			InstalledPackagesDir = FindPackagesDir(_projectDir);
 			RelativeInstalledPackagesDir = _projectDir.Relativize(InstalledPackagesDir);
 		}
@@ -60,8 +59,10 @@ namespace NugetCracker.Components.CSharp
 
 		protected virtual void ParseAvailableData()
 		{
+			_dependencies.Clear();
 			ParseProjectFile();
 			ParsePackagesFile();
+			_dependencies.Sort((c1, c2) => c1.Name.CompareTo(c2.Name));
 		}
 
 		protected void ParsePackagesFile()
@@ -76,6 +77,10 @@ namespace NugetCracker.Components.CSharp
 						_dependencies.Add(new NugetReference(packageId, packageVersions));
 				}
 			}
+		}
+		public virtual VersionPart PartToCascadeBump(VersionPart partBumpedOnDependency)
+		{
+			return UsesNUnit ? partBumpedOnDependency : VersionPart.Revision;
 		}
 
 		private string PackagesConfigFilePath
@@ -93,6 +98,7 @@ namespace NugetCracker.Components.CSharp
 			try {
 				UpdatePackagesConfig(newPackage, packagesFile);
 				UpdatePackageReferencesOnProject(logger, newPackage);
+				ParseAvailableData();
 				if (!installDirs.Contains(InstalledPackagesDir))
 					installDirs.Add(InstalledPackagesDir);
 				return true;

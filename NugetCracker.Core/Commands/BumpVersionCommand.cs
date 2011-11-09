@@ -22,14 +22,14 @@ namespace NugetCracker.Commands
 		{
 			get
 			{
-				return @"B[umpVersion] [options] pattern
+				return @"B[umpVersion] [options] pattern [pattern] ...
 
-	Bumps up the [AssemblyVersion]/Package Version of the component and rebuilds/repackages. 
+	Bumps up the [AssemblyVersion]/Package Version of the components and rebuilds/repackages. 
 	The [AssemblyFileVersion] attribute also is kept in sync with the [AssemblyVersion].
 
 	Update all dependent components to use the new build/package, also bumping up their 
-	version numbers using the same policy (-part option), and them their dependent components 
-	and so on. 
+	version numbers using the specific policy for each component type, and them their dependent 
+    components and so on. 
 
 	If some components generate a Nuget, the Nuget is published to a temporary output 'source' 
 	and the dependent components have their package references updated.
@@ -37,29 +37,40 @@ namespace NugetCracker.Commands
 	Options
 	-part:major|minor|build|revision		
 		Increments the major, minor, build, revision version number. 
-		If option is ommitted the default is to increment build number.
+		If option is ommitted the default is to increment revision number.
 ";
 			}
 		}
 
 		public bool Process(ILogger logger, IEnumerable<string> args, MetaProjectPersistence metaProject, ComponentsList components, string packagesOutputDirectory)
 		{
-			var componentNamePattern = args.FirstOrDefault(s => !s.StartsWith("-"));
-			if (componentNamePattern == null) {
-				logger.Error("No component pattern specified");
-				return true;
+			foreach (var componentNamePattern in args.Where(s => !s.StartsWith("-"))) {
+				if (componentNamePattern == null) {
+					logger.Error("No component pattern specified");
+					return true;
+				}
+				var partToBump = ParsePartToBump(logger, args);
+				var specificComponent = components.FindComponent<IVersionable>(componentNamePattern);
+				if (specificComponent == null)
+					return true;
+				BumpVersion(logger, specificComponent, partToBump, packagesOutputDirectory);
 			}
-			var partToBump = ParsePartToBump(logger, args);
-			var specificComponent = components.FindComponent<IVersionable>(componentNamePattern);
-			if (specificComponent == null)
-				return true;
-			BumpVersion(logger, specificComponent, partToBump, packagesOutputDirectory);
 			return true;
 		}
 
 		private static VersionPart ParsePartToBump(ILogger logger, IEnumerable<string> args)
 		{
-			var part = args.ParseStringParameter("part", "build");
+			var defaultPart = "revision";
+			var part = args.ParseStringParameter("part", defaultPart);
+			var versionPart = TranslateToVersionPart(part);
+			if (versionPart != VersionPart.None)
+				return versionPart;
+			logger.ErrorDetail("Invalid value for 'part' option: '{0}'. Using default value '{1}'.", part, defaultPart);
+			return TranslateToVersionPart(defaultPart);
+		}
+
+		private static VersionPart TranslateToVersionPart(string part)
+		{
 			switch (part) {
 				case "major":
 					return VersionPart.Major;
@@ -69,9 +80,9 @@ namespace NugetCracker.Commands
 					return VersionPart.Build;
 				case "revision":
 					return VersionPart.Revision;
+				default:
+					return VersionPart.None;
 			}
-			logger.ErrorDetail("Invalid value for 'part' option: '{0}'. Using default value 'build'.", part);
-			return VersionPart.Build;
 		}
 
 		private bool BumpVersion(ILogger logger, IVersionable component, VersionPart partToBump, string packagesOutputDirectory)
@@ -82,9 +93,12 @@ namespace NugetCracker.Commands
 				if (!BumpUp(logger, component, partToBump))
 					return false;
 				foreach (IComponent dependentComponent in component.DependentComponents) {
-					if (dependentComponent is IVersionable)
-						if (BumpUp(logger, (IVersionable)dependentComponent, partToBump))
-							componentsToRebuild.Add((IProject)dependentComponent);
+					if (dependentComponent is IVersionable) {
+						var versionableComponent = (IVersionable)dependentComponent;
+						if (BumpUp(logger, versionableComponent, versionableComponent.PartToCascadeBump(partToBump)))
+							if (dependentComponent is IProject)
+								componentsToRebuild.Add((IProject)dependentComponent);
+					}
 				}
 			}
 			logger.Info("Rebuilding bumped components");

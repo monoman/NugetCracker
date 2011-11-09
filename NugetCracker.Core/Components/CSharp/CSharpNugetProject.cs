@@ -54,6 +54,11 @@ namespace NugetCracker.Components.CSharp
 
 		public override string Type { get { return "C# Nuget Project"; } }
 
+		public override VersionPart PartToCascadeBump(VersionPart partBumpedOnDependency)
+		{
+			return partBumpedOnDependency;
+		}
+
 		public IEnumerable<string> AssemblyNames
 		{
 			get { return new[] { base._assemblyName }; }
