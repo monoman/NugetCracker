@@ -73,5 +73,11 @@ namespace NugetCracker.Persistence
 			return ExecuteQuery(metaProject => metaProject.ExcludedDirectories).Any(s => path.StartsWith(s));
 		}
 
+		public string LastPublishedTo
+		{
+			get { return ExecuteQuery(metaProject => metaProject.LastPublishedTo); }
+			set { ExecuteTransaction(new SetLastPublishedToTransaction(value)); }
+		}
+
 	}
 }

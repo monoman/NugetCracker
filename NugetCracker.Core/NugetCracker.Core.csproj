@@ -73,6 +73,7 @@
     <Compile Include="Interfaces\IReference.cs" />
     <Compile Include="Interfaces\IVersionable.cs" />
     <Compile Include="Persistence\MetaProjectPersistence.cs" />
+    <Compile Include="Transactions\SetLastPublishedToTransaction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transactions\AddDirectoryTransaction.cs" />
     <Compile Include="Transactions\AddExcludedDirectoryTransaction.cs" />

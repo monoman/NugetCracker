@@ -24,7 +24,7 @@ namespace NugetCracker.Commands
 		{
 			get
 			{
-				return @"P[ublishPackages] pattern options
+				return @"P[ublishPackages] pattern [options]
 
 	Publish packages to specified folder.
 
@@ -37,13 +37,14 @@ namespace NugetCracker.Commands
 
 		public bool Process(ILogger logger, IEnumerable<string> args, MetaProjectPersistence metaProject, ComponentsList components, string packagesOutputDirectory)
 		{
-			var destination = args.ParseStringParameter("to");
+			var destination = args.ParseStringParameter("to", metaProject.LastPublishedTo);
 			if (string.IsNullOrWhiteSpace(destination))
 				return true;
 			if (!Directory.Exists(destination)) {
 				logger.Error("Could not find destination folder: '{0}'", destination);
 				return true;
 			}
+			metaProject.LastPublishedTo = destination;
 			var componentNamePattern = args.FirstOrDefault(s => !s.StartsWith("-")) ?? ".*";
 			foreach (var component in components.FilterBy(componentNamePattern, nugets: true))
 				if (component is INugetSpec)

@@ -16,9 +16,15 @@ namespace NugetCracker.Components.CSharp
 
 		public bool Pack(ILogger logger, string outputDirectory)
 		{
-			using (logger.Block)
-				return ToolHelper.ExecuteTool(logger, "nuget", "pack \"" + FullPath + "\" -Verbose ", outputDirectory);
-			//return ToolHelper.ExecuteTool(logger, "nuget", "pack \"" + FullPath + "\" -Verbose -OutputDirectory \"" + outputDirectory + "\"", _projectDir);
+			using (logger.Block) {
+				var result = ToolHelper.ExecuteTool(logger, "nuget", "pack \"" + FullPath + "\" -Verbose ", outputDirectory);
+				logger.Info("Renaming {0} to {1}", Bad1dot6OutputPackageFilename, OutputPackageFilename);
+				var newName = outputDirectory.Combine(OutputPackageFilename);
+				if (File.Exists(newName))
+					File.Delete(newName);
+				File.Move(outputDirectory.Combine(Bad1dot6OutputPackageFilename), outputDirectory.Combine(OutputPackageFilename));
+				return result;
+			}
 		}
 
 		public bool FixReferencesToNuget(ILogger logger, string outputDirectory)
@@ -38,6 +44,11 @@ namespace NugetCracker.Components.CSharp
 		public string OutputPackageFilename
 		{
 			get { return Path.GetFileNameWithoutExtension(FullPath) + "." + CurrentVersion.ToShort() + ".nupkg"; }
+		}
+
+		private string Bad1dot6OutputPackageFilename
+		{
+			get { return Path.GetFileNameWithoutExtension(FullPath) + "." + CurrentVersion.ToString() + ".nupkg"; }
 		}
 
 		public IEnumerable<INugetSpec> DependentPackages
