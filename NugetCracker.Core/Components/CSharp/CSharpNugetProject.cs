@@ -18,11 +18,14 @@ namespace NugetCracker.Components.CSharp
 		{
 			using (logger.Block) {
 				var result = ToolHelper.ExecuteTool(logger, "nuget", "pack \"" + FullPath + "\" -Verbose ", outputDirectory);
-				logger.Info("Renaming {0} to {1}", Bad1dot6OutputPackageFilename, OutputPackageFilename);
 				var newName = outputDirectory.Combine(OutputPackageFilename);
-				if (File.Exists(newName))
-					File.Delete(newName);
-				File.Move(outputDirectory.Combine(Bad1dot6OutputPackageFilename), outputDirectory.Combine(OutputPackageFilename));
+				var badName = outputDirectory.Combine(Bad1dot6OutputPackageFilename);
+				if (File.Exists(badName)) {
+					logger.Info("Renaming {0} to {1}", Bad1dot6OutputPackageFilename, OutputPackageFilename);
+					if (File.Exists(newName))
+						File.Delete(newName);
+					File.Move(badName, newName);
+				}
 				return result;
 			}
 		}
