@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using NugetCracker.Interfaces;
 using NugetCracker.Utilities;
-using System.Text.RegularExpressions;
 
 namespace NugetCracker.Components.CSharp
 {
@@ -20,7 +21,7 @@ namespace NugetCracker.Components.CSharp
 				var result = ToolHelper.ExecuteTool(logger, "nuget", "pack \"" + FullPath + "\" -Verbose ", outputDirectory);
 				var newName = outputDirectory.Combine(OutputPackageFilename);
 				var badName = outputDirectory.Combine(Bad1dot6OutputPackageFilename);
-				if (File.Exists(badName)) {
+				if (File.Exists(badName) && !badName.Equals(newName, StringComparison.OrdinalIgnoreCase)) {
 					logger.Info("Renaming {0} to {1}", Bad1dot6OutputPackageFilename, OutputPackageFilename);
 					if (File.Exists(newName))
 						File.Delete(newName);
