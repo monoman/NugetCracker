@@ -69,12 +69,16 @@ namespace NugetCracker.Components.CSharp
 		{
 			var packagesFile = Path.Combine(_projectDir, "packages.config");
 			if (File.Exists(packagesFile)) {
-				XDocument packages = XDocument.Load(packagesFile);
-				foreach (XElement source in packages.Descendants("package")) {
-					var packageId = source.Attribute("id").Value;
-					var packageVersions = source.Attribute("version").Value;
-					if (!string.IsNullOrWhiteSpace(packageId))
-						_dependencies.Add(new NugetReference(packageId, packageVersions));
+				try {
+					XDocument packages = XDocument.Load(packagesFile);
+					foreach (XElement source in packages.Descendants("package")) {
+						var packageId = source.Attribute("id").Value;
+						var packageVersions = source.Attribute("version").Value;
+						if (!string.IsNullOrWhiteSpace(packageId))
+							_dependencies.Add(new NugetReference(packageId, packageVersions));
+					}
+				} catch (Exception e) {
+					Console.Error.WriteLine("Could not read file '{0}'. Cause: {1}", packagesFile, e.Message);
 				}
 			}
 		}
@@ -345,28 +349,32 @@ namespace NugetCracker.Components.CSharp
 		{
 			bool found = false;
 			if (File.Exists(sourcePath)) {
-				string info = File.ReadAllText(sourcePath);
-				string pattern = "AssemblyVersion\\(\"([^\"]*)\"\\)";
-				var match = Regex.Match(info, pattern, RegexOptions.Multiline);
-				if (match.Success) {
-					try {
-						string version = match.Groups[1].Value;
-						if (version.Contains('*'))
-							version = version.Replace('*', '0');
-						if (version.Count(c => c == '.') < 3)
-							version = version + ".0";
-						CurrentVersion = new Version(version);
-					} catch {
-						return false;
+				try {
+					string info = File.ReadAllText(sourcePath);
+					string pattern = "AssemblyVersion\\(\"([^\"]*)\"\\)";
+					var match = Regex.Match(info, pattern, RegexOptions.Multiline);
+					if (match.Success) {
+						try {
+							string version = match.Groups[1].Value;
+							if (version.Contains('*'))
+								version = version.Replace('*', '0');
+							if (version.Count(c => c == '.') < 3)
+								version = version + ".0";
+							CurrentVersion = new Version(version);
+						} catch {
+							return false;
+						}
+						found = true;
 					}
-					found = true;
+					pattern = "AssemblyDescription\\(\"([^\"]+)\"\\)";
+					match = Regex.Match(info, pattern, RegexOptions.Multiline);
+					if (match.Success)
+						Description = match.Groups[1].Value;
+				} catch (Exception e) {
+					Console.Error.WriteLine("Could not read file '{0}'. Cause: {1}", sourcePath, e.Message);
 				}
-				pattern = "AssemblyDescription\\(\"([^\"]+)\"\\)";
-				match = Regex.Match(info, pattern, RegexOptions.Multiline);
-				if (match.Success)
-					Description = match.Groups[1].Value;
 			} else
-				Console.WriteLine("\nMissing file: {0}", sourcePath);
+				Console.Error.WriteLine("\nMissing file: {0}", sourcePath);
 			return found;
 		}
 

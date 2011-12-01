@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text.RegularExpressions;
 using NugetCracker.Interfaces;
+using System;
 
 namespace NugetCracker.Components.CSharp
 {

@@ -77,12 +77,16 @@ namespace NugetCracker.Data
 
 		public void Scan(MetaProjectPersistence metaProject, string path, IEnumerable<IComponentsFactory> factories, Action<string> scanned)
 		{
-			if (!metaProject.IsExcludedDirectory(path)) {
-				foreach (IComponentsFactory factory in factories)
-					_list.AddRange(factory.FindComponentsIn(path));
-				foreach (var dir in Directory.EnumerateDirectories(path))
-					Scan(metaProject, dir, factories, scanned);
-				scanned(path);
+			try {
+				if (!metaProject.IsExcludedDirectory(path)) {
+					foreach (IComponentsFactory factory in factories)
+						_list.AddRange(factory.FindComponentsIn(path));
+					foreach (var dir in Directory.EnumerateDirectories(path))
+						Scan(metaProject, dir, factories, scanned);
+					scanned(path);
+				}
+			} catch (Exception e) {
+				Console.Error.WriteLine(e);
 			}
 		}
 
