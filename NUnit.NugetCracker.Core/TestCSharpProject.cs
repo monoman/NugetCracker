@@ -14,10 +14,10 @@ namespace NUnit.NugetCracker
 		[Test]
 		public void TestFixPackageReference()
 		{
-			var result = CSharpProject.FixPackageReference(projectXml, "Sample.PluginInterface");
+			var result = CSharpProject.FixPackageReference(projectXml, "Sample.PluginInterface", "net35");
 			Assert.That<string>(ref result, Is.Not.StringContaining("2.5.6"));
 			Assert.That<string>(ref result, Is.StringContaining("<Reference Include=\"Sample.PluginInterface\""));
-			Assert.That<string>(ref result, Is.StringContaining(@"<HintPath>..\..\..\packages\Sample.PluginInterface\lib\"));
+			Assert.That<string>(ref result, Is.StringContaining(@"<HintPath>..\..\..\packages\Sample.PluginInterface\lib\net35"));
 		}
 
 		[Test]

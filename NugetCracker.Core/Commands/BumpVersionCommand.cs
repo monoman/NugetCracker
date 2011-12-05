@@ -44,16 +44,18 @@ namespace NugetCracker.Commands
 
 		public bool Process(ILogger logger, IEnumerable<string> args, MetaProjectPersistence metaProject, ComponentsList components, string packagesOutputDirectory)
 		{
+			bool foundOne = false;
+			var partToBump = ParsePartToBump(logger, args);
 			foreach (var componentNamePattern in args.Where(s => !s.StartsWith("-"))) {
-				if (componentNamePattern == null) {
-					logger.Error("No component pattern specified");
-					return true;
-				}
-				var partToBump = ParsePartToBump(logger, args);
+				foundOne = true;
 				var specificComponent = components.FindComponent<IVersionable>(componentNamePattern);
 				if (specificComponent == null)
 					return true;
 				BumpVersion(logger, specificComponent, partToBump, packagesOutputDirectory);
+			}
+			if (!foundOne) {
+				logger.Error("No component pattern specified");
+				return true;
 			}
 			return true;
 		}
@@ -106,7 +108,8 @@ namespace NugetCracker.Commands
 				if (!BuildAndUpdate(logger, component, packagesOutputDirectory))
 					return false;
 				foreach (IProject dependentComponent in componentsToRebuild)
-					BuildAndUpdate(logger, dependentComponent, packagesOutputDirectory);
+					if (!BuildAndUpdate(logger, dependentComponent, packagesOutputDirectory))
+						return false;
 			}
 			return true;
 		}

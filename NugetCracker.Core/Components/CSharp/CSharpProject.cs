@@ -126,21 +126,22 @@ namespace NugetCracker.Components.CSharp
 		protected virtual void UpdatePackageReferencesOnProject(ILogger logger, IReference newPackage)
 		{
 			try {
-				FullPath.TransformFile(xml => FixPackageReference(xml, newPackage.Name));
+				FullPath.TransformFile(xml => FixPackageReference(xml, newPackage.Name, newPackage.Platform));
 			} catch (Exception e) {
 				logger.Error("Could not update references for package '{0}' in project '{1}'. Cause: {2}",
 					newPackage, FullPath, e.Message);
 			}
 		}
 
-		public static string FixPackageReference(string xml, string packageName)
+		public static string FixPackageReference(string xml, string packageName, string platform)
 		{
 			string pattern = "<Reference \\s*Include=\"" + packageName + ",[^>]*>";
-			string pattern2 = "^(\\s*<HintPath>.*\\\\)(" + packageName + "\\.\\d+[^\\\\<]*)(\\\\.*\\\\[^\\\\<]*\\.dll)([^<]*</HintPath>\\s*)$";
-			return
+			string pattern2 = "^(\\s*<HintPath>.*\\\\)(" + packageName + "[^\\\\]*)(\\\\lib\\\\net[^\\\\]*)(\\\\[^\\\\]*\\.dll)([^<]*</HintPath>\\s*)$";
+			var xmlOut =
 				DisableNugetPowerToolsActions(xml)
-				.RegexReplace(pattern, "<Reference Include=\"" + packageName + "\">")
-				.RegexReplace(pattern2, "$1" + packageName + "$3$4");
+				.RegexReplace(pattern, "<Reference Include=\"" + packageName + "\">");
+			xmlOut = xmlOut.RegexReplace(pattern2, "$1" + packageName + "\\lib\\" + platform + "$4$5");
+			return xmlOut;
 		}
 
 		public IComponent PromoteToNuget(ILogger logger, string outputDirectory, string tags, string licenseUrl = null,
@@ -385,7 +386,7 @@ namespace NugetCracker.Components.CSharp
 
 		public virtual bool Build(ILogger logger)
 		{
-			var arguments = UseMonoTools ? "" : "/verbosity:minimal ";
+			var arguments = "/t:Rebuild " + (UseMonoTools ? "" : "/verbosity:minimal ");
 			using (logger.Block)
 				return ToolHelper.ExecuteTool(logger, BuildTool, arguments + '"' + FullPath + '"', _projectDir, ProcessBuildOutput);
 		}
@@ -540,5 +541,11 @@ namespace NugetCracker.Components.CSharp
 		}
 
 		public string RelativeInstalledPackagesDir { get; private set; }
+
+
+		public string Platform
+		{
+			get { return _targetFrameworkVersion.ToLibFolder(); }
+		}
 	}
 }

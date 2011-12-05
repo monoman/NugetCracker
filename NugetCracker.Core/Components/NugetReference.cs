@@ -1,4 +1,5 @@
 ﻿using NugetCracker.Interfaces;
+using System;
 
 namespace NugetCracker.Components
 {
@@ -24,6 +25,11 @@ namespace NugetCracker.Components
 		public override int GetHashCode()
 		{
 			return Name.GetHashCode();
+		}
+
+		public string Platform
+		{
+			get { return "net40"; } // FIXME need to have access to either the referenced project target platform or the consumer project's.
 		}
 	}
 

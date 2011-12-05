@@ -83,5 +83,6 @@ namespace NugetCracker.Components.CSharp
 		{
 			return _targetFrameworkVersion.CompatibleFramework(consumerFramework);
 		}
+
 	}
 }
