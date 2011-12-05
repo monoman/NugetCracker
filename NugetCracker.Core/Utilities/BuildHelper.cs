@@ -93,7 +93,7 @@ namespace NugetCracker.Utilities
 
 		private static NuGet.IPackage FindPackage(ILogger logger, IReference newPackage, string sourceDirectory)
 		{
-			var repo = new NuGet.LocalPackageRepository(sourceDirectory, false);
+			var repo = new NuGet.LocalPackageRepository(sourceDirectory);
 			var packages = (from p in repo.GetPackages()
 							where p.Id == newPackage.Name
 							orderby p.Version descending
