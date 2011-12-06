@@ -120,19 +120,46 @@ namespace NugetCracker.Utilities
 		{
 			var package = nuget.OutputPackageFilename;
 			var destinationPackage = destination.Combine(package);
-			var originPackage = packagesOutputDirectory.Combine(package);
 			if (File.Exists(destinationPackage))
 				return;
-			if (!File.Exists(originPackage)) {
+			var originPackage = packagesOutputDirectory.Combine(package);
+			if (File.Exists(originPackage)) {
+				try {
+					logger.Info("Publishing package '{0}' to '{1}'", package, destination);
+					File.Copy(originPackage, destinationPackage);
+				} catch (Exception e) {
+					logger.Error(e);
+				}
+			} else {
 				logger.ErrorDetail("No built package for nuget '{0}'", nuget.Name);
-				return;
-			}
-			try {
-				logger.Info("Publishing package '{0}' to '{1}'", package, destination);
-				File.Copy(originPackage, destinationPackage);
-			} catch (Exception e) {
-				logger.Error(e);
 			}
 		}
+
+		public static bool PackageExists(INugetSpec nuget, string packagesOutputDirectory)
+		{
+			return File.Exists(packagesOutputDirectory.Combine(nuget.OutputPackageFilename));
+		}
+
+		public static bool BuildChain(ILogger logger, IVersionable component, string packagesOutputDirectory, IEnumerable<IProject> componentsToRebuild)
+		{
+			using (logger.Block) {
+				if (!BuildAndUpdate(logger, component, packagesOutputDirectory))
+					return false;
+				foreach (IProject dependentComponent in componentsToRebuild)
+					if (!BuildAndUpdate(logger, dependentComponent, packagesOutputDirectory))
+						return false;
+			}
+			return true;
+		}
+
+		private static bool BuildAndUpdate(ILogger logger, IVersionable component, string packagesOutputDirectory)
+		{
+			if (!BuildHelper.Build(logger, component, packagesOutputDirectory))
+				return false;
+			if (!BuildHelper.UpdatePackageDependency(logger, component as INugetSpec, packagesOutputDirectory))
+				return false;
+			return true;
+		}
+
 	}
 }

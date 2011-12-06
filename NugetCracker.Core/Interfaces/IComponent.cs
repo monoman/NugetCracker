@@ -19,5 +19,6 @@ namespace NugetCracker.Interfaces
 		bool UpgradePackageDependency(ILogger logger, IComponent newPackage, string sourceDirectory, ICollection<string> installDirs);
 
 		IEnumerable<IComponent> DependentComponents { get; set; }
+		IEnumerable<IProject> DependentProjects { get; }
 	}
 }

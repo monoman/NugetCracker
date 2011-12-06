@@ -37,7 +37,7 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="NuGet.Core">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NuGet.Core\lib\net40-Client\NuGet.Core.dll</HintPath>
+      <HintPath>..\packages\NuGet.Core\lib\net40\NuGet.Core.dll</HintPath>
     </Reference>
     <Reference Include="System.Core" />
   </ItemGroup>

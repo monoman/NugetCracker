@@ -24,7 +24,7 @@ namespace NugetCracker.Commands
 			{
 				return @"R[ebuild] [pattern]
 
-	Rebuilds current version of components matching pattern.
+	Rebuilds current version of components matching pattern. If no pattern is provided it builds components which weren't built and packaged for their current version'
 ";
 			}
 		}
@@ -36,14 +36,34 @@ namespace NugetCracker.Commands
 					if (dependency is NugetReference)
 						if (!component.InstallPackageDependencyFromSources(logger, dependency, packagesOutputDirectory))
 							return true;
-			var componentNamePattern = args.FirstOrDefault(s => !s.StartsWith("-")) ?? ".*";
-			foreach (var component in components.FilterBy(componentNamePattern, orderByTreeDepth: true))
-				if (component is IVersionable) {
-					BuildHelper.Build(logger, component as IVersionable, packagesOutputDirectory);
-					if (!BuildHelper.UpdatePackageDependency(logger, component as INugetSpec, packagesOutputDirectory))
-						return true;
-				}
+			var componentNamePattern = args.FirstOrDefault(s => !s.StartsWith("-"));
+			if (!string.IsNullOrWhiteSpace(componentNamePattern)) {
+				var rootComponent = components.FindComponent<IVersionable>(componentNamePattern);
+				if (rootComponent == null)
+					return true;
+				BuildHelper.BuildChain(logger, rootComponent, packagesOutputDirectory, rootComponent.DependentProjects);
+			} else {
+				foreach (var rootComponent in GetPendingForPublishingComponents(logger, components, packagesOutputDirectory))
+					BuildHelper.BuildChain(logger, rootComponent, packagesOutputDirectory, rootComponent.DependentProjects);
+			}
 			return true;
+		}
+
+		private IEnumerable<IVersionable> GetPendingForPublishingComponents(ILogger logger, ComponentsList components, string packagesOutputDirectory)
+		{
+			var list = new List<IVersionable>();
+			foreach (var component in components.FilterBy(".*", nugets: true))
+				if (component is INugetSpec && component is IVersionable)
+					if (!BuildHelper.PackageExists(component as INugetSpec, packagesOutputDirectory))
+						list.Add((IVersionable)component);
+			foreach (var versionable in list) {
+				var isRoot = true;
+				foreach (var other in list)
+					if (versionable.Dependencies.Contains(other))
+						isRoot = false;
+				if (isRoot)
+					yield return versionable;
+			}
 		}
 
 	}

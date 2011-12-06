@@ -547,5 +547,11 @@ namespace NugetCracker.Components.CSharp
 		{
 			get { return _targetFrameworkVersion.ToLibFolder(); }
 		}
+
+
+		public IEnumerable<IProject> DependentProjects
+		{
+			get { return DependentComponents.Where(c => c is IProject).Cast<IProject>(); }
+		}
 	}
 }

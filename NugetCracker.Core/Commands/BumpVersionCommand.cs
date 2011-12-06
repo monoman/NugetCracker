@@ -104,24 +104,9 @@ namespace NugetCracker.Commands
 				}
 			}
 			logger.Info("Rebuilding bumped components");
-			using (logger.Block) {
-				if (!BuildAndUpdate(logger, component, packagesOutputDirectory))
-					return false;
-				foreach (IProject dependentComponent in componentsToRebuild)
-					if (!BuildAndUpdate(logger, dependentComponent, packagesOutputDirectory))
-						return false;
-			}
-			return true;
+			return BuildHelper.BuildChain(logger, component, packagesOutputDirectory, componentsToRebuild);
 		}
 
-		private static bool BuildAndUpdate(ILogger logger, IVersionable component, string packagesOutputDirectory)
-		{
-			if (!BuildHelper.Build(logger, component, packagesOutputDirectory))
-				return false;
-			if (!BuildHelper.UpdatePackageDependency(logger, component as INugetSpec, packagesOutputDirectory))
-				return false;
-			return true;
-		}
 
 		private static bool BumpUp(ILogger logger, IVersionable component, VersionPart partToBump)
 		{

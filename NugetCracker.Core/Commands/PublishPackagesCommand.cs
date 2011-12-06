@@ -46,9 +46,18 @@ namespace NugetCracker.Commands
 			}
 			metaProject.LastPublishedTo = destination;
 			var componentNamePattern = args.FirstOrDefault(s => !s.StartsWith("-")) ?? ".*";
-			foreach (var component in components.FilterBy(componentNamePattern, nugets: true))
+			var list = components.FilterBy(componentNamePattern, nugets: true);
+			var listIsOk = true;
+			foreach (var component in list)
 				if (component is INugetSpec)
-					BuildHelper.CopyIfNew(logger, component as INugetSpec, packagesOutputDirectory, destination);
+					if (!BuildHelper.PackageExists(component as INugetSpec, packagesOutputDirectory)) {
+						listIsOk = false;
+						logger.ErrorDetail("There is no built package for nuget '{0}'", component.Name);
+					}
+			if (listIsOk)
+				foreach (var component in list)
+					if (component is INugetSpec)
+						BuildHelper.CopyIfNew(logger, component as INugetSpec, packagesOutputDirectory, destination);
 			return true;
 		}
 
