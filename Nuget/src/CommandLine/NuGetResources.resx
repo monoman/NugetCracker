@@ -1,0 +1,734 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="DeleteCommandDeletedPackage" xml:space="preserve">
+    <value>{0} {1} was deleted successfully.</value>
+  </data>
+  <data name="DeleteCommandDeletingPackage" xml:space="preserve">
+    <value>Deleting {0} {1} from the {2}.</value>
+  </data>
+  <data name="DeleteCommandDescription" xml:space="preserve">
+    <value>Deletes a package from the server.</value>
+  </data>
+  <data name="DeleteCommandSourceDescription" xml:space="preserve">
+    <value>Specifies the server URL.</value>
+  </data>
+  <data name="DeleteCommandUsageDescription" xml:space="preserve">
+    <value>Specify the Id and version of the package to delete from the server.</value>
+  </data>
+  <data name="DeleteCommandUsageSummary" xml:space="preserve">
+    <value>&lt;package Id&gt; &lt;package version&gt; [API Key] [options]</value>
+  </data>
+  <data name="HelpCommandDescription" xml:space="preserve">
+    <value>Displays general help information and help information about other commands.</value>
+  </data>
+  <data name="HelpCommandUsageDescription" xml:space="preserve">
+    <value>Pass a command name to display help information for that command.</value>
+  </data>
+  <data name="HelpCommandUsageSummary" xml:space="preserve">
+    <value>[command]</value>
+  </data>
+  <data name="InvalidOptionValueError" xml:space="preserve">
+    <value>Invalid option value: '{0} {1}'</value>
+  </data>
+  <data name="ListCommandDescription" xml:space="preserve">
+    <value>Displays a list of packages from a given source. If no sources are specified, all sources defined in %AppData%\NuGet\NuGet.config are used. If NuGet.config specifies no sources, uses the default NuGet feed.</value>
+  </data>
+  <data name="ListCommandNoPackages" xml:space="preserve">
+    <value>No packages found.</value>
+  </data>
+  <data name="ListCommandSourceDescription" xml:space="preserve">
+    <value>A list of packages sources to search.</value>
+  </data>
+  <data name="ListCommandUsageDescription" xml:space="preserve">
+    <value>Specify optional search terms.</value>
+  </data>
+  <data name="ListCommandUsageSummary" xml:space="preserve">
+    <value>[search terms] [options]</value>
+  </data>
+  <data name="ListCommandVerboseListDescription" xml:space="preserve">
+    <value>Displays a detailed list of information for each package.</value>
+  </data>
+  <data name="InstallCommandDescription" xml:space="preserve">
+    <value>Installs a package using the specified sources. If no sources are specified, all sources defined in %AppData%\NuGet\NuGet.config are used.  If NuGet.config specifies no sources, uses the default NuGet feed.</value>
+  </data>
+  <data name="InstallCommandVersionDescription" xml:space="preserve">
+    <value>The version of the package to install.</value>
+  </data>
+  <data name="InstallCommandSourceDescription" xml:space="preserve">
+    <value>A list of packages sources to use for the install.</value>
+  </data>
+  <data name="InstallCommandUsageDescription" xml:space="preserve">
+    <value>Specify the id and optionally the version of the package to install. If a path to a packages.config file is used instead of an id, all the packages it contains are installed.</value>
+  </data>
+  <data name="InstallCommandUsageSummary" xml:space="preserve">
+    <value>packageId|pathToPackagesConfig [options]</value>
+  </data>
+  <data name="MissingOptionValueError" xml:space="preserve">
+    <value>Missing option value for: '{0}'</value>
+  </data>
+  <data name="OptionInvalidWithoutSetter" xml:space="preserve">
+    <value>[option] on '{0}' is invalid without a setter.</value>
+  </data>
+  <data name="PackageCommandBasePathDescription" xml:space="preserve">
+    <value>The base path of the files defined in the nuspec file.</value>
+  </data>
+  <data name="PackageCommandDescription" xml:space="preserve">
+    <value>Creates a NuGet package based on the specified nuspec or project file.</value>
+  </data>
+  <data name="PackageCommandOutputDirDescription" xml:space="preserve">
+    <value>Specifies the directory for the created NuGet package file. If not specified, uses the current directory.</value>
+  </data>
+  <data name="PackageCommandSpecifyInputFileError" xml:space="preserve">
+    <value>Please specify a nuspec or project file to use.</value>
+  </data>
+  <data name="PackageCommandSuccess" xml:space="preserve">
+    <value>Successfully created package '{0}'.</value>
+  </data>
+  <data name="PackageCommandUsageDescription" xml:space="preserve">
+    <value>Specify the location of the nuspec or project file to create a package.</value>
+  </data>
+  <data name="PackageCommandUsageSummary" xml:space="preserve">
+    <value>&lt;nuspec | project&gt; [options]</value>
+  </data>
+  <data name="PublishCommandDescription" xml:space="preserve">
+    <value>Publishes a package that was uploaded to the server but not added to the feed.</value>
+  </data>
+  <data name="PublishCommandPackagePublished" xml:space="preserve">
+    <value>Your package was published.</value>
+  </data>
+  <data name="PublishCommandPublishingPackage" xml:space="preserve">
+    <value>Publishing {0} {1} to {2}...</value>
+  </data>
+  <data name="PublishCommandSourceDescription" xml:space="preserve">
+    <value>Specifies the server URL.</value>
+  </data>
+  <data name="PublishCommandUsageDescription" xml:space="preserve">
+    <value>Specify the id and version of the package that will be published to the feed.</value>
+  </data>
+  <data name="PublishCommandUsageSummary" xml:space="preserve">
+    <value>&lt;package id&gt; &lt;package version&gt; &lt;API Key&gt; [options]</value>
+  </data>
+  <data name="PushCommandPushingPackage" xml:space="preserve">
+    <value>Pushing {0} to {1}...</value>
+  </data>
+  <data name="PushCommandDescription" xml:space="preserve">
+    <value>Pushes a package to the server and optionally publishes it.</value>
+  </data>
+  <data name="PushCommandNoSourceError" xml:space="preserve">
+    <value>There is no default source, please specify a source.</value>
+  </data>
+  <data name="PushCommandCreateOnlyDescription" xml:space="preserve">
+    <value>Specifies if the package should be created and uploaded to the server but not published to the server. False by default.</value>
+  </data>
+  <data name="PushCommandSourceDescription" xml:space="preserve">
+    <value>Specifies the server URL.</value>
+  </data>
+  <data name="PushCommandUsageDescription" xml:space="preserve">
+    <value>Specify the path to the package and your API key to push the package to the server.</value>
+  </data>
+  <data name="PushCommandUsageSummary" xml:space="preserve">
+    <value>&lt;package path&gt; [API key] [options]</value>
+  </data>
+  <data name="ResourcePropertyDoesNotHaveAccessibleGet" xml:space="preserve">
+    <value>The resource type '{0}' does not have an accessible get for the '{1}' property.</value>
+  </data>
+  <data name="ResourcePropertyNotStringType" xml:space="preserve">
+    <value>The property '{0}' on resource type '{1}' is not a string type.</value>
+  </data>
+  <data name="ResourceTypeDoesNotHaveProperty" xml:space="preserve">
+    <value>The resource type '{0}' does not have an accessible static property named '{1}'.</value>
+  </data>
+  <data name="UnableToConvertTypeError" xml:space="preserve">
+    <value>Unable to change from type '{0}' to '{1}'.</value>
+  </data>
+  <data name="UnknowCommandError" xml:space="preserve">
+    <value>Unknown command: '{0}'</value>
+  </data>
+  <data name="UnknownOptionError" xml:space="preserve">
+    <value>Unknown option: '{0}'</value>
+  </data>
+  <data name="UpdateCommandCheckingForUpdates" xml:space="preserve">
+    <value>Checking for updates from {0}.</value>
+  </data>
+  <data name="UpdateCommandCurrentlyRunningNuGetExe" xml:space="preserve">
+    <value>Currently running NuGet.exe {0}.</value>
+  </data>
+  <data name="UpdateCommandDescription" xml:space="preserve">
+    <value>Update packages to latest available versions. This command also updates NuGet.exe itself.</value>
+  </data>
+  <data name="UpdateCommandNuGetUpToDate" xml:space="preserve">
+    <value>NuGet.exe is up to date.</value>
+  </data>
+  <data name="UpdateCommandUnableToFindPackage" xml:space="preserve">
+    <value>Unable to find '{0}' package.</value>
+  </data>
+  <data name="UpdateCommandUnableToLocateNuGetExe" xml:space="preserve">
+    <value>Invalid NuGet.CommandLine package. Unable to locate NuGet.exe within the package.</value>
+  </data>
+  <data name="UpdateCommandUpdateSuccessful" xml:space="preserve">
+    <value>Update successful.</value>
+  </data>
+  <data name="UpdateCommandUpdatingNuGet" xml:space="preserve">
+    <value>Updating NuGet.exe to {0}.</value>
+  </data>
+  <data name="InvalidArguments" xml:space="preserve">
+    <value>{0}: invalid arguments.</value>
+  </data>
+  <data name="PackageCommandAddedFile" xml:space="preserve">
+    <value>Added file '{0}'.</value>
+  </data>
+  <data name="PackageCommandAttemptingToBuildPackage" xml:space="preserve">
+    <value>Attempting to build package from '{0}'.</value>
+  </data>
+  <data name="PackageCommandVerboseDescription" xml:space="preserve">
+    <value>Shows verbose output for package building.</value>
+  </data>
+  <data name="SpecCommandAssemblyPathDescription" xml:space="preserve">
+    <value>Assembly to use for metadata.</value>
+  </data>
+  <data name="SpecCommandCreatedNuSpec" xml:space="preserve">
+    <value>Created '{0}' successfully.</value>
+  </data>
+  <data name="SpecCommandDescription" xml:space="preserve">
+    <value>Generates a nuspec for a new package. If this command is run in the same folder as a project file (.csproj, .vbproj, .fsproj), it will create a tokenized nuspec file.</value>
+  </data>
+  <data name="SpecCommandForceDescription" xml:space="preserve">
+    <value>Overwrite nuspec file if it exists.</value>
+  </data>
+  <data name="SpecCommandFileExists" xml:space="preserve">
+    <value>'{0}' already exists, use -f to overwrite it.</value>
+  </data>
+  <data name="DefaultCommandDescription" xml:space="preserve">
+    <value>No description was provided for this command.</value>
+  </data>
+  <data name="ConsoleConfirmMessage" xml:space="preserve">
+    <value>{0} (y/N) </value>
+  </data>
+  <data name="ConsoleConfirmMessageAccept" xml:space="preserve">
+    <value>y</value>
+  </data>
+  <data name="DeleteCommandCanceled" xml:space="preserve">
+    <value>Delete canceled</value>
+  </data>
+  <data name="DeleteCommandConfirm" xml:space="preserve">
+    <value>{0} {1} will be deleted from the {2}. Would you like to continue?</value>
+  </data>
+  <data name="DeleteCommandNoPromptDescription" xml:space="preserve">
+    <value>Do not prompt when deleting.</value>
+  </data>
+  <data name="InstallCommandExcludeVersionDescription" xml:space="preserve">
+    <value>If set, the destination folder will contain only the package name, not the version number</value>
+  </data>
+  <data name="AmbiguousCommand" xml:space="preserve">
+    <value>Ambiguous command '{0}'. Possible values: {1}.</value>
+  </data>
+  <data name="AmbiguousOption" xml:space="preserve">
+    <value>Ambiguous option '{0}'. Possible values: {1}.</value>
+  </data>
+  <data name="PackageCommandVersionDescription" xml:space="preserve">
+    <value>Overrides the version number from the nuspec file.</value>
+  </data>
+  <data name="PackageCommandExcludeDescription" xml:space="preserve">
+    <value>Specifies one or more wildcard patterns to exclude when creating a package.</value>
+  </data>
+  <data name="InstallCommandOutputDirDescription" xml:space="preserve">
+    <value>Specifies the directory in which packages will be installed. If none specified, uses the current directory.</value>
+  </data>
+  <data name="InstallCommandNothingToInstall" xml:space="preserve">
+    <value>All packages listed in {0} are already installed.</value>
+  </data>
+  <data name="NoApiKeyFound" xml:space="preserve">
+    <value>No API Key was provided and no API Key could be found for {0}. To save an API Key for a source use the 'setApiKey' command.</value>
+  </data>
+  <data name="SetApiKeyCommandApiKeySaved" xml:space="preserve">
+    <value>The API Key '{0}' was saved for {1}.</value>
+  </data>
+  <data name="SetApiKeyCommandSourceDescription" xml:space="preserve">
+    <value>Server URL where the API key is valid.</value>
+  </data>
+  <data name="SetApiKeyCommandDescription" xml:space="preserve">
+    <value>Saves an API key for a given server URL. When no URL is provided API key is saved for the NuGet gallery.</value>
+  </data>
+  <data name="SetApiKeyCommandUsageDescription" xml:space="preserve">
+    <value>Specify the API key to save and an optional URL to the server that provided the API key.</value>
+  </data>
+  <data name="SetApiKeyCommandUsageSummary" xml:space="preserve">
+    <value>&lt;API key&gt; [options]</value>
+  </data>
+  <data name="BuildingProjectTargetingFramework" xml:space="preserve">
+    <value>Building project for target framework '{0}'.</value>
+  </data>
+  <data name="FailedToBuildProject" xml:space="preserve">
+    <value>Failed to build '{0}'.</value>
+  </data>
+  <data name="PackageCommandSymbolsDescription" xml:space="preserve">
+    <value>Determines if a package containing sources and symbols should be created. When specified with a nuspec, creates a regular NuGet package file and the corresponding symbols package.</value>
+  </data>
+  <data name="PackagingFilesFromOutputPath" xml:space="preserve">
+    <value>Packing files from '{0}'.</value>
+  </data>
+  <data name="UnableToExtractAssemblyMetadata" xml:space="preserve">
+    <value>Unable to extract metadata from '{0}'.</value>
+  </data>
+  <data name="UsingPackagesConfigForDependencies" xml:space="preserve">
+    <value>Found packages.config. Using packages listed as dependencies</value>
+  </data>
+  <data name="Warning_FileDoesNotExist" xml:space="preserve">
+    <value>'{0}' was included in the project but doesn't exist. Skipping...</value>
+  </data>
+  <data name="Warning_UnspecifiedField" xml:space="preserve">
+    <value>{0} was not specified. Using '{1}'.</value>
+  </data>
+  <data name="PackageCommandNoDefaultExcludes" xml:space="preserve">
+    <value>Prevent default exclusion of NuGet package files and files and folders starting with a dot e.g. .svn.</value>
+  </data>
+  <data name="PackageCommandToolDescription" xml:space="preserve">
+    <value>Determines if the output files of the project should be in the tool folder. </value>
+  </data>
+  <data name="DefaultSymbolServer" xml:space="preserve">
+    <value>the symbol server</value>
+  </data>
+  <data name="LiveFeed" xml:space="preserve">
+    <value>the NuGet gallery</value>
+  </data>
+  <data name="PackageCommandAttemptingToBuildSymbolsPackage" xml:space="preserve">
+    <value>Attempting to build symbols package for '{0}'.</value>
+  </data>
+  <data name="Warning_SymbolServerNotConfigured" xml:space="preserve">
+    <value>Found symbols package '{0}', but no API key was specified for the symbol server. To save an API Key, run 'NuGet.exe setApiKey [your API key from http://www.NuGet.org]'.</value>
+  </data>
+  <data name="SpecCommandUsageSummary" xml:space="preserve">
+    <value>[package id]</value>
+  </data>
+  <data name="UsingNuspecForMetadata" xml:space="preserve">
+    <value>Using '{0}' for metadata.</value>
+  </data>
+  <data name="ListCommandAllVersionsDescription" xml:space="preserve">
+    <value>List all versions of a package. By default, only the latest package version is displayed.</value>
+  </data>
+  <data name="InvalidSource" xml:space="preserve">
+    <value>The specified source '{0}' is invalid. Please provide a valid source.</value>
+  </data>
+  <data name="SetApiKeyCommandDefaultApiKeysSaved" xml:space="preserve">
+    <value>The API Key '{0}' was saved for {1} and {2}.</value>
+  </data>
+  <data name="PackageCommandPropertiesDescription" xml:space="preserve">
+    <value>Provides the ability to specify a semicolon ";" delimited list of properties when creating a package.</value>
+  </data>
+  <data name="PackageCommandBuildDescription" xml:space="preserve">
+    <value>Determines if the project should be built before building the package.</value>
+  </data>
+  <data name="UnableToFindBuildOutput" xml:space="preserve">
+    <value>Unable to find '{0}'. Make sure the project has been built.</value>
+  </data>
+  <data name="InvalidFile" xml:space="preserve">
+    <value>No packages.config or solution file specified. Use the -self switch to update NuGet.exe.</value>
+  </data>
+  <data name="NoUpdatesAvailable" xml:space="preserve">
+    <value>No updates available for '{0}'.</value>
+  </data>
+  <data name="PackageDoesNotExist" xml:space="preserve">
+    <value>Unable to locate '{0} {1}'. Make sure all packages exist in the packages folder before running update.</value>
+  </data>
+  <data name="UnableToFindPackages" xml:space="preserve">
+    <value>Unable to find '{0}'. Make sure they are specified in packages.config.</value>
+  </data>
+  <data name="UnableToLocatePackagesFolder" xml:space="preserve">
+    <value>Unable to locate the packages folder. Try specifying it using the repositoryPath switch.</value>
+  </data>
+  <data name="UnableToLocateProjectFile" xml:space="preserve">
+    <value>Unable to locate project file for '{0}'.</value>
+  </data>
+  <data name="UpdateCommandIdDescription" xml:space="preserve">
+    <value>Package ids to update.</value>
+  </data>
+  <data name="UpdateCommandRepositoryPathDescription" xml:space="preserve">
+    <value>Path to the local packages folder (location where packages are installed).</value>
+  </data>
+  <data name="UpdateCommandSafeDescription" xml:space="preserve">
+    <value>Looks for updates with the highest version available within the same major and minor version as the installed package.</value>
+  </data>
+  <data name="UpdateCommandSelfDescription" xml:space="preserve">
+    <value>Update the running NuGet.exe to the newest version available from the server.</value>
+  </data>
+  <data name="UpdateCommandSourceDescription" xml:space="preserve">
+    <value>A list of package sources to search for updates.</value>
+  </data>
+  <data name="UpdatingPackage" xml:space="preserve">
+    <value>Updating '{0}' to '{1}'.</value>
+  </data>
+  <data name="FoundProjects" xml:space="preserve">
+    <value>Found {0} projects with a packages.config file. ({1})</value>
+  </data>
+  <data name="LookingForInstalledPackages" xml:space="preserve">
+    <value>Looking for installed packages in '{0}'.</value>
+  </data>
+  <data name="ScanningForProjects" xml:space="preserve">
+    <value>Scanning for projects...</value>
+  </data>
+  <data name="UpdatingProject" xml:space="preserve">
+    <value>Updating '{0}'...</value>
+  </data>
+  <data name="FoundProject" xml:space="preserve">
+    <value>Found 1 project with a packages.config file. ({0})</value>
+  </data>
+  <data name="NoProjectsFound" xml:space="preserve">
+    <value>No projects found with packages.config.</value>
+  </data>
+  <data name="UnableToFindSolution" xml:space="preserve">
+    <value>Unable to find solution '{0}'.</value>
+  </data>
+  <data name="UpdateCommandVerboseDescription" xml:space="preserve">
+    <value>Show verbose output while updating.</value>
+  </data>
+  <data name="CommandLine_Warning" xml:space="preserve">
+    <value>WARNING: {0}</value>
+  </data>
+  <data name="Credentials_Password" xml:space="preserve">
+    <value>Password: </value>
+  </data>
+  <data name="Credentials_UserName" xml:space="preserve">
+    <value>UserName: </value>
+  </data>
+  <data name="HelpCommandAll" xml:space="preserve">
+    <value>Print detailed help for all available commands.</value>
+  </data>
+  <data name="HelpCommandMarkdown" xml:space="preserve">
+    <value>Print detailed all help in markdown format.</value>
+  </data>
+  <data name="InstallCommandUsageExamples" xml:space="preserve">
+    <value>nuget install elmah
+
+nuget install packages.config
+
+nuget install ninject -o c:\foo</value>
+  </data>
+  <data name="PackCommandUsageExamples" xml:space="preserve">
+    <value>nuget pack
+
+nuget pack foo.nuspec
+
+nuget pack foo.csproj
+
+nuget pack foo.csproj -Build -Symbols -Properties Configuration=Release
+
+nuget pack foo.nuspec -Version 2.1.0</value>
+  </data>
+  <data name="PushCommandUsageExamples" xml:space="preserve">
+    <value>nuget push foo.nupkg 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a
+
+nuget push foo.nupkg 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -s http://customsource/
+
+nuget push foo.nupkg
+
+nuget push foo.nupkg.symbols</value>
+  </data>
+  <data name="SetApiKeyCommandUsageExamples" xml:space="preserve">
+    <value>nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a
+
+nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -Source http://example.com/nugetfeed</value>
+  </data>
+  <data name="SpecCommandUsageExamples" xml:space="preserve">
+    <value>nuget spec
+
+nuget spec MyPackage
+
+nuget spec -a MyAssembly.dll</value>
+  </data>
+  <data name="DeleteCommandUsageExamples" xml:space="preserve">
+    <value>nuget delete MyPackage 1.0
+    
+nuget delete MyPackage 1.0 -NoPrompt</value>
+  </data>
+  <data name="ListCommandUsageExamples" xml:space="preserve">
+    <value>nuget list
+
+nuget list -verbose -allversions</value>
+  </data>
+  <data name="HelpCommandUsageExamples" xml:space="preserve">
+    <value>nuget help
+
+nuget help push
+
+nuget ?
+
+nuget push -?</value>
+  </data>
+  <data name="PublishCommandUsageExamples" xml:space="preserve">
+    <value>nuget push foo.nupkg 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a
+
+nuget push foo.nupkg 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -s http://example.com/nuget-publish-endpoint
+
+nuget push foo.nupkg
+
+nuget push foo.nupkg.symbols</value>
+  </data>
+  <data name="UpdateCommandUsageExamples" xml:space="preserve">
+    <value>nuget update
+    
+nuget update -Safe
+
+nuget update -Self</value>
+  </data>
+  <data name="Credentials_RequestCredentials" xml:space="preserve">
+    <value>Please provide credentials for: {0}</value>
+  </data>
+  <data name="InstallCommandPackageAlreadyExists" xml:space="preserve">
+    <value>Package "{0}" is already installed.</value>
+  </data>
+  <data name="SourcesCommandNoSources" xml:space="preserve">
+    <value>No sources found.</value>
+  </data>
+  <data name="SourcesCommandRegisteredSources" xml:space="preserve">
+    <value>Registered Sources:</value>
+  </data>
+  <data name="SourcesCommandInvalidSource" xml:space="preserve">
+    <value>The source specified is invalid. Please provide a valid source.</value>
+  </data>
+  <data name="SourcesCommandNameRequired" xml:space="preserve">
+    <value>The name specified cannot be empty. Please provide a valid name.</value>
+  </data>
+  <data name="SourcesCommandSourceAddedSuccessfully" xml:space="preserve">
+    <value>Package Source with Name: {0} added successfully.</value>
+  </data>
+  <data name="SourcesCommandSourceRequired" xml:space="preserve">
+    <value>The source specified cannot be empty. Please provide a valid source.</value>
+  </data>
+  <data name="SourcesCommandUniqueName" xml:space="preserve">
+    <value>The name specified has already been added to the list of available package sources. Please provide a unique name.</value>
+  </data>
+  <data name="SourcesCommandUniqueSource" xml:space="preserve">
+    <value>The source specified has already been added to the list of available package sources. Please provide a unique source.</value>
+  </data>
+  <data name="SourcesCommandNoMatchingSourcesFound" xml:space="preserve">
+    <value>Unable to find any package source(s) matching name: {0}.</value>
+  </data>
+  <data name="SourcesCommandSourceRemovedSuccessfully" xml:space="preserve">
+    <value>Package source with Name: {0} removed successfully.</value>
+  </data>
+  <data name="SourcesCommandAllNameIsReserved" xml:space="preserve">
+    <value>Package source name 'All' is a reserved name.</value>
+  </data>
+  <data name="ReservedPackageNameAll" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="SourcesCommandNameDescription" xml:space="preserve">
+    <value>Name of the source.</value>
+  </data>
+  <data name="SourcesCommandSourceDescription" xml:space="preserve">
+    <value>Path to the package(s) source.</value>
+  </data>
+  <data name="SourcesCommandUsageSummary" xml:space="preserve">
+    <value>&lt;List|Add|Remove|Enable|Disable&gt; -Name [name] -Source [source]</value>
+  </data>
+  <data name="SourcesCommandDescription" xml:space="preserve">
+    <value>Provides the ability to manage list of sources located in  %AppData%\NuGet\NuGet.config</value>
+  </data>
+  <data name="PackageCommandNoFilesForLibPackage" xml:space="preserve">
+    <value>Failed to build package. Ensure '{0}' includes assembly files. For help on building symbols package, visit {1}.</value>
+  </data>
+  <data name="PackageCommandNoFilesForSymbolsPackage" xml:space="preserve">
+    <value>Failed to build package. Ensure '{0}' includes source and symbol files. For help on building symbols package, visit {1}.</value>
+  </data>
+  <data name="InstallCommandInvalidPackageReference" xml:space="preserve">
+    <value>'{0}' contains invalid package references. </value>
+  </data>
+  <data name="InstallCommandPackageReferenceInvalidVersion" xml:space="preserve">
+    <value>Version string specified for package reference '{0}' is invalid.</value>
+  </data>
+  <data name="PackageCommandNoRunAnalysis" xml:space="preserve">
+    <value>Specify if the command should not run package analysis after building the package.</value>
+  </data>
+  <data name="PackageCommandPackageIssueSummary" xml:space="preserve">
+    <value>{0} issue(s) found with package '{1}'.</value>
+  </data>
+  <data name="PackageCommandIssueDescription" xml:space="preserve">
+    <value>Description: {0}</value>
+  </data>
+  <data name="PackageCommandIssueSolution" xml:space="preserve">
+    <value>Solution: {0}</value>
+  </data>
+  <data name="PackageCommandIssueTitle" xml:space="preserve">
+    <value>Issue: {0}</value>
+  </data>
+  <data name="Warning_DefaultSpecValue" xml:space="preserve">
+    <value>The value "{0}" for {1} is a sample value and should be removed.</value>
+  </data>
+  <data name="Warning_DefaultSpecValueSolution" xml:space="preserve">
+    <value>Replace with an appropriate value or remove and it and rebuild your package.</value>
+  </data>
+  <data name="Warning_DefaultSpecValueTitle" xml:space="preserve">
+    <value>Remove sample nuspec values.</value>
+  </data>
+  <data name="Credentials_ProxyCredentials" xml:space="preserve">
+    <value>Please provide proxy credentials:</value>
+  </data>
+  <data name="SourcesCommandDisabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="SourcesCommandEnabled" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="SourcesCommandSourceDisabledSuccessfully" xml:space="preserve">
+    <value>Package source with Name: {0} disabled successfully.</value>
+  </data>
+  <data name="SourcesCommandSourceEnabledSuccessfully" xml:space="preserve">
+    <value>Package source with Name: {0} enabled successfully.</value>
+  </data>
+  <data name="Warning_SemanticVersion" xml:space="preserve">
+    <value>Version "{0}" does not follow semantic versioning guidelines.</value>
+  </data>
+  <data name="Warning_SemanticVersionSolution" xml:space="preserve">
+    <value>Update your nuspec file or use the AssemblyInformationalVersion assembly attribute to specify a semantic version as described at http://semver.org. </value>
+  </data>
+  <data name="Warning_SemanticVersionTitle" xml:space="preserve">
+    <value>Use semantic versioning</value>
+  </data>
+  <data name="InstallCommandPrerelease" xml:space="preserve">
+    <value>Allows prerelease packages to be installed. This flag is not required when restoring packages by installing from packages.config.</value>
+  </data>
+  <data name="OfficialPackageSourceName" xml:space="preserve">
+    <value>NuGet official package source</value>
+  </data>
+  <data name="ListCommandPrerelease" xml:space="preserve">
+    <value>Allow prerelease packages to be shown.</value>
+  </data>
+  <data name="UpdateCommandPrerelease" xml:space="preserve">
+    <value>Allows updating to prerelease versions. This flag is not required when updating prerelease packages that are already installed.</value>
+  </data>
+  <data name="CommandApiKey" xml:space="preserve">
+    <value>The API key for the server.</value>
+  </data>
+  <data name="Warning_PublishPackageDeprecated" xml:space="preserve">
+    <value>Unpublished packages are no longer supported. Associated commands and properties would be removed in future versions.</value>
+  </data>
+  <data name="PackageCommandFileFromDependencyIsChanged" xml:space="preserve">
+    <value>File from dependency is changed. Adding file '{0}'.</value>
+    </data>
+  <data name="PushCommandPackagePushed" xml:space="preserve">
+    <value>Your package was pushed.</value>
+  </data>
+  <data name="PackageCommandFileFromDependencyIsNotChanged" xml:space="preserve">
+    <value>File from dependency is not changed. File '{0}' is not added.</value>
+  </data>
+  <data name="UnableToFindFile">
+    <value>File does not exists ({0}).</value>
+  </data>
+</root>

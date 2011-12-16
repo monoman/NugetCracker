@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Coverage|x86'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <Import Project="..\..\Build\NuGet.Settings.targets" />
+  <PropertyGroup>
+    <ProjectGuid>{087B1726-2ECE-43E9-8280-9FFEAABA0DAE}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NuGet</RootNamespace>
+    <AssemblyName>NuGet</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Services.Client" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\CommandLine\Common\ConsoleCredentialProvider.cs">
+      <Link>ConsoleCredentialProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Extensions\CredentialProviderExtensions.cs">
+      <Link>CredentialProviderExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\CredentialStore.cs">
+      <Link>CredentialStore.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\HttpClient.cs">
+      <Link>HttpClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\ICredentialCache.cs">
+      <Link>ICredentialCache.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\ICredentialProvider.cs">
+      <Link>ICredentialProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\IHttpClient.cs">
+      <Link>IHttpClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\IHttpClientEvents.cs">
+      <Link>IHttpClientEvents.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\IHttpWebResponse.cs">
+      <Link>IHttpWebResponse.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\IProxyCache.cs">
+      <Link>IProxyCache.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\CredentialType.cs">
+      <Link>CredentialType.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\NullCredentialProvider.cs">
+      <Link>NullCredentialProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\ProxyCache.cs">
+      <Link>ProxyCache.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\RequestHelper.cs">
+      <Link>RequestHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Repositories\ProgressEventArgs.cs">
+      <Link>ProgressEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Utility\CredentialResult.cs">
+      <Link>CredentialResult.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Utility\CredentialState.cs">
+      <Link>CredentialState.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Utility\IProgressProvider.cs">
+      <Link>IProgressProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Utility\MemoryCache.cs">
+      <Link>MemoryCache.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Utility\UriUtility.cs">
+      <Link>UriUtility.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Utility\WebRequestEventArgs.cs">
+      <Link>WebRequestEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="DataServicePackage.cs" />
+    <Compile Include="DataServicePackageRepository.cs" />
+    <Compile Include="NuGetResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>NuGetResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="NuGetResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>NuGetResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

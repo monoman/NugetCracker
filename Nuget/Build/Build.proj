@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Go" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Import Project="$(MSBuildProjectDirectory)\Build.tasks" />
+    
+    <PropertyGroup>
+       <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+        <NuGetRoot>$(MSBuildProjectDirectory)\..</NuGetRoot>
+        <NuGetTestRoot>$(NuGetRoot)\test</NuGetTestRoot>
+        <NuGetSrcRoot>$(NuGetRoot)\src</NuGetSrcRoot>
+        <DropDirectory>$(NuGetRoot)\bin</DropDirectory>
+        <ArtifactDropDirectory>$(DropDirectory)\artifacts</ArtifactDropDirectory>
+        <NuGetDropDirectory>$(DropDirectory)\NuGet</NuGetDropDirectory>
+        <ExeBuildDirectory>$(NuGetSrcRoot)\CommandLine\bin\$(Configuration)</ExeBuildDirectory>
+        <ExeDropDirectory>$(NuGetDropDirectory)\Console</ExeDropDirectory>
+        <BootStrapperBuildDirectory>$(NuGetSrcRoot)\Bootstrapper\bin\$(Configuration)</BootStrapperBuildDirectory>
+        <BootStrapperDropDirectory>$(NuGetDropDirectory)\Bootstrapper</BootStrapperDropDirectory>
+        <VisualStudioAddInBuildDirectory>$(NuGetSrcRoot)\VsExtension\bin\$(Configuration)</VisualStudioAddInBuildDirectory>
+        <VisualStudioAddInDropDirectory>$(NuGetDropDirectory)\VisualStudioAddIn</VisualStudioAddInDropDirectory>
+        <ServerBuildDirectory>$(NuGetSrcRoot)\Server</ServerBuildDirectory>
+        <ServerDropDirectory>$(NuGetDropDirectory)\Server</ServerDropDirectory>
+        <NuGetCoreBuildDirectory>$(NuGetSrcRoot)\Core</NuGetCoreBuildDirectory>
+        <NuGetCoreDropDirectory>$(NuGetDropDirectory)\Core</NuGetCoreDropDirectory>
+        <ZipExe>$(NuGetRoot)\Tools\7za920\7za.exe</ZipExe>
+        <ILMergeExe>$(NuGetRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>
+        <ILMergeArtifactDirectory>$(ArtifactDropDirectory)\ILMerge</ILMergeArtifactDirectory>
+        <ILMergeInternalizeIgnoreFile>$(NuGetRoot)\Build\ilmerge.internalize.ignore.txt</ILMergeInternalizeIgnoreFile>
+    </PropertyGroup>
+    
+    <PropertyGroup>
+        <MajorVersion>1</MajorVersion>
+        <MinorVersion>6</MinorVersion>
+        <!-- Ensure that we come up with a new version every 65535 years -->
+        <VersionStartYear>2010</VersionStartYear>
+        
+        <!-- Build number is of the format (CurrentYear - VersionStartYear + 1)(2 digit month)(2 digit day) -->
+        <Build>$([MSBuild]::Add(1, $([MSBuild]::Subtract($([System.DateTime]::Now.Year), $(VersionStartYear)))))$([System.DateTime]::Now.ToString("MMdd"))</Build>
+        <Revision>$(BUILD_NUMBER)</Revision>
+        <Version>$(MajorVersion).$(MinorVersion).$(Build).$(Revision)</Version>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <RegexTransform Include="$(NuGetSrcRoot)\VsExtension\source.extension.vsixmanifest">        
+            <Find><![CDATA[<Version>\d+\.\d+\.\d+\.\d+</Version>]]></Find>
+            <ReplaceWith><![CDATA[<Version>$(Version)</Version>]]></ReplaceWith>
+        </RegexTransform>
+        <RegexTransform Include="$(NuGetSrcRoot)\VsExtension\source.extension.vsixmanifest">        
+            <Find><![CDATA[<AllUsers>false</AllUsers>]]></Find>
+            <ReplaceWith><![CDATA[<AllUsers>true</AllUsers>]]></ReplaceWith>
+        </RegexTransform>
+        <RegexTransform Include="$(NuGetRoot)\Common\CommonAssemblyInfo.cs">
+            <Find>\d+\.\d+\.\d+\.\d+</Find>
+            <ReplaceWith>$(Version)</ReplaceWith>
+        </RegexTransform>
+        <RegexTransform Include="$(NuGetSrcRoot)\VsConsole\PowerShellHost\Scripts\nuget.psd1">
+          <Find><![CDATA[ModuleVersion = '\d+\.\d+\.\d+\.\d+']]></Find>
+          <ReplaceWith><![CDATA[ModuleVersion = '$(Version)']]></ReplaceWith>
+        </RegexTransform>
+        <RegexTransform Include="$(NuGetSrcRoot)\VsExtension\NuGetPackage.cs">
+          <Find><![CDATA[ProductVersion = "\d+\.\d+\.\d+\.\d+"]]></Find>
+          <ReplaceWith><![CDATA[ProductVersion = "$(Version)"]]></ReplaceWith>
+        </RegexTransform>
+        <RegexTransform Include="$(NuGetSrcRoot)\**\*.nuspec">
+            <Find><![CDATA[<version>\d+\.\d+\.\d+\.\d+</version>]]></Find>
+            <ReplaceWith><![CDATA[<version>$(Version)</version>]]></ReplaceWith>
+        </RegexTransform>
+    </ItemGroup>
+    
+    <Target Name="Go" DependsOnTargets="CheckFxCop; UpdateVsixVersion; Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyBootStrapperOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyLicenseToAllDirectories; BuildPackages">
+    </Target>
+    
+    <Target Name="CheckFxCop">
+        <Error 
+            Condition="!Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\CodeAnalysis\fxcoptask.dll') "
+            Text="FxCop not found at $(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\CodeAnalysis\fxcoptask.dll. Cannot proceed" />
+    </Target>
+
+    <Target Name="UpdateVsixVersion" Condition="'$(BUILD_NUMBER)' != ''">
+        <RegexTransform Items="@(RegexTransform)" />
+    </Target>
+
+    <Target Name="Build">
+        <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true" />
+    </Target>
+
+    <Target Name="RunTests">
+        <MSBuild Projects="$(NuGetTestRoot)\Dialog.Test\Dialog.Test.csproj" Targets="RunTests" BuildInParallel="true" />
+        <MSBuild Projects="$(NuGetTestRoot)\CommandLine.Test\CommandLine.Test.csproj" Targets="RunTests" BuildInParallel="true" />
+        <MSBuild Projects="$(NuGetTestRoot)\Core.Test\Core.Test.csproj" Targets="RunTests" BuildInParallel="true" />
+        <MSBuild Projects="$(NuGetTestRoot)\VisualStudio.Test\VisualStudio.Test.csproj" Targets="RunTests" BuildInParallel="true" />
+        <MSBuild Projects="$(NuGetTestRoot)\PowerShellCmdlets.Test\PowerShellCmdlets.Test.csproj" Targets="RunTests" BuildInParallel="true" />
+        <MSBuild Projects="$(NuGetTestRoot)\PowerShellHost.Test\PowerShellHost.Test.csproj" Targets="RunTests" BuildInParallel="true" />
+        <MSBuild Projects="$(NuGetTestRoot)\Server.Test\Server.Test.csproj" Targets="RunTests" BuildInParallel="true" />
+        <MSBuild Projects="$(NuGetTestRoot)\Test.Integration\Test.Integration.csproj" Targets="RunTests" BuildInParallel="true" />
+    </Target>
+    
+    <Target Name="ReportFxCopResults">
+        <ItemGroup>
+            <FxCopOutputItems Include="$(NuGetRoot)\**\*.dll.CodeAnalysisLog.xml" />
+        </ItemGroup>
+        <Message Text="##teamcity[importData type='FxCop' path='%(FxCopOutputItems.Identity)']" />
+    </Target>
+
+    <Target Name="CreateDropDirectories">
+        <Message Text="Making the output directories for the compiled output at '$(DropDirectory)'." />
+        <RemoveDir Directories="$(DropDirectory)" Condition="Exists('$(DropDirectory)')" ContinueOnError="True" />
+        <MakeDir Directories="$(DropDirectory)" Condition="!Exists('$(DropDirectory)')" />
+        <MakeDir Directories="$(ArtifactDropDirectory)" Condition="!Exists('$(ArtifactDropDirectory)')" />
+        <MakeDir Directories="$(NuGetDropDirectory)" Condition="!Exists('$(NuGetDropDirectory)')" />
+        <MakeDir Directories="$(ExeDropDirectory)" Condition="!Exists('$(ExeDropDirectory)')" />
+        <MakeDir Directories="$(BootStrapperDropDirectory)" Condition="!Exists('$(BootStrapperDropDirectory)')" />
+        <MakeDir Directories="$(VisualStudioAddInDropDirectory)" Condition="!Exists('$(VisualStudioAddInDropDirectory)')" />
+        <MakeDir Directories="$(ServerDropDirectory)" Condition="!Exists('$(ServerDropDirectory)')" />
+        <MakeDir Directories="$(NuGetCoreDropDirectory)" Condition="!Exists('$(NuGetCoreDropDirectory)')" />
+    </Target>
+
+    <Target Name="CopyExecutableOutputToDropDirectory">
+        <ItemGroup>
+            <ExecutableFiles Include="$(ExeBuildDirectory)\Merged\NuGet.exe;$(NuGetSrcRoot)\CommandLine\Properties\*.nuspec" />
+        </ItemGroup>
+        <Message Text="Copying the NuGet Console output to $(ExeDropDirectory)" />
+        <Copy ContinueOnError="false" SourceFiles="@(ExecutableFiles)" DestinationFolder="$(ExeDropDirectory)" />
+    </Target>
+    
+    <Target Name="CopyBootStrapperOutputToDropDirectory">
+        <ItemGroup>
+            <BootStrapperOutputItems Exclude="$(BootStrapperBuildDirectory)\**\*.pdb" Include="$(BootStrapperBuildDirectory)\**\*.*" />
+        </ItemGroup>
+        <Message Text="Copying the NuGet BootStrapper output to $(BootStrapperDropDirectory)" />
+        <Copy ContinueOnError="false" SourceFiles="@(BootStrapperOutputItems)" DestinationFiles="@(BootStrapperOutputItems ->'$(BootStrapperDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    </Target>    
+    <Target Name="CopyVisualStudioAddInOutputToDropDirectory">
+        <ItemGroup>
+            <VisualStudioAddInOutputItems Include="$(VisualStudioAddInBuildDirectory)\**\*.vsix" />
+        </ItemGroup>
+        <Message Text="Copying the NuGet Visual Studio Add-In output to $(VisualStudioAddInDropDirectory)" />
+        <Copy ContinueOnError="false" SourceFiles="@(VisualStudioAddInOutputItems)" DestinationFiles="@(VisualStudioAddInOutputItems ->'$(VisualStudioAddInDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    </Target>
+    
+    <Target Name="CopyServerOutputToDropDirectory">
+        <ItemGroup>
+            <ServerOutputItems Include="$(ServerBuildDirectory)\**\*.*" Exclude="$(ServerBuildDirectory)\**\*.cs;$(ServerBuildDirectory)\**\*.csp*;$(ServerBuildDirectory)\obj\**\*.*;$(ServerBuildDirectory)\Packages\**\*.*;$(ServerBuildDirectory)\App_Data\**"/>
+        </ItemGroup>
+        <Message Text="Copying the NuGet Server output to $(ServerDropDirectory)" />
+        <Copy ContinueOnError="false" SourceFiles="@(ServerOutputItems)" DestinationFiles="@(ServerOutputItems ->'$(ServerDropDirectory)\www\%(RecursiveDir)%(Filename)%(Extension)')" />
+        <Exec Command="&quot;$(ZipExe)&quot; a ..\server.zip" WorkingDirectory="$(ServerDropDirectory)\www" />
+        <RemoveDir Directories="$(ServerDropDirectory)\www" />
+    </Target>
+        
+    <Target Name="CopyLicenseToAllDirectories">
+        <ItemGroup>
+            <LicenseFileItems Include="$(MSBuildProjectDirectory)\..\LICENSE.txt" />
+        </ItemGroup>
+        <Message Text="Copying the License to all drop directories" />
+        <Copy ContinueOnError="false" SourceFiles="@(LicenseFileItems)" DestinationFiles="@(LicenseFileItems -&gt;'$(ExeDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+        <Copy ContinueOnError="false" SourceFiles="@(LicenseFileItems)" DestinationFiles="@(LicenseFileItems -&gt;'$(VisualStudioAddInDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+        <Copy ContinueOnError="false" SourceFiles="@(LicenseFileItems)" DestinationFiles="@(LicenseFileItems -&gt;'$(ServerDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    </Target>
+  
+    <Target Name="BuildPackages">
+        <PropertyGroup>
+            <NuGetExe>$(ExeDropDirectory)\NuGet.exe</NuGetExe>
+        </PropertyGroup>
+        <Exec Command="&quot;$(NuGetExe)&quot; pack" WorkingDirectory="$(ExeDropDirectory)" />
+        <Exec Command="&quot;$(NuGetExe)&quot; pack -o &quot;$(ServerDropDirectory)&quot; -Build -p Configuration=Release -Symbols -exclude **\NuGet.Core.*" WorkingDirectory="$(ServerBuildDirectory)" />
+        <Exec Command="&quot;$(NuGetExe)&quot; pack -o &quot;$(NuGetCoreDropDirectory)&quot; -Build -Symbols" WorkingDirectory="$(NuGetCoreBuildDirectory)" />
+    </Target>
+</Project>

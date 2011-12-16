@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>NuGet.CommandLine</id>
+    <version>1.7.0</version>
+    <authors>Outercurve Foundation</authors>
+    <licenseUrl>http://nuget.codeplex.com/license</licenseUrl>
+    <projectUrl>http://nuget.codeplex.com</projectUrl>
+    <description>NuGet Command Line Tool</description>
+  </metadata>
+  <files>
+      <file src="NuGet.exe" target="tools" />
+  </files>
+</package>
