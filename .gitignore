@@ -49,5 +49,6 @@ _UpgradeReport_Files/
 *.*sdf
 *.ipch
 MetaProject.NugetCracker
-
 Nuget/src/VsConsole/PowerShellHost/DebugConstants.cs
+packages/
+NugetPackages/

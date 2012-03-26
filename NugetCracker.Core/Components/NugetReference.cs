@@ -31,6 +31,9 @@ namespace NugetCracker.Components
 		{
 			get { return "net40"; } // FIXME need to have access to either the referenced project target platform or the consumer project's.
 		}
+
+		public abstract string Version { get; }
+
 	}
 
 	public class NugetReference : BasicReference
@@ -46,12 +49,17 @@ namespace NugetCracker.Components
 		public NugetReference(IComponent nuget)
 		{
 			Name = nuget.Name;
-			Versions = nuget.CurrentVersion.ToString();
+			Versions = nuget.CurrentVersion.ToString(4);
 		}
 
 		public override string ToString()
 		{
 			return string.Format("Nuget Reference: {0} {1}", Name, Versions);
+		}
+
+		public override string Version
+		{
+			get { return Versions; }
 		}
 	}
 

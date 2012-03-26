@@ -81,7 +81,6 @@ namespace NugetCracker.Utilities
 			using (logger.QuietBlock) {
 				RemoveInstalledVersions(logger, newPackage, installDir);
 				string arguments = "install " + newPackage.Name
-						+ " -ExcludeVersion"
 						+ " -OutputDirectory \"" + installDir + "\"";
 				if (!string.IsNullOrWhiteSpace(sourceDirectory))
 					arguments += " -Source \"" + sourceDirectory + "\"";

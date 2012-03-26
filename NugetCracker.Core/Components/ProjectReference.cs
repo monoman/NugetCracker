@@ -38,5 +38,10 @@ namespace NugetCracker.Components
 		}
 
 		public string FullPath { get; private set; }
+
+		public override string Version
+		{
+			get { throw new NotImplementedException(); }
+		}
 	}
 }

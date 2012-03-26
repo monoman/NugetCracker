@@ -38,6 +38,8 @@ namespace NugetCracker.Commands
 	-part:major|minor|build|revision		
 		Increments the major, minor, build, revision version number. 
 		If option is ommitted the default is to increment revision number.
+
+	-n[obuild]
 ";
 			}
 		}
@@ -46,12 +48,13 @@ namespace NugetCracker.Commands
 		{
 			bool foundOne = false;
 			var partToBump = ParsePartToBump(logger, args);
+			bool noBuild = args.Where(s => s.StartsWith("-n")).Count() > 0;
 			foreach (var componentNamePattern in args.Where(s => !s.StartsWith("-"))) {
 				foundOne = true;
 				var specificComponent = components.FindComponent<IVersionable>(componentNamePattern);
 				if (specificComponent == null)
 					return true;
-				BumpVersion(logger, specificComponent, partToBump, packagesOutputDirectory);
+				BumpVersion(logger, specificComponent, partToBump, packagesOutputDirectory, noBuild);
 			}
 			if (!foundOne) {
 				logger.Error("No component pattern specified");
@@ -87,7 +90,7 @@ namespace NugetCracker.Commands
 			}
 		}
 
-		private bool BumpVersion(ILogger logger, IVersionable component, VersionPart partToBump, string packagesOutputDirectory)
+		private bool BumpVersion(ILogger logger, IVersionable component, VersionPart partToBump, string packagesOutputDirectory, bool noBuild)
 		{
 			var componentsToRebuild = new List<IProject>();
 			logger.Info("Bumping versions. Affected version part: {0} number", partToBump);
@@ -103,6 +106,8 @@ namespace NugetCracker.Commands
 					}
 				}
 			}
+			if (noBuild)
+				return true;
 			logger.Info("Rebuilding bumped components");
 			return BuildHelper.BuildChain(logger, component, packagesOutputDirectory, componentsToRebuild);
 		}

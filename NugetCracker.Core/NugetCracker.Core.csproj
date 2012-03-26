@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Nuget">
+      <HintPath>..\Nuget.exe</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -41,7 +44,6 @@
     <Compile Include="Commands\AddNugetCommand.cs" />
     <Compile Include="Commands\BumpVersionCommand.cs" />
     <Compile Include="Commands\ExcludeDirectoryCommand.cs" />
-    <Compile Include="Commands\FixReferencesCommand.cs" />
     <Compile Include="Commands\ListCommand.cs" />
     <Compile Include="Commands\NugetifyCommand.cs" />
     <Compile Include="Commands\PublishPackagesCommand.cs" />
@@ -52,8 +54,11 @@
     <Compile Include="Components\CSharp\CSharpNugetProject.cs" />
     <Compile Include="Components\CSharp\CSharpProject.cs" />
     <Compile Include="Components\CSharp\CSharpWebsite.cs" />
+    <Compile Include="Components\IFile.cs" />
+    <Compile Include="Interfaces\ISolution.cs" />
     <Compile Include="Components\NugetReference.cs" />
     <Compile Include="Components\ProjectReference.cs" />
+    <Compile Include="Components\Solution.cs" />
     <Compile Include="Data\ComponentsList.cs" />
     <Compile Include="Data\MetaProject.cs" />
     <Compile Include="Extensions.cs" />

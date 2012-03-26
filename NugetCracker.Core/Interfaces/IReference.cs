@@ -9,6 +9,8 @@ namespace NugetCracker.Interfaces
 	{
 		string Name { get; }
 
+		string Version { get; }
+
 		string Platform { get; }
 	}
 }

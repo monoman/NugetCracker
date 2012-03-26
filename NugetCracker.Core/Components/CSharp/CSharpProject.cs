@@ -14,8 +14,10 @@ namespace NugetCracker.Components.CSharp
 	public class CSharpProject : IProject
 	{
 		public IEnumerable<IComponent> DependentComponents { get; set; }
+		public IEnumerable<ISolution> Parents { get { return _parents; } }
 
 		readonly List<IReference> _dependencies = new List<IReference>();
+		readonly List<ISolution> _parents = new List<ISolution>();
 		protected string _assemblyInfoPath;
 		protected string _projectDir;
 		protected bool _isWeb;
@@ -115,7 +117,7 @@ namespace NugetCracker.Components.CSharp
 
 		public bool InstallPackageDependencyFromSources(ILogger logger, IReference dependency, string sourceDirectories = null, bool force = false)
 		{
-			if (force || !Directory.Exists(InstalledPackagesDir.Combine(dependency.Name)))
+			if (force || !Directory.Exists(InstalledPackagesDir.Combine(dependency.Name + "." + dependency.Version)))
 				if (!BuildHelper.InstallPackage(logger, dependency, InstalledPackagesDir, sourceDirectories))
 					return false;
 			using (logger.QuietBlock)
@@ -126,21 +128,21 @@ namespace NugetCracker.Components.CSharp
 		protected virtual void UpdatePackageReferencesOnProject(ILogger logger, IReference newPackage)
 		{
 			try {
-				FullPath.TransformFile(xml => FixPackageReference(xml, newPackage.Name, newPackage.Platform));
+				FullPath.TransformFile(xml => FixPackageReference(xml, newPackage.Name, newPackage.Version, newPackage.Platform));
 			} catch (Exception e) {
 				logger.Error("Could not update references for package '{0}' in project '{1}'. Cause: {2}",
 					newPackage, FullPath, e.Message);
 			}
 		}
 
-		public static string FixPackageReference(string xml, string packageName, string platform)
+		public static string FixPackageReference(string xml, string packageName, string version, string platform)
 		{
 			string pattern = "<Reference \\s*Include=\"" + packageName + ",[^>]*>";
 			string pattern2 = "^(\\s*<HintPath>.*\\\\)(" + packageName + "[^\\\\]*)(\\\\lib\\\\net[^\\\\]*)(\\\\[^\\\\]*\\.dll)([^<]*</HintPath>\\s*)$";
 			var xmlOut =
 				DisableNugetPowerToolsActions(xml)
 				.RegexReplace(pattern, "<Reference Include=\"" + packageName + "\">");
-			xmlOut = xmlOut.RegexReplace(pattern2, "$1" + packageName + "\\lib\\" + platform + "$4$5");
+			xmlOut = xmlOut.RegexReplace(pattern2, "$1" + packageName + "." + version + "\\lib\\" + platform + "$4$5");
 			return xmlOut;
 		}
 
@@ -499,7 +501,19 @@ namespace NugetCracker.Components.CSharp
 
 		public override string ToString()
 		{
-			return string.Format("{0}{1} - {2} [{3} - {4}] {5}", Name, CurrentVersionTag, Description, Type, _targetFrameworkVersion.ToLibFolder(), _status);
+			return string.Format("{0}{1} - {2} ({6}) [{3} - {4}] {5}", Name, CurrentVersionTag, Description, Type, _targetFrameworkVersion.ToLibFolder(), _status, OwningStatus);
+		}
+
+		public string OwningStatus
+		{
+			get
+			{
+				if (_parents.Count == 0)
+					return "Orphan!";
+				if (_parents.Count > 1)
+					return "MultiOwned!";
+				return _parents[0].Name;
+			}
 		}
 
 		public bool MatchName(string pattern)
@@ -552,6 +566,25 @@ namespace NugetCracker.Components.CSharp
 		public IEnumerable<IProject> DependentProjects
 		{
 			get { return DependentComponents.Where(c => c is IProject).Cast<IProject>(); }
+		}
+
+
+		public string Version
+		{
+			get { return CurrentVersion.ToString(4); }
+		}
+
+
+		public void AddParent(ISolution solution)
+		{
+			if (!_parents.Contains(solution))
+				_parents.Add(solution);
+		}
+
+		public void RemoveParent(ISolution solution)
+		{
+			if (_parents.Contains(solution))
+				_parents.Remove(solution);
 		}
 	}
 }

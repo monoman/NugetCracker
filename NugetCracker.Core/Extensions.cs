@@ -96,23 +96,24 @@ namespace NugetCracker
 			return Path.Combine(path, relativePath);
 		}
 
-		public static string Relativize(this string projectDir, string packagesDir)
+		private static char[] DirectorySeparators = new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+		public static string Relativize(this string originDir, string destinationDir)
 		{
 			try {
-				string[] projectDirParts = projectDir.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-				string[] packagesDirParts = packagesDir.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+				string[] originDirParts = originDir.Split(DirectorySeparators, StringSplitOptions.RemoveEmptyEntries);
+				string[] destinationDirParts = destinationDir.Split(DirectorySeparators, StringSplitOptions.RemoveEmptyEntries);
 				StringBuilder sb = new StringBuilder();
 				int i = 0;
-				for (; i < packagesDirParts.Length && i < projectDirParts.Length; i++)
-					if (!projectDirParts[i].Equals(packagesDirParts[i], StringComparison.OrdinalIgnoreCase))
+				for (; i < destinationDirParts.Length && i < originDirParts.Length; i++)
+					if (!originDirParts[i].Equals(destinationDirParts[i], StringComparison.OrdinalIgnoreCase))
 						break;
-				for (int j = i; j < projectDirParts.Length; j++)
+				for (int j = i; j < originDirParts.Length; j++)
 					sb.Append("..").Append(Path.DirectorySeparatorChar);
-				for (; i < packagesDirParts.Length; i++)
-					sb.Append(packagesDirParts[i]).Append(Path.DirectorySeparatorChar);
+				for (; i < destinationDirParts.Length; i++)
+					sb.Append(destinationDirParts[i]).Append(Path.DirectorySeparatorChar);
 				return sb.ToString();
 			} catch (Exception) {
-				return packagesDir;
+				return destinationDir;
 			}
 		}
 

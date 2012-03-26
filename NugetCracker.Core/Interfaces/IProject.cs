@@ -8,6 +8,11 @@ namespace NugetCracker.Interfaces
 		bool Build(ILogger logger);
 		bool DeployTo(ILogger logger, string path);
 
+		IEnumerable<ISolution> Parents { get; }
+
+		void AddParent(ISolution solution);
+		void RemoveParent(ISolution solution);
+
 		bool CanBecomeNugget { get; }
 		IComponent PromoteToNuget(ILogger logger, string outputDirectory, string tags, string licenseUrl = null,
 			string projectUrl = null, string iconUrl = null, string copyright = null, bool requireLicenseAcceptance = false);

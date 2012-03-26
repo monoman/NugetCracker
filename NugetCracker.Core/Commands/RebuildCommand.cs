@@ -31,11 +31,7 @@ namespace NugetCracker.Commands
 
 		public bool Process(ILogger logger, IEnumerable<string> args, MetaProjectPersistence metaProject, ComponentsList components, string packagesOutputDirectory)
 		{
-			foreach (IComponent component in components)
-				foreach (IReference dependency in component.Dependencies)
-					if (dependency is NugetReference)
-						if (!component.InstallPackageDependencyFromSources(logger, dependency, packagesOutputDirectory))
-							return true;
+			UpdatePackagesCommand.UpdateDependencies(logger, components, packagesOutputDirectory);
 			var componentNamePattern = args.FirstOrDefault(s => !s.StartsWith("-"));
 			if (!string.IsNullOrWhiteSpace(componentNamePattern)) {
 				var rootComponent = components.FindComponent<IVersionable>(componentNamePattern);

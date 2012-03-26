@@ -4,12 +4,15 @@ using System.IO;
 using System.Linq;
 using NugetCracker.Interfaces;
 using NugetCracker.Persistence;
+using NugetCracker.Components;
 
 namespace NugetCracker.Data
 {
 	public class ComponentsList : IComponentFinder, IEnumerable<IComponent>
 	{
 		List<IComponent> _list = new List<IComponent>();
+
+		public readonly List<ISolution> Solutions = new List<ISolution>();
 
 		public T FindComponent<T>(string componentNamePattern, Func<T, bool> filter = null, bool interactive = true) where T : class
 		{
@@ -53,9 +56,9 @@ namespace NugetCracker.Data
 
 		public int Count { get { return _list.Count; } }
 
-		public IEnumerable<IComponent> FilterBy(string pattern, bool nugets = false, bool orderByTreeDepth = false, bool groupByType = false)
+		public IEnumerable<IComponent> FilterBy(string pattern, bool nugets = false, bool orderByTreeDepth = false, bool groupByType = false, bool orphans = false)
 		{
-			var list = _list.FindAll(c => c.MatchName(pattern) && (!nugets || c is INugetSpec));
+			var list = _list.FindAll(c => c.MatchName(pattern) && (!nugets || c is INugetSpec) && (!orphans || isOrphan(c)));
 			if (groupByType) {
 				if (orderByTreeDepth)
 					list.Sort((c1, c2) =>
@@ -75,6 +78,12 @@ namespace NugetCracker.Data
 			return list;
 		}
 
+		private bool isOrphan(IComponent c)
+		{
+			var p = c as IProject;
+			return (p != null) && (p.Parents.Count() == 0);
+		}
+
 		public void Scan(MetaProjectPersistence metaProject, string path, IEnumerable<IComponentsFactory> factories, Action<string> scanned)
 		{
 			try {
@@ -83,6 +92,8 @@ namespace NugetCracker.Data
 						_list.AddRange(factory.FindComponentsIn(path));
 					foreach (var dir in Directory.EnumerateDirectories(path))
 						Scan(metaProject, dir, factories, scanned);
+					foreach (var solutionFullPath in Directory.EnumerateFiles(path, "*.sln"))
+						Solutions.Add(new Solution(solutionFullPath));
 					scanned(path);
 				}
 			} catch (Exception e) {
@@ -154,9 +165,28 @@ namespace NugetCracker.Data
 			FindDependents();
 		}
 
+		public void MatchSolutionsToProjects()
+		{
+			Solutions.Sort((s1, s2) => s1.Name.CompareTo(s2.Name));
+			foreach (var solution in Solutions)
+				foreach (var project in solution.Projects) {
+					var component = FindMatchingComponent(project);
+					if (component != null)
+						component.AddParent(solution);
+					else
+						Console.WriteLine("Could not find project '{0}' for solution '{1}'", project.Name, solution.Name);
+				}
+		}
+
+		public IProject FindMatchingComponent(IFile project)
+		{
+			return FindComponent<IProject>("^" + project.Name + "$", p => p.FullPath == project.FullPath, false);
+		}
+
 		public void Clear()
 		{
 			_list.Clear();
+			Solutions.Clear();
 		}
 
 		public bool Contains(IComponent component)

@@ -27,14 +27,15 @@ namespace NugetCracker
 			new ExcludeDirectoryCommand(),
 			new NugetifyCommand(),
 			new AddNugetCommand(),
-			new FixReferencesCommand(),
 			new UpdatePackagesCommand(),
 			new PublishPackagesCommand()
 		};
 		static List<string> _helpLines = null;
 
-		static Version Version {
-			get {
+		static Version Version
+		{
+			get
+			{
 				return new System.Reflection.AssemblyName(System.Reflection.Assembly.GetCallingAssembly().FullName).Version;
 			}
 		}
@@ -73,27 +74,29 @@ namespace NugetCracker
 			var commandName = args.First().ToLowerInvariant();
 			args = args.Skip(1);
 			switch (commandName) {
-			case "quit":
-			case "q":
-			case "exit":
-			case "e":
-				return false;
-			case "help":
-			case "?":
-				return HelpCommand(logger, args);
-			default:
-				foreach (ICommand command in _commands)
-					if (command.Matches(commandName))
-						using (logger.Block)
-							return command.Process(logger, args, _metaProjectPersistence, _components, PackagesOutputDirectory);
-				break;
+				case "quit":
+				case "q":
+				case "exit":
+				case "e":
+					return false;
+				case "help":
+				case "?":
+					return HelpCommand(logger, args);
+				default:
+					foreach (ICommand command in _commands)
+						if (command.Matches(commandName))
+							using (logger.Block)
+								return command.Process(logger, args, _metaProjectPersistence, _components, PackagesOutputDirectory);
+					break;
 			}
 			logger.Error("Unknown command '{0}'", commandName);
 			return true;
 		}
 
-		private static string PackagesOutputDirectory {
-			get {
+		private static string PackagesOutputDirectory
+		{
+			get
+			{
 				var path = _metaProjectPersistence.ToAbsolutePath("NugetPackages");
 				if (!Directory.Exists(path))
 					Directory.CreateDirectory(path);
@@ -119,8 +122,10 @@ namespace NugetCracker
 			}
 		}
 
-		private static IEnumerable<string> HelpLines {
-			get {
+		private static IEnumerable<string> HelpLines
+		{
+			get
+			{
 				if (_helpLines == null) {
 					_helpLines = new List<string> {
 							"Help, ?         Show this list of commands or an specific command help",

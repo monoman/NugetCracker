@@ -2,6 +2,8 @@
 using NugetCracker.Data;
 using NugetCracker.Interfaces;
 using NugetCracker.Persistence;
+using System.IO;
+using NugetCracker.Components;
 
 namespace NugetCracker.Commands
 {
@@ -60,12 +62,16 @@ namespace NugetCracker.Commands
 				});
 			}
 			logger.Info("Scanned {0} directories", scannedDirsCount);
-			logger.Info("Found {0} components", components.Count);
+			logger.Info("Found {0} component{1}", components.Count, components.Count > 1 ? "s" : "");
+			logger.Info("Found {0} solution{1}", components.Solutions.Count, components.Solutions.Count > 1 ? "s" : "");
 			logger.Info("Sorting...");
 			components.SortByName();
 			logger.Info("Finding dependents...");
 			components.FindDependents();
+			logger.Info("Matching solutions to projects...");
+			components.MatchSolutionsToProjects();
 			return;
 		}
+
 	}
 }

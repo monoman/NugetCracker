@@ -27,17 +27,21 @@ namespace NugetCracker.Persistence
 
 		public string ToRelativePath(string dirPath)
 		{
+			dirPath = NormalizePathEnd(dirPath);
 			if (!Path.IsPathRooted(dirPath))
 				return dirPath;
-			var basePath = Path.GetDirectoryName(FilePath);
+			var basePath = NormalizePathEnd(Path.GetDirectoryName(FilePath));
 			if (dirPath.Equals(basePath, StringComparison.InvariantCultureIgnoreCase))
 				return ".";
-			if (dirPath.ToLowerInvariant().StartsWith(basePath.ToLowerInvariant()))
-				return dirPath.Substring(basePath.Length + 1);
-			var basePathBase = Path.GetDirectoryName(basePath);
-			if (dirPath.ToLowerInvariant().StartsWith(basePathBase.ToLowerInvariant()))
-				return ".." + dirPath.Substring(basePathBase.Length);
-			return null;
+			return basePath.Relativize(dirPath);
+		}
+
+		private static string NormalizePathEnd(string dirPath)
+		{
+			var lastChar = dirPath.Last();
+			if (lastChar == Path.DirectorySeparatorChar || lastChar == Path.AltDirectorySeparatorChar)
+				return dirPath;
+			return dirPath + Path.DirectorySeparatorChar;
 		}
 
 		public string ToAbsolutePath(string dirPath)
