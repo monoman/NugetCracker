@@ -86,7 +86,7 @@ namespace NugetCracker.Components.CSharp
 		}
 		public virtual VersionPart PartToCascadeBump(VersionPart partBumpedOnDependency)
 		{
-			return UsesNUnit ? partBumpedOnDependency : VersionPart.Revision;
+			return UsesNUnit || (ComponentType == "Library" && !_isWeb) ? partBumpedOnDependency : VersionPart.Revision;
 		}
 
 		private string PackagesConfigFilePath
@@ -254,13 +254,13 @@ namespace NugetCracker.Components.CSharp
 		private static void UpdatePackagesConfig(IComponent newPackage, string packagesFile)
 		{
 			string pattern = "<package \\s*id=\"" + newPackage.Name + "\" \\s*version=\"([^\"]*)\"\\s*/>";
-			string replace = "<package id=\"" + newPackage.Name + "\" version=\"" + newPackage.CurrentVersion.ToShort() + "\" />";
+			string replace = "<package id=\"" + newPackage.Name + "\" version=\"" + newPackage.CurrentVersion.ToString() + "\" />";
 			packagesFile.TransformFile(xml => Regex.Replace(xml, pattern, replace, RegexOptions.Singleline));
 		}
 
 		private static void AddToPackagesConfig(IComponent newPackage, string packagesFile)
 		{
-			var newXmlLine = "<package id=\"" + newPackage.Name + "\" version=\"" + newPackage.CurrentVersion.ToShort() + "\" />";
+			var newXmlLine = "<package id=\"" + newPackage.Name + "\" version=\"" + newPackage.CurrentVersion.ToString() + "\" />";
 			if (!File.Exists(packagesFile)) {
 				File.WriteAllText(packagesFile,
 @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -485,7 +485,7 @@ namespace NugetCracker.Components.CSharp
 
 		public virtual string Type { get { return _isWeb ? "C# Web Project" : ("C# {0} Project".FormatWith(ComponentType)); } }
 
-		private string CurrentVersionTag { get { return string.Format(_isWeb ? " ({0})" : ".{0}", CurrentVersion.ToShort()); } }
+		private string CurrentVersionTag { get { return string.Format(_isWeb ? " ({0})" : ".{0}", CurrentVersion.ToString()); } }
 
 		public string ToLongString()
 		{

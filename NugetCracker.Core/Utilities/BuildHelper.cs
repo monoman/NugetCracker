@@ -11,7 +11,7 @@ namespace NugetCracker.Utilities
 		public static bool Build(ILogger logger, IVersionable component, string packagesOutputDirectory)
 		{
 			var componentName = component.Name;
-			var version = component.CurrentVersion.ToShort();
+			var version = component.CurrentVersion.ToString();
 			if (component is IProject) {
 				logger.Info("Building {0}.{1}", componentName, version);
 				if (!(component as IProject).Build(logger)) {
@@ -42,7 +42,7 @@ namespace NugetCracker.Utilities
 						return false;
 					}
 				if (!ReinstallPackageOn(logger, package, packagesOutputDirectory, installDirs)) {
-					logger.Error("Could not reinstall package '{0}.{1}'", package.Name, package.CurrentVersion.ToShort());
+					logger.Error("Could not reinstall package '{0}.{1}'", package.Name, package.CurrentVersion.ToString());
 					return false;
 				}
 			}

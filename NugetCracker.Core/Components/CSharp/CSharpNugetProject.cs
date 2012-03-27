@@ -18,16 +18,7 @@ namespace NugetCracker.Components.CSharp
 		public bool Pack(ILogger logger, string outputDirectory)
 		{
 			using (logger.Block) {
-				var result = ToolHelper.ExecuteTool(logger, "nuget", "pack \"" + FullPath + "\" -Verbose ", outputDirectory);
-				var newName = outputDirectory.Combine(OutputPackageFilename);
-				var badName = outputDirectory.Combine(Bad1dot6OutputPackageFilename);
-				if (File.Exists(badName) && !badName.Equals(newName, StringComparison.OrdinalIgnoreCase)) {
-					logger.Info("Renaming {0} to {1}", Bad1dot6OutputPackageFilename, OutputPackageFilename);
-					if (File.Exists(newName))
-						File.Delete(newName);
-					File.Move(badName, newName);
-				}
-				return result;
+				return ToolHelper.ExecuteTool(logger, "nuget", "pack \"" + FullPath + "\" -Verbose ", outputDirectory);
 			}
 		}
 
@@ -46,11 +37,6 @@ namespace NugetCracker.Components.CSharp
 		}
 
 		public string OutputPackageFilename
-		{
-			get { return Path.GetFileNameWithoutExtension(FullPath) + "." + CurrentVersion.ToShort() + ".nupkg"; }
-		}
-
-		private string Bad1dot6OutputPackageFilename
 		{
 			get { return Path.GetFileNameWithoutExtension(FullPath) + "." + CurrentVersion.ToString() + ".nupkg"; }
 		}

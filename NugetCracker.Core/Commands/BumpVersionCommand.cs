@@ -119,10 +119,10 @@ namespace NugetCracker.Commands
 			Version currentVersion = component.CurrentVersion;
 			Version newVersion = currentVersion.Bump(partToBump);
 			if (component.SetNewVersion(logger, newVersion)) {
-				logger.Info("Bumped component '{0}' version from {1} to {2}", componentName, currentVersion.ToShort(), newVersion.ToShort());
+				logger.Info("Bumped component '{0}' version from {1} to {2}", componentName, currentVersion.ToString(), newVersion.ToString());
 				return true;
 			}
-			logger.Error("Could not bump component '{0}' version to {1}", componentName, newVersion.ToShort());
+			logger.Error("Could not bump component '{0}' version to {1}", componentName, newVersion.ToString());
 			return false;
 		}
 

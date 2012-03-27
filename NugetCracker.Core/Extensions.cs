@@ -79,15 +79,15 @@ namespace NugetCracker
 			return oldVersion;
 		}
 
-		public static string ToShort(this Version version)
-		{
-			if (version.Revision == 0)
-				if (version.Build == 0)
-					return version.ToString(2);
-				else
-					return version.ToString(3);
-			return version.ToString();
-		}
+		//public static string ToShort(this Version version)
+		//{
+		//    if (version.Revision == 0)
+		//        if (version.Build == 0)
+		//            return version.ToString(2);
+		//        else
+		//            return version.ToString(3);
+		//    return version.ToString();
+		//}
 
 		public static string Combine(this string path, string relativePath)
 		{
