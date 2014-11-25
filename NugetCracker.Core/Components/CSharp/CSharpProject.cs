@@ -485,7 +485,7 @@ namespace NugetCracker.Components.CSharp
 
 		public virtual string Type { get { return _isWeb ? "C# Web Project" : ("C# {0} Project".FormatWith(ComponentType)); } }
 
-		private string CurrentVersionTag { get { return string.Format(_isWeb ? " ({0})" : ".{0}", CurrentVersion.ToString()); } }
+		private string CurrentVersionTag { get { return string.Format(_isWeb ? " ({0})" : ".{0}", CurrentVersion.ToString(3)); } }
 
 		public string ToLongString()
 		{

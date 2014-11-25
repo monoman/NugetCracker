@@ -10,8 +10,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NugetCracker</RootNamespace>
     <AssemblyName>NugetCracker.Core</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,10 +31,16 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Nuget">
-      <HintPath>..\Nuget.exe</HintPath>
+    <Reference Include="Microsoft.Web.XmlTransform, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.Web.Xdt.2.1.1\lib\net40\Microsoft.Web.XmlTransform.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.Core, Version=2.8.50926.602, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Nuget.Core.2.8.3\lib\net40-Client\NuGet.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -41,15 +49,10 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Commands\AddNugetCommand.cs" />
     <Compile Include="Commands\BumpVersionCommand.cs" />
     <Compile Include="Commands\ExcludeDirectoryCommand.cs" />
     <Compile Include="Commands\ListCommand.cs" />
-    <Compile Include="Commands\NugetifyCommand.cs" />
-    <Compile Include="Commands\PublishPackagesCommand.cs" />
-    <Compile Include="Commands\RebuildCommand.cs" />
     <Compile Include="Commands\ScanCommand.cs" />
-    <Compile Include="Commands\UpdatePackagesCommand.cs" />
     <Compile Include="Components\CSharp\CSharpComponentsFactory.cs" />
     <Compile Include="Components\CSharp\CSharpNugetProject.cs" />
     <Compile Include="Components\CSharp\CSharpProject.cs" />
@@ -82,6 +85,10 @@
     <Compile Include="Utilities\ToolHelper.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Commons.Prevalence\Commons.Prevalence.csproj">
+      <Project>{a5bec694-1421-438e-b444-08246bcb7161}</Project>
+      <Name>Commons.Prevalence</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="NugetCracker.Core.nuspec" />
@@ -98,10 +105,4 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <ProjectReference Include="..\Commons.Prevalence\Commons.Prevalence.csproj">
-      <Project>{A5BEC694-1421-438E-B444-08246BCB7161}</Project>
-      <Name>Commons.Prevalence</Name>
-    </ProjectReference>
-  </ItemGroup>
 </Project>

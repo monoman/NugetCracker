@@ -22,13 +22,13 @@ namespace NugetCracker
 		static ICommand[] _commands = new ICommand[] {
 			new BumpVersionCommand(),
 			new ListCommand(),
-			new RebuildCommand(),
+			//new RebuildCommand(),
 			new ScanCommand(_factories),
-			new ExcludeDirectoryCommand(),
-			new NugetifyCommand(),
-			new AddNugetCommand(),
-			new UpdatePackagesCommand(),
-			new PublishPackagesCommand()
+			new ExcludeDirectoryCommand()//,
+			//new NugetifyCommand(),
+			//new AddNugetCommand(),
+			//new UpdatePackagesCommand(),
+			//new PublishPackagesCommand()
 		};
 		static List<string> _helpLines = null;
 
@@ -42,7 +42,7 @@ namespace NugetCracker
 
 		static void Main(string[] args)
 		{
-			Console.WriteLine("NugetCracker {0}\nSee https://github.com/monoman/NugetCracker\n", Version.ToString());
+			Console.WriteLine("NugetCracker {0}\nSee https://github.com/monoman/NugetCracker\n", Version.ToString(3));
 			using (_metaProjectPersistence = new MetaProjectPersistence(args.GetMetaProjectFilePath())) {
 				Console.WriteLine("Using {0}", _metaProjectPersistence.FilePath);
 				_components = new ComponentsList();
