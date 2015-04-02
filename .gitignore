@@ -52,3 +52,4 @@ MetaProject.NugetCracker
 Nuget/src/VsConsole/PowerShellHost/DebugConstants.cs
 packages/
 NugetPackages/
+NugetCracker.sln.ide/
